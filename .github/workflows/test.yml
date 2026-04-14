@@ -197,11 +197,27 @@ jobs:
           taskName="assemble${product^}Release"
           echo "开始${{ env.product }}$typeName构建，任务: $taskName"
           chmod +x gradlew
+          buildLog="${{ github.workspace }}/gradle-build.log"
+          set +e
           ./gradlew "$taskName" \
             -PLEGADO_VERSION_NAME="${{ env.VERSION }}" \
             -PLEGADO_GIT_COMMITS="${{ env.LEGADO_GIT_COMMITS }}" \
             -PLEGADO_RELEASE_SUFFIX="$releaseSuffix" \
-            --build-cache --parallel --daemon --warning-mode all
+            --build-cache --parallel --daemon --warning-mode all 2>&1 | tee "$buildLog"
+          gradleExit=${PIPESTATUS[0]}
+          set -e
+          if [ "$gradleExit" -ne 0 ]; then
+            {
+              echo "### Gradle build failed"
+              echo ""
+              echo "exit_code: $gradleExit"
+              echo ""
+              echo '```'
+              tail -n 200 "$buildLog"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$gradleExit"
+          fi
           echo "修改APK文件名"
           mkdir -p "${{ github.workspace }}/apk/"
           find "${{ github.workspace }}/app/build/outputs" -type f -name "*.apk" | while IFS= read -r file; do
