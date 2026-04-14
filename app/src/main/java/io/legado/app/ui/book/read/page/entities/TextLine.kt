@@ -1,11 +1,8 @@
 package io.legado.app.ui.book.read.page.entities
 
-import android.annotation.SuppressLint
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
 import android.graphics.Paint.FontMetrics
-import android.os.Build
-import android.text.TextPaint
 import androidx.annotation.Keep
 import io.legado.app.help.PaintPool
 import io.legado.app.help.book.isImage
@@ -43,7 +40,6 @@ data class TextLine(
     var startX: Float = 0f,
     var indentSize: Int = 0,
     var extraLetterSpacing: Float = 0f,
-    var extraLetterSpacingOffsetX: Float = 0f,
     var wordSpacing: Float = 0f,
     var exceed: Boolean = false,
     var onlyTextColumn: Boolean = true,
@@ -188,7 +184,6 @@ data class TextLine(
         }
     }
 
-    @SuppressLint("NewApi")
     private fun fastDrawTextLine(view: ContentTextView, canvas: Canvas) {
         val textPaint = if (isTitle) {
             ChapterProvider.titlePaint
@@ -213,8 +208,7 @@ data class TextLine(
         if (wordSpacing != 0f) {
             paint.wordSpacing = wordSpacing
         }
-        val offsetX = if (atLeastApi35) letterSpacingHalf else extraLetterSpacingOffsetX
-        canvas.drawText(text, indentSize, text.length, startX + offsetX, lineBase - lineTop, paint)
+        canvas.drawText(text, indentSize, text.length, startX + letterSpacingHalf, lineBase - lineTop, paint)
         PaintPool.recycle(paint)
         for (i in columns.indices) {
             val column = columns[i] as TextColumn
@@ -240,16 +234,18 @@ data class TextLine(
                 paint
             )
         } else if (underlineMode == 2) { // 虚线
-            val dashPathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
-            val dashPath = TextPaint(paint)
-            dashPath.pathEffect = dashPathEffect
+            val dashPaint = PaintPool.obtain()
+            dashPaint.set(paint)
+            dashPaint.pathEffect = dashUnderlineEffect
             canvas.drawLine(
                 lineStart + indentWidth,
                 lineY,
                 lineEnd,
                 lineY,
-                dashPath
+                dashPaint
             )
+            dashPaint.pathEffect = null
+            PaintPool.recycle(dashPaint)
         }
     }
 
@@ -257,7 +253,7 @@ data class TextLine(
         if (!AppConfig.optimizeRender || exceed || !onlyTextColumn || textPage.isMsgPage) {
             return false
         }
-        if (wordSpacing != 0f && (!atLeastApi26 || !wordSpacingWorking)) {
+        if (wordSpacing != 0f && !wordSpacingWorking) {
             return false
         }
         return searchResultColumnCount == 0
@@ -276,12 +272,9 @@ data class TextLine(
         canvasRecorder.recycle()
     }
 
-    @SuppressLint("NewApi")
     companion object {
         val emptyTextLine = TextLine()
-        private val atLeastApi26 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        val atLeastApi28 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-        private val atLeastApi35 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+        private val dashUnderlineEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
         private val wordSpacingWorking by lazy {
             // issue 3785 3846
             val paint = PaintPool.obtain()

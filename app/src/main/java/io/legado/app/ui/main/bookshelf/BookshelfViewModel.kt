@@ -17,6 +17,7 @@ import io.legado.app.help.http.decompressed
 import io.legado.app.help.http.newCallResponseBody
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.http.text
+import io.legado.app.help.source.BookSourceUrlMatcher
 import io.legado.app.model.analyzeRule.AnalyzeUrl
 import io.legado.app.model.webBook.WebBook
 import io.legado.app.utils.FileUtils
@@ -37,6 +38,7 @@ import java.io.OutputStreamWriter
 class BookshelfViewModel(application: Application) : BaseViewModel(application) {
     val addBookProgressLiveData = MutableLiveData(-1)
     var addBookJob: Coroutine<*>? = null
+    private val bookSourceUrlMatcher = BookSourceUrlMatcher()
 
     fun addBookByUrl(bookUrls: String) {
         var successCount = 0
@@ -52,40 +54,7 @@ class BookshelfViewModel(application: Application) : BaseViewModel(application) 
                     successCount++
                     continue
                 }
-                val baseUrl = NetworkUtils.getBaseUrl(bookUrl) ?: continue
-                var source: BookSource? = null
-                val urlMatcher = AnalyzeUrl.paramPattern.matcher(bookUrl)
-                if (urlMatcher.find()) { //指定书源
-                    val origin = GSON.fromJsonObject<AnalyzeUrl.UrlOption>(
-                        bookUrl.substring(urlMatcher.end())
-                    ).getOrNull()?.getOrigin()
-                    try {
-                        origin?.let {
-                            appDb.bookSourceDao.getBookSource(it)?.let { bs ->
-                                if (bookUrl.matches(bs.bookUrlPattern!!.toRegex())) {
-                                    source = bs
-                                }
-                            }
-                        }
-                    } catch (_: Exception) {
-                    }
-                }
-                if (source == null) { //根据域名找书源
-                    source = appDb.bookSourceDao.getBookSourceAddBook(baseUrl)
-                }
-                if (source == null) {
-                    for (bookSource in hasBookUrlPattern) { //在所有启用的书源中查找
-                        try {
-                            val bs = bookSource.getBookSource()!!
-                            if (bookUrl.matches(bs.bookUrlPattern!!.toRegex())) {
-                                source = bs
-                                break
-                            }
-                        } catch (_: Exception) {
-                        }
-                    }
-                }
-                val bookSource = source ?: continue
+                val bookSource = resolveBookSource(bookUrl, hasBookUrlPattern) ?: continue
                 val book = Book(
                     bookUrl = bookUrl,
                     origin = bookSource.bookSourceUrl,
@@ -205,6 +174,35 @@ class BookshelfViewModel(application: Application) : BaseViewModel(application) 
         }.onFinally {
             context.toastOnUi(R.string.success)
         }
+    }
+
+    private fun resolveBookSource(bookUrl: String, hasBookUrlPattern: List<BookSourcePart>): BookSource? {
+        resolveSourceByUrlOption(bookUrl)?.let { return it }
+        val baseUrl = NetworkUtils.getBaseUrl(bookUrl) ?: return null
+        appDb.bookSourceDao.getBookSourceAddBook(baseUrl)?.let { return it }
+        return resolveSourceByPattern(bookUrl, hasBookUrlPattern)
+    }
+
+    private fun resolveSourceByUrlOption(bookUrl: String): BookSource? {
+        val urlMatcher = AnalyzeUrl.paramPattern.matcher(bookUrl)
+        if (!urlMatcher.find()) {
+            return null
+        }
+        val origin = GSON.fromJsonObject<AnalyzeUrl.UrlOption>(
+            bookUrl.substring(urlMatcher.end())
+        ).getOrNull()?.getOrigin() ?: return null
+        val source = appDb.bookSourceDao.getBookSource(origin) ?: return null
+        return if (bookSourceUrlMatcher.matches(bookUrl, source.bookUrlPattern)) source else null
+    }
+
+    private fun resolveSourceByPattern(bookUrl: String, hasBookUrlPattern: List<BookSourcePart>): BookSource? {
+        for (bookSourcePart in hasBookUrlPattern) {
+            val source = kotlin.runCatching { bookSourcePart.getBookSource() }.getOrNull() ?: continue
+            if (bookSourceUrlMatcher.matches(bookUrl, source.bookUrlPattern)) {
+                return source
+            }
+        }
+        return null
     }
 
 }

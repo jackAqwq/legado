@@ -1,7 +1,6 @@
 package io.legado.app.ui.book.read.page.provider
 
 import android.graphics.Paint
-import android.text.Layout
 import android.text.Spanned
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -46,7 +45,6 @@ import android.util.Size
 import androidx.core.text.HtmlCompat
 import io.legado.app.constant.AppPattern.noWordCountRegex
 import io.legado.app.data.appDb
-import io.legado.app.ui.book.read.page.entities.TextLine.Companion.atLeastApi28
 import io.legado.app.ui.book.read.page.entities.column.TextHtmlColumn
 import io.legado.app.ui.book.read.page.provider.ChapterProvider.reviewStr
 import io.legado.app.ui.book.read.page.provider.ChapterProvider.srcReplaceStr
@@ -610,23 +608,10 @@ class TextChapterLayout(
         if (textPaint.color != textColor) {
             textPaint.color = textColor
         }
-        val staticLayout = if (atLeastApi28) {
-            StaticLayout.Builder.obtain(spanned, 0, spanned.length, textPaint, width)
-                .setIncludePad(true)
-                .setUseLineSpacingFromFallbacks(true)
-                .build()
-        } else {
-            @Suppress("DEPRECATION")
-            StaticLayout(
-                spanned,
-                textPaint,
-                width,
-                Layout.Alignment.ALIGN_NORMAL,
-                1f,
-                0f,
-                true
-            )
-        }
+        val staticLayout = StaticLayout.Builder.obtain(spanned, 0, spanned.length, textPaint, width)
+            .setIncludePad(true)
+            .setUseLineSpacingFromFallbacks(true)
+            .build()
         val tempPaint = TextPaint(textPaint)
         for (lineIndex in 0 until staticLayout.lineCount) {
             val lineStart = staticLayout.getLineStart(lineIndex)
@@ -1143,7 +1128,6 @@ class TextChapterLayout(
         } else {
             val gapCount: Int = words.lastIndex
             val d = if (gapCount > 0) residualWidth / gapCount else 0f
-            textLine.extraLetterSpacingOffsetX = -d / 2
             textLine.extraLetterSpacing = d / textPaint.textSize
             var x = startX
             for (index in words.indices) {
