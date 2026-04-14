@@ -34,6 +34,15 @@ def version = (findProperty("LEGADO_VERSION_NAME")?.toString()?.trim()) ?: "3." 
 def gitCommits = safeParseInt(findProperty("LEGADO_GIT_COMMITS") ?: System.getenv("LEGADO_GIT_COMMITS"), 0)
 def releaseSuffix = (findProperty("LEGADO_RELEASE_SUFFIX")?.toString()?.trim()) ?: ".release"
 
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == "com.squareup" && details.requested.name == "javapoet") {
+            details.useVersion("1.13.0")
+            details.because("Hilt aggregate deps requires ClassName#canonicalName")
+        }
+    }
+}
+
 android {
     compileSdk = compile_sdk_version
     namespace = 'io.legado.app'
