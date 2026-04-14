@@ -2,7 +2,6 @@ package io.legado.app.help.http
 
 import android.annotation.SuppressLint
 import android.net.http.SslError
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AndroidRuntimeException
@@ -198,11 +197,7 @@ class BackstageWebView(
             view: WebView,
             request: WebResourceRequest
         ): Boolean {
-            isRedirect = isRedirect || if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                request.isRedirect
-            } else {
-                request.url.toString() != view.url
-            }
+            isRedirect = isRedirect || request.isRedirect
             return super.shouldOverrideUrlLoading(view, request)
         }
 

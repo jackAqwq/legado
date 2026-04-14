@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.addCallback
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.legado.app.R
 import io.legado.app.constant.AppLog
-import io.legado.app.exception.NoStackTraceException
 import io.legado.app.utils.registerForActivityResult
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.launch
@@ -67,16 +65,12 @@ class PermissionActivity : AppCompatActivity() {
             //所有文件的管理权限
             Request.TYPE_MANAGE_ALL_FILES_ACCESS -> showSettingDialog(permissions, rationale) {
                 try {
-                    if (Permissions.isManageExternalStorage()) {
-                        val settingIntent =
-                            Intent(
-                                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                                Uri.parse("package:$packageName")
-                            )
-                        settingActivityResult.launch(settingIntent)
-                    } else {
-                        throw NoStackTraceException("no MANAGE_ALL_FILES_ACCESS_PERMISSION")
-                    }
+                    val settingIntent =
+                        Intent(
+                            Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                    settingActivityResult.launch(settingIntent)
                 } catch (e: Exception) {
                     AppLog.put("请求所有文件的管理权限出错\n$e", e, true)
                     RequestPlugins.sRequestCallback?.onError(e)
@@ -87,19 +81,15 @@ class PermissionActivity : AppCompatActivity() {
             Request.TYPE_REQUEST_NOTIFICATIONS -> showSettingDialog(permissions, rationale) {
                 lifecycleScope.launch {
                     try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                            && requestPermissionResult.launch(Permissions.POST_NOTIFICATIONS)
-                        ) {
+                        if (requestPermissionResult.launch(Permissions.POST_NOTIFICATIONS)) {
                             onRequestPermissionFinish()
-                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        } else {
                             //这种方案适用于 API 26, 即8.0（含8.0）以上可以用
                             val intent = Intent()
                             intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
                             intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
                             intent.putExtra(Settings.EXTRA_CHANNEL_ID, applicationInfo.uid)
                             settingActivityResult.launch(intent)
-                        } else {
-                            openSettingsActivity()
                         }
                     } catch (e: Exception) {
                         AppLog.put("请求通知权限出错\n$e", e, true)

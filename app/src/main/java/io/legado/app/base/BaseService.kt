@@ -1,7 +1,6 @@
 package io.legado.app.base
 
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import androidx.annotation.CallSuper
 import androidx.lifecycle.LifecycleService
@@ -18,9 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Semaphore
 import kotlin.coroutines.CoroutineContext
-import android.provider.Settings
-import androidx.annotation.RequiresApi
-
 abstract class BaseService : LifecycleService() {
 
     private val simpleName = this::class.simpleName.toString()
@@ -99,12 +95,10 @@ abstract class BaseService : LifecycleService() {
                 }
             }
             .request()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PermissionsCompat.Builder()
-                .addPermissions(Permissions.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                .rationale(R.string.ignore_battery_permission_rationale)
-                .request()
-        }
+        PermissionsCompat.Builder()
+            .addPermissions(Permissions.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            .rationale(R.string.ignore_battery_permission_rationale)
+            .request()
     }
     /**
      * 检测悬浮窗权限

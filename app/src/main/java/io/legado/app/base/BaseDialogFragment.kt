@@ -2,7 +2,6 @@ package io.legado.app.base
 
 import android.content.DialogInterface
 import android.content.DialogInterface.OnDismissListener
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -65,14 +64,6 @@ abstract class BaseDialogFragment(
                     }
                 }
             })
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            //不加这个android 5.0对话框顶部会有空白
-            setStyle(STYLE_NO_TITLE, 0)
         }
     }
 

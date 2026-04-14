@@ -1,7 +1,5 @@
 package io.legado.app.lib.permission
 
-import android.os.Build
-
 @Suppress("unused")
 object Permissions {
 
@@ -87,6 +85,6 @@ object Permissions {
     }
 
     fun isManageExternalStorage(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        return true
     }
 }
