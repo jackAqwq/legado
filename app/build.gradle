@@ -20,9 +20,19 @@ static def releaseTime() {
     return new Date().format("yy.MMddHH", TimeZone.getTimeZone("GMT+8"))
 }
 
+static int safeParseInt(def value, int fallback = 0) {
+    if (value == null) return fallback
+    try {
+        return value.toString().trim().toInteger()
+    } catch (Exception ignored) {
+        return fallback
+    }
+}
+
 def name = "legado"
-def version = "3." + releaseTime()
-def gitCommits = Integer.parseInt('git rev-list HEAD --count'.execute().text.trim())
+def version = (findProperty("LEGADO_VERSION_NAME")?.toString()?.trim()) ?: "3." + releaseTime()
+def gitCommits = safeParseInt(findProperty("LEGADO_GIT_COMMITS") ?: System.getenv("LEGADO_GIT_COMMITS"), 0)
+def releaseSuffix = (findProperty("LEGADO_RELEASE_SUFFIX")?.toString()?.trim()) ?: ".release"
 
 android {
     compileSdk = compile_sdk_version
@@ -78,10 +88,10 @@ android {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
                 signingConfig signingConfigs.myConfig
             }
-            applicationIdSuffix '.release'
-            if (getApplicationIdSuffix() == '.releaseA') {
+            applicationIdSuffix releaseSuffix
+            if (releaseSuffix == '.releaseA') {
                 manifestPlaceholders.put("app_name", "@string/app_name_a")
-            } else if (getApplicationIdSuffix() == '.releaseS') {
+            } else if (releaseSuffix == '.releaseS') {
                 manifestPlaceholders.put("app_name", "@string/app_name_s")
             } else {
                 manifestPlaceholders.put("app_name", "@string/app_name")

@@ -54,7 +54,9 @@ import io.legado.app.utils.ChineseUtils
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.defaultSharedPreferences
 import io.legado.app.utils.getPrefBoolean
+import io.legado.app.utils.getPrefLong
 import io.legado.app.utils.isDebuggable
+import io.legado.app.utils.putPrefLong
 import kotlinx.coroutines.launch
 import org.chromium.base.ThreadUtils
 import splitties.init.appCtx
@@ -143,7 +145,11 @@ class App : Application() {
             
             // 同步阅读记录
             if (AppConfig.syncBookProgress) {
-                AppWebDav.downloadAllBookProgress()
+                val now = System.currentTimeMillis()
+                if (shouldRunStartupBookProgressSync(now)) {
+                    AppWebDav.downloadAllBookProgress()
+                    putPrefLong(PreferKey.syncBookProgressStartupLastTime, now)
+                }
             }
         }
     }
@@ -253,6 +259,11 @@ class App : Application() {
         RhinoWrapFactory.register(ContentRule::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(BookChapter::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(Book.ReadConfig::class.java, ReadOnlyJavaObject.factory)
+    }
+
+    private fun shouldRunStartupBookProgressSync(now: Long): Boolean {
+        val lastSyncTime = getPrefLong(PreferKey.syncBookProgressStartupLastTime, 0L)
+        return now - lastSyncTime >= TimeUnit.MINUTES.toMillis(30)
     }
 
     class EventLogger : DefaultLogger() {

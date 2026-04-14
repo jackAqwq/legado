@@ -98,6 +98,7 @@ object PreferKey {
     const val screenOrientation = "screenOrientation"
     const val syncBookProgress = "syncBookProgress"
     const val syncBookProgressPlus = "syncBookProgressPlus"
+    const val syncBookProgressStartupLastTime = "syncBookProgressStartupLastTime"
     const val cronet = "Cronet"
     const val antiAlias = "antiAlias"
     const val bitmapCacheSize = "bitmapCacheSize"

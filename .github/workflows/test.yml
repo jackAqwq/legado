@@ -157,6 +157,9 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      - name: Compute Build Metadata
+        run: |
+          echo "LEGADO_GIT_COMMITS=$(git rev-list HEAD --count)" >> $GITHUB_ENV
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -185,16 +188,18 @@ jobs:
         run: |
           if [ "${{ env.type }}" == 'release' ]; then
             typeName="原包名"
+            releaseSuffix=".release"
           else
             typeName="共存"
-            sed "s/'.release'/'.releaseS'/" $GITHUB_WORKSPACE/app/build.gradle  -i
-            # sed 's/.release/.releaseS/'     $GITHUB_WORKSPACE/app/google-services.json -i
+            releaseSuffix=".releaseS"
           fi
-          echo "统一版本号"
-          sed "/def version/c def version = \"${{ env.VERSION }}\"" $GITHUB_WORKSPACE/app/build.gradle  -i
           echo "开始${{ env.product }}$typeName构建"
           chmod +x gradlew
-          ./gradlew assemble${{ env.product }}release --build-cache --parallel --daemon --warning-mode all
+          ./gradlew assemble${{ env.product }}release \
+            -PLEGADO_VERSION_NAME="${{ env.VERSION }}" \
+            -PLEGADO_GIT_COMMITS="${{ env.LEGADO_GIT_COMMITS }}" \
+            -PLEGADO_RELEASE_SUFFIX="$releaseSuffix" \
+            --build-cache --parallel --daemon --warning-mode all
           echo "修改APK文件名"
           mkdir -p ${{ github.workspace }}/apk/
           for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
