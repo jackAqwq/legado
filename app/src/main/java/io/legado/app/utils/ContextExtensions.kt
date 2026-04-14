@@ -56,7 +56,8 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.system.exitProcess
 
-private const val MUTABLE_PENDING_INTENT_FLAGS = FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+@PublishedApi
+internal const val MUTABLE_PENDING_INTENT_FLAGS = FLAG_UPDATE_CURRENT or FLAG_MUTABLE
 
 inline fun <reified A : Activity> Context.startActivity(configIntent: Intent.() -> Unit = {}) {
     val intent = Intent(this, A::class.java)
