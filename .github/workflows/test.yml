@@ -205,7 +205,7 @@ jobs:
             --build-cache --parallel --daemon --warning-mode all
           echo "修改APK文件名"
           mkdir -p "${{ github.workspace }}/apk/"
-          find "${{ github.workspace }}/app/build/outputs/apk" -type f -name "*.apk" | while IFS= read -r file; do
+          find "${{ github.workspace }}/app/build/outputs" -type f -name "*.apk" | while IFS= read -r file; do
             fileName="$(basename "$file")"
             if [ "${{ env.type }}" == 'release' ]; then
               mv "$file" "${{ github.workspace }}/apk/legado_测试版_${{ env.VERSIONL }}_${typeName}_${fileName}"
@@ -215,9 +215,11 @@ jobs:
           done
           echo "移动mapping文件"
           mkdir -p "${{ github.workspace }}/mapping/"
-          find "${{ github.workspace }}/app/build/outputs/mapping" -type f -name "mapping.txt" | while IFS= read -r file; do
-            mv "$file" "${{ github.workspace }}/mapping/mapping.txt"
-          done
+          if [ -d "${{ github.workspace }}/app/build/outputs/mapping" ]; then
+            find "${{ github.workspace }}/app/build/outputs/mapping" -type f -name "mapping.txt" | while IFS= read -r file; do
+              mv "$file" "${{ github.workspace }}/mapping/mapping.txt"
+            done
+          fi
 
       - name: Move Missing Rules Files
         run: |
@@ -236,11 +238,12 @@ jobs:
 
       - name: Check Build production
         run: |
-          if [ ! -d "${{ github.workspace }}/apk" ]; then
-            echo "Build production not found! Check gradle logs."
-            exit 1
+          mkdir -p "${{ github.workspace }}/apk"
+          apkCount=$(find "${{ github.workspace }}/apk" -maxdepth 1 -type f -name "*.apk" | wc -l)
+          if [ "$apkCount" -eq 0 ]; then
+            find "${{ github.workspace }}/app/build/outputs" -type f -name "*.apk" -exec cp {} "${{ github.workspace }}/apk/" \;
+            apkCount=$(find "${{ github.workspace }}/apk" -maxdepth 1 -type f -name "*.apk" | wc -l)
           fi
-          apkCount=$(find "${{ github.workspace }}/apk" -maxdepth 1 -type f -name "legado_*.apk" | wc -l)
           if [ "$apkCount" -eq 0 ]; then
             echo "Build production not found! Check gradle logs."
             exit 1
