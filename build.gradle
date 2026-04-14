@@ -12,6 +12,9 @@ buildscript {
 //        splitties_version = '3.0.0'
 //        room_version = '2.6.1'
     }
+    dependencies {
+        classpath("com.squareup:javapoet:1.13.0")
+    }
 }
 
 plugins {
