@@ -486,8 +486,7 @@ fun View.canScroll(direction: Int): Boolean {
     return canScrollVertically(direction) || canScrollHorizontally(direction)
 }
 
-private val requestLayoutBroken = Build.VERSION.SDK_INT <= Build.VERSION_CODES.M
-        || Build.VERSION.SDK_INT in Build.VERSION_CODES.O..Build.VERSION_CODES.Q
+private const val requestLayoutBroken = false
 
 fun View.setOnApplyWindowInsetsListenerCompat(listener: (View, WindowInsetsCompat) -> WindowInsetsCompat) {
     ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->

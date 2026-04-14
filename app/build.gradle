@@ -67,8 +67,8 @@ android {
         }
     }
     defaultConfig {
-        applicationId "io.legado.app"
-        minSdk 21
+        applicationId "io.legado.app.qwq"
+        minSdk 35
         targetSdk 36
         versionCode 10000 + gitCommits
         versionName version
@@ -152,8 +152,6 @@ android {
     }
 
     compileOptions {
-        // Flag to enable support for the new language APIs
-        coreLibraryDesugaringEnabled = true
         // Sets Java compatibility
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -180,10 +178,6 @@ android {
 }
 
 dependencies {
-    //compileOnly "com.android.tools.build:gradle:$agp_version"
-    //noinspection GradleDependency,GradlePackageUpdate
-    //coreLibraryDesugaring('com.android.tools:desugar_jdk_libs_nio:2.0.4')
-    coreLibraryDesugaring(libs.desugar)
     testImplementation(libs.junit)
     androidTestImplementation(libs.bundles.androidTest)
     //kotlin

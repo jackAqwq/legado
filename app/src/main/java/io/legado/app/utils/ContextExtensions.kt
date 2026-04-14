@@ -56,6 +56,8 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.system.exitProcess
 
+private const val MUTABLE_PENDING_INTENT_FLAGS = FLAG_UPDATE_CURRENT or FLAG_MUTABLE
+
 inline fun <reified A : Activity> Context.startActivity(configIntent: Intent.() -> Unit = {}) {
     val intent = Intent(this, A::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -98,12 +100,7 @@ inline fun <reified T : Service> Context.servicePendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
-    return getService(this, requestCode, intent, flags)
+    return getService(this, requestCode, intent, MUTABLE_PENDING_INTENT_FLAGS)
 }
 
 @SuppressLint("UnspecifiedImmutableFlag")
@@ -112,12 +109,7 @@ fun Context.activityPendingIntent(
     action: String,
 ): PendingIntent? {
     intent.action = action
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
-    return getActivity(this, 0, intent, flags)
+    return getActivity(this, 0, intent, MUTABLE_PENDING_INTENT_FLAGS)
 }
 
 @SuppressLint("UnspecifiedImmutableFlag")
@@ -128,12 +120,7 @@ inline fun <reified T : Activity> Context.activityPendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
-    return getActivity(this, 0, intent, flags)
+    return getActivity(this, 0, intent, MUTABLE_PENDING_INTENT_FLAGS)
 }
 
 @SuppressLint("UnspecifiedImmutableFlag")
@@ -144,12 +131,7 @@ inline fun <reified T : BroadcastReceiver> Context.broadcastPendingIntent(
     val intent = Intent(this, T::class.java)
     intent.action = action
     configIntent.invoke(intent)
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        FLAG_UPDATE_CURRENT or FLAG_MUTABLE
-    } else {
-        FLAG_UPDATE_CURRENT
-    }
-    return getBroadcast(this, 0, intent, flags)
+    return getBroadcast(this, 0, intent, MUTABLE_PENDING_INTENT_FLAGS)
 }
 
 fun Context.startForegroundServiceCompat(intent: Intent) {
@@ -373,10 +355,7 @@ fun Context.openFileUri(uri: Uri, type: String? = null) {
     val intent = Intent()
     intent.action = Intent.ACTION_VIEW
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        //7.0版本以上
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
+    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     val uri = if (uri.isContentScheme()) uri
     else FileProvider.getUriForFile(this, AppConst.authority, File(uri.path!!))
     intent.setDataAndType(uri, type ?: IntentType.from(uri))

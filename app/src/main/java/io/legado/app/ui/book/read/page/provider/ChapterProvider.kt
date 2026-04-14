@@ -3,7 +3,6 @@ package io.legado.app.ui.book.read.page.provider
 import android.graphics.Paint.FontMetrics
 import android.graphics.RectF
 import android.graphics.Typeface
-import android.os.Build
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.os.postDelayed
@@ -16,7 +15,6 @@ import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
 import io.legado.app.model.ReadBook
 import io.legado.app.ui.book.read.page.entities.TextChapter
-import io.legado.app.utils.RealPathUtil
 import io.legado.app.utils.buildMainHandler
 import io.legado.app.utils.dpToPx
 import io.legado.app.utils.isContentScheme
@@ -190,9 +188,7 @@ object ChapterProvider {
         val bodyIndent = ReadBookConfig.paragraphIndent
         indentCharWidth = if (bodyIndent.isNotEmpty()) {
             var indentWidth = StaticLayout.getDesiredWidth(bodyIndent, contentPaint)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                indentWidth += contentPaint.letterSpacing * contentPaint.textSize
-            }
+            indentWidth += contentPaint.letterSpacing * contentPaint.textSize
             indentWidth / bodyIndent.length
         } else {
             0f
@@ -207,16 +203,12 @@ object ChapterProvider {
     private fun getTypeface(fontPath: String): Typeface? {
         return kotlin.runCatching {
             when {
-                fontPath.isContentScheme() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                fontPath.isContentScheme() -> {
                     appCtx.contentResolver
                         .openFileDescriptor(fontPath.toUri(), "r")!!
                         .use {
                             Typeface.Builder(it.fileDescriptor).build()
                         }
-                }
-
-                fontPath.isContentScheme() -> {
-                    Typeface.createFromFile(RealPathUtil.getPath(appCtx, fontPath.toUri()))
                 }
 
                 fontPath.isNotEmpty() -> Typeface.createFromFile(fontPath)
@@ -238,19 +230,8 @@ object ChapterProvider {
         val bold = Typeface.create(typeface, Typeface.BOLD)
         val normal = Typeface.create(typeface, Typeface.NORMAL)
         val (titleFont, textFont) = when (ReadBookConfig.textBold) {
-            1 -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    Pair(Typeface.create(typeface, 900, false), bold)
-                else
-                    Pair(bold, bold)
-            }
-
-            2 -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                    Pair(normal, Typeface.create(typeface, 300, false))
-                else
-                    Pair(normal, normal)
-            }
+            1 -> Pair(Typeface.create(typeface, 900, false), bold)
+            2 -> Pair(normal, Typeface.create(typeface, 300, false))
 
             else -> Pair(bold, normal)
         }
@@ -262,9 +243,6 @@ object ChapterProvider {
         tPaint.typeface = titleFont
         tPaint.textSize = with(ReadBookConfig) { textSize + titleSize }.toFloat().spToPx()
         tPaint.isAntiAlias = true
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && AppConfig.optimizeRender) {
-            tPaint.isLinearText = true
-        }
         //正文
         val cPaint = TextPaint()
         cPaint.color = ReadBookConfig.textColor
@@ -272,9 +250,6 @@ object ChapterProvider {
         cPaint.typeface = textFont
         cPaint.textSize = ReadBookConfig.textSize.toFloat().spToPx()
         cPaint.isAntiAlias = true
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && AppConfig.optimizeRender) {
-            cPaint.isLinearText = true
-        }
         return Pair(tPaint, cPaint)
     }
 
