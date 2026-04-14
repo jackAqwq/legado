@@ -186,6 +186,7 @@ jobs:
       - name: Build With Gradle
         continue-on-error: true
         run: |
+          set -eo pipefail
           if [ "${{ env.type }}" == 'release' ]; then
             typeName="原包名"
             releaseSuffix=".release"
@@ -193,26 +194,29 @@ jobs:
             typeName="共存"
             releaseSuffix=".releaseS"
           fi
-          echo "开始${{ env.product }}$typeName构建"
+          product="${{ env.product }}"
+          taskName="assemble${product^}Release"
+          echo "开始${{ env.product }}$typeName构建，任务: $taskName"
           chmod +x gradlew
-          ./gradlew assemble${{ env.product }}release \
+          ./gradlew "$taskName" \
             -PLEGADO_VERSION_NAME="${{ env.VERSION }}" \
             -PLEGADO_GIT_COMMITS="${{ env.LEGADO_GIT_COMMITS }}" \
             -PLEGADO_RELEASE_SUFFIX="$releaseSuffix" \
             --build-cache --parallel --daemon --warning-mode all
           echo "修改APK文件名"
-          mkdir -p ${{ github.workspace }}/apk/
-          for file in `ls ${{ github.workspace }}/app/build/outputs/apk/*/*/*.apk`; do
+          mkdir -p "${{ github.workspace }}/apk/"
+          find "${{ github.workspace }}/app/build/outputs/apk" -type f -name "*.apk" | while IFS= read -r file; do
+            fileName="$(basename "$file")"
             if [ "${{ env.type }}" == 'release' ]; then
-              mv "$file" ${{ github.workspace }}/apk/legado_测试版_${{ env.VERSIONL }}_$typeName.apk
+              mv "$file" "${{ github.workspace }}/apk/legado_测试版_${{ env.VERSIONL }}_${typeName}_${fileName}"
             else
-              mv "$file" ${{ github.workspace }}/apk/legado_正式版_${{ env.VERSIONL }}_$typeName.apk
+              mv "$file" "${{ github.workspace }}/apk/legado_正式版_${{ env.VERSIONL }}_${typeName}_${fileName}"
             fi
           done
           echo "移动mapping文件"
-          mkdir -p ${{ github.workspace }}/mapping/
-          for file in `ls ${{ github.workspace }}/app/build/outputs/mapping/*/mapping.txt`; do
-            mv "$file" ${{ github.workspace }}/mapping/mapping.txt
+          mkdir -p "${{ github.workspace }}/mapping/"
+          find "${{ github.workspace }}/app/build/outputs/mapping" -type f -name "mapping.txt" | while IFS= read -r file; do
+            mv "$file" "${{ github.workspace }}/mapping/mapping.txt"
           done
 
       - name: Move Missing Rules Files
@@ -232,15 +236,16 @@ jobs:
 
       - name: Check Build production
         run: |
-          if [ ! -d ${{ github.workspace }}/apk ]; then
+          if [ ! -d "${{ github.workspace }}/apk" ]; then
             echo "Build production not found! Check gradle logs."
             exit 1
           fi
-          cd ${{ github.workspace }}/apk/
-          if [ ! -e legado_*.apk ]; then
+          apkCount=$(find "${{ github.workspace }}/apk" -maxdepth 1 -type f -name "legado_*.apk" | wc -l)
+          if [ "$apkCount" -eq 0 ]; then
             echo "Build production not found! Check gradle logs."
             exit 1
           fi
+          echo "Build production found: $apkCount apk(s)."
 
       - name: Upload App To Artifact
         uses: actions/upload-artifact@v7
