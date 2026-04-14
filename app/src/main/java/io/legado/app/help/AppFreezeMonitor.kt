@@ -41,8 +41,9 @@ object AppFreezeMonitor {
 
         // 初始化handler
         if (handler == null) {
-            handlerThread = HandlerThread("AppFreezeMonitor").apply { start() }
-            handler = Handler(handlerThread?.looper)
+            val thread = HandlerThread("AppFreezeMonitor").apply { start() }
+            handlerThread = thread
+            handler = Handler(thread.looper)
         }
 
         var previous = SystemClock.uptimeMillis()

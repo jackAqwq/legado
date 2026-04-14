@@ -1,6 +1,5 @@
 package io.legado.app.help.http
 
-import io.legado.app.App
 import io.legado.app.constant.AppConst
 import io.legado.app.help.CacheManager
 import io.legado.app.help.config.AppConfig
@@ -26,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import splitties.init.appCtx
 
 /**
  * 代理客户端缓存，用于缓存不同代理配置的OkHttpClient实例
@@ -38,7 +38,7 @@ private val proxyClientCache: ConcurrentHashMap<String, OkHttpClient> by lazy {
  * OkHttp缓存目录
  */
 private val cacheDir by lazy {
-    File(App.INSTANCE.cacheDir, "okhttp_cache")
+    File(appCtx.cacheDir, "okhttp_cache")
 }
 
 /**
@@ -56,7 +56,7 @@ private val cacheInterceptor = Interceptor {
     val response = it.proceed(request)
     
     // 缓存策略：在线时缓存5分钟，离线时缓存7天
-    val cacheControl = if (NetworkUtils.isNetworkAvailable(App.INSTANCE)) {
+    val cacheControl = if (NetworkUtils.isAvailable()) {
         "public, max-age=300" // 在线时缓存5分钟
     } else {
         "public, only-if-cached, max-stale=604800" // 离线时缓存7天

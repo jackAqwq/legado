@@ -93,7 +93,7 @@ object CronetLoader : CronetEngine.Builder.LibraryLoader(), Cronet.LoaderInterfa
             }
             
             // 检查网络状态，仅在网络可用时下载
-            if (!io.legado.app.utils.NetworkUtils.isNetworkAvailable(appCtx)) {
+            if (!io.legado.app.utils.NetworkUtils.isAvailable()) {
                 DebugLog.d(javaClass.simpleName, "网络不可用，跳过Cronet预下载")
                 return@async
             }
