@@ -208,18 +208,14 @@ jobs:
           find "${{ github.workspace }}/app/build/outputs" -type f -name "*.apk" | while IFS= read -r file; do
             fileName="$(basename "$file")"
             if [ "${{ env.type }}" == 'release' ]; then
-              mv "$file" "${{ github.workspace }}/apk/legado_测试版_${{ env.VERSIONL }}_${typeName}_${fileName}"
+              cp "$file" "${{ github.workspace }}/apk/legado_测试版_${{ env.VERSIONL }}_${typeName}_${fileName}" || true
             else
-              mv "$file" "${{ github.workspace }}/apk/legado_正式版_${{ env.VERSIONL }}_${typeName}_${fileName}"
+              cp "$file" "${{ github.workspace }}/apk/legado_正式版_${{ env.VERSIONL }}_${typeName}_${fileName}" || true
             fi
           done
           echo "移动mapping文件"
           mkdir -p "${{ github.workspace }}/mapping/"
-          if [ -d "${{ github.workspace }}/app/build/outputs/mapping" ]; then
-            find "${{ github.workspace }}/app/build/outputs/mapping" -type f -name "mapping.txt" | while IFS= read -r file; do
-              mv "$file" "${{ github.workspace }}/mapping/mapping.txt"
-            done
-          fi
+          find "${{ github.workspace }}/app/build/outputs/mapping" -type f -name "mapping.txt" -exec cp {} "${{ github.workspace }}/mapping/mapping.txt" \; 2>/dev/null || true
 
       - name: Move Missing Rules Files
         run: |
