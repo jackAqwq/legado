@@ -138,7 +138,7 @@ android {
         arg("room.incremental", "true")
         arg("room.expandProjection", "true")
         arg("room.generateKotlin", "false")
-        //arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.schemaLocation", "$projectDir/schemas")
 
     }
 
