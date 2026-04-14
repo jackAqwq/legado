@@ -83,13 +83,24 @@ object CronetLoader : CronetEngine.Builder.LibraryLoader(), Cronet.LoaderInterfa
      */
     override fun preDownload() {
         Coroutine.async {
-            //md5 = getUrlMd5(md5Url)
+            // 延迟5秒开始下载，避免影响应用启动
+            Thread.sleep(5000)
+            
+            // 检查文件是否已存在且MD5正确
             if (soFile.exists() && md5 == getFileMD5(soFile)) {
-                DebugLog.d(javaClass.simpleName, "So 库已存在")
-            } else {
-                download(soUrl, md5, downloadFile, soFile)
+                DebugLog.d(javaClass.simpleName, "So 库已存在且校验通过")
+                return@async
             }
-            DebugLog.d(javaClass.simpleName, soName)
+            
+            // 检查网络状态，仅在网络可用时下载
+            if (!io.legado.app.utils.NetworkUtils.isNetworkAvailable(appCtx)) {
+                DebugLog.d(javaClass.simpleName, "网络不可用，跳过Cronet预下载")
+                return@async
+            }
+            
+            // 开始下载
+            DebugLog.d(javaClass.simpleName, "开始预下载Cronet库")
+            download(soUrl, md5, downloadFile, soFile)
         }
     }
 

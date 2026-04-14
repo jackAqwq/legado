@@ -22,13 +22,11 @@ object DispatchersMonitor {
 
     private const val TAG = "DispatchersMonitor"
 
-    private val dispatcher by lazy {
-        Executors.newSingleThreadExecutor {
-            Thread(it, TAG)
-        }.asCoroutineDispatcher()
-    }
+    private var dispatcher = Executors.newSingleThreadExecutor { 
+        Thread(it, TAG) 
+    }.asCoroutineDispatcher()
 
-    private val scope = CoroutineScope(dispatcher)
+    private var scope = CoroutineScope(dispatcher)
 
     fun init() {
         scope.coroutineContext.cancelChildren()
@@ -38,6 +36,19 @@ object DispatchersMonitor {
         monitor(IO)
         monitor(Default)
         monitor(Main)
+    }
+
+    /**
+     * 清理资源
+     */
+    fun clear() {
+        scope.coroutineContext.cancelChildren()
+        dispatcher.close()
+        // 重新创建dispatcher和scope，以便下次初始化时使用
+        dispatcher = Executors.newSingleThreadExecutor { 
+            Thread(it, TAG) 
+        }.asCoroutineDispatcher()
+        scope = CoroutineScope(dispatcher)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

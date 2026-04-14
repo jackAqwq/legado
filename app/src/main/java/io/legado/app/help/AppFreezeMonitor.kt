@@ -15,29 +15,34 @@ object AppFreezeMonitor {
 
     private const val TAG = "AppFreezeMonitor"
 
-    val handler by lazy {
-        Handler(HandlerThread("AppFreezeMonitor").apply { start() }.looper)
-    }
+    private var handler: Handler? = null
+    private var handlerThread: HandlerThread? = null
 
-    val screenStatusReceiver by lazy {
+    private val screenStatusReceiver by lazy {
         ScreenStatusReceiver()
     }
 
     private var registeredReceiver = false
+    private var context: Context? = null
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     fun init(context: Context) {
+        this.context = context.applicationContext
+        
         if (!AppConfig.recordLog) {
-            if (registeredReceiver) {
-                registeredReceiver = false
-                context.unregisterReceiver(screenStatusReceiver)
-            }
+            unregister()
             return
         }
 
         if (!registeredReceiver) {
             registeredReceiver = true
             context.registerReceiver(screenStatusReceiver, screenStatusReceiver.filter)
+        }
+
+        // 初始化handler
+        if (handler == null) {
+            handlerThread = HandlerThread("AppFreezeMonitor").apply { start() }
+            handler = Handler(handlerThread?.looper)
         }
 
         var previous = SystemClock.uptimeMillis()
@@ -54,12 +59,32 @@ object AppFreezeMonitor {
 
                 previous = current
 
-                if (AppConfig.recordLog) {
-                    handler.postDelayed(this, 3000)
+                if (AppConfig.recordLog && handler != null) {
+                    handler?.postDelayed(this, 3000)
                 }
             }
         }
-        handler.postDelayed(runnable, 3000)
+        handler?.postDelayed(runnable, 3000)
+    }
+
+    /**
+     * 取消注册和清理资源
+     */
+    fun unregister() {
+        if (registeredReceiver && context != null) {
+            try {
+                context?.unregisterReceiver(screenStatusReceiver)
+                registeredReceiver = false
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        
+        // 清理handler
+        handler?.removeCallbacksAndMessages(null)
+        handlerThread?.quitSafely()
+        handler = null
+        handlerThread = null
     }
 
     class ScreenStatusReceiver : BroadcastReceiver() {

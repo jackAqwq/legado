@@ -81,8 +81,37 @@ class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
         if ((ex is OutOfMemoryError || ex.cause is OutOfMemoryError) && AppConfig.recordHeapDump) {
             doHeapDump()
         }
-        context.longToastOnUiLegacy(ex.stackTraceStr)
+        
+        // 提供更友好的错误提示
+        val friendlyMessage = getFriendlyErrorMessage(ex)
+        context.longToastOnUiLegacy(friendlyMessage)
         Thread.sleep(3000)
+    }
+    
+    /**
+     * 获取友好的错误信息
+     */
+    private fun getFriendlyErrorMessage(ex: Throwable): String {
+        return when (ex) {
+            is OutOfMemoryError -> {
+                "内存不足，请关闭其他应用后重试"
+            }
+            is java.net.SocketTimeoutException -> {
+                "网络连接超时，请检查网络状态"
+            }
+            is java.net.ConnectException -> {
+                "无法连接到服务器，请检查网络状态"
+            }
+            is java.net.UnknownHostException -> {
+                "无法解析服务器地址，请检查网络状态"
+            }
+            is SecurityException -> {
+                "权限不足，请检查应用权限设置"
+            }
+            else -> {
+                "应用出现异常，已记录错误信息，请稍后重试\n错误: ${ex.message ?: "未知错误"}"
+            }
+        }
     }
 
     companion object {

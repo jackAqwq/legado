@@ -69,6 +69,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // 必须在主线程执行的初始化
         CrashHandler(this)
         if (isDebuggable) {
             ThreadUtils.setThreadAssertsDisabledForTesting(true)
@@ -77,27 +78,47 @@ class App : Application() {
         applyDayNightInit(this)
         registerActivityLifecycleCallbacks(LifecycleHelp)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(AppConfig)
+        createNotificationChannels()
+        
+        // 核心初始化 - 尽快完成
         Coroutine.async {
             LogUtils.init(this@App)
             LogUtils.d("App", "onCreate")
             LogUtils.logDeviceInfo()
-            //预下载Cronet so
-            Cronet.preDownload()
-            createNotificationChannels()
+            
+            // 配置LiveEventBus
             LiveEventBus.config()
                 .lifecycleObserverAlwaysActive(true)
                 .autoClear(false)
                 .enableLogger(BuildConfig.DEBUG || AppConfig.recordLog)
                 .setLogger(EventLogger())
+            
+            // 初始化URL流处理器
+            URL.setURLStreamHandlerFactory(ObsoleteUrlFactory(okHttpClient))
+            
+            // 初始化Rhino脚本引擎
+            initRhino()
+            
+            // 版本更新
             DefaultData.upVersion()
+        }
+        
+        // 后台初始化 - 不影响启动速度
+        Coroutine.async {
+            // 预下载Cronet so
+            Cronet.preDownload()
+            
+            // 监控初始化
             AppFreezeMonitor.init(this@App)
             DispatchersMonitor.init()
-            URL.setURLStreamHandlerFactory(ObsoleteUrlFactory(okHttpClient))
-            launch { installGmsTlsProvider(appCtx) }
-            initRhino()
-            //初始化封面
+            
+            // 安装GMS TLS提供程序
+            installGmsTlsProvider(appCtx)
+            
+            // 初始化封面
             BookCover.toString()
-            //清除过期数据
+            
+            // 清除过期数据
             appDb.cacheDao.clearDeadline(System.currentTimeMillis())
             if (getPrefBoolean(PreferKey.autoClearExpired, true)) {
                 val clearTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)
@@ -107,19 +128,20 @@ class App : Application() {
             BookHelp.clearInvalidCache()
             Backup.clearCache()
             ReadBookConfig.clearBgAndCache()
-//            ThemeConfig.clearBg() //每次手动切换主题时清理多余图片
-            //初始化简繁转换引擎
+            
+            // 初始化简繁转换引擎
             when (AppConfig.chineseConverterType) {
                 1 -> {
                     ChineseUtils.fixT2sDict()
                     ChineseUtils.preLoad(true, TransType.TRADITIONAL_TO_SIMPLE)
                 }
-
                 2 -> ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
             }
-            //调整排序序号
+            
+            // 调整排序序号
             SourceHelp.adjustSortNumber()
-            //同步阅读记录
+            
+            // 同步阅读记录
             if (AppConfig.syncBookProgress) {
                 AppWebDav.downloadAllBookProgress()
             }

@@ -27,8 +27,14 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
      * 判断指定Activity是否存在
      */
     fun isExistActivity(activityClass: Class<*>): Boolean {
-        activities.forEach { item ->
-            if (item.get()?.javaClass == activityClass) {
+        val iterator = activities.iterator()
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+            val activity = item.get()
+            if (activity == null) {
+                // 移除已经回收的引用
+                iterator.remove()
+            } else if (activity.javaClass == activityClass) {
                 return true
             }
         }
@@ -40,11 +46,19 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
      */
     fun finishActivity(vararg activityClasses: Class<*>) {
         val waitFinish = ArrayList<WeakReference<Activity>>()
-        for (temp in activities) {
-            for (activityClass in activityClasses) {
-                if (temp.get()?.javaClass == activityClass) {
-                    waitFinish.add(temp)
-                    break
+        val iterator = activities.iterator()
+        while (iterator.hasNext()) {
+            val temp = iterator.next()
+            val activity = temp.get()
+            if (activity == null) {
+                // 移除已经回收的引用
+                iterator.remove()
+            } else {
+                for (activityClass in activityClasses) {
+                    if (activity.javaClass == activityClass) {
+                        waitFinish.add(temp)
+                        break
+                    }
                 }
             }
         }
@@ -117,5 +131,8 @@ object LifecycleHelp : Application.ActivityLifecycleCallbacks {
 
     private fun onAppFinished() {
         appFinishedListener?.invoke()
+        // 清理监控资源，防止内存泄漏
+        AppFreezeMonitor.unregister()
+        DispatchersMonitor.clear()
     }
 }
