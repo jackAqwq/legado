@@ -77,7 +77,7 @@ class WebService : BaseService() {
     private var webSocketServer: WebSocketServer? = null
     private var notificationList = mutableListOf(appCtx.getString(R.string.service_starting))
     private val networkChangedListener by lazy {
-        NetworkChangedListener(this)
+        NetworkChangedListener()
     }
 
     @SuppressLint("WakelockTimeout")
@@ -228,3 +228,4 @@ class WebService : BaseService() {
         }
     }
 }
+

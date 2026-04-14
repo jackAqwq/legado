@@ -103,7 +103,7 @@ class ReadMangaActivity : VMBaseActivity<ActivityMangaBinding, ReadMangaViewMode
     private var mRecyclerViewPreloader: RecyclerViewPreloader<Any>? = null
 
     private val networkChangedListener by lazy {
-        NetworkChangedListener(this)
+        NetworkChangedListener()
     }
 
     private var justInitData: Boolean = false

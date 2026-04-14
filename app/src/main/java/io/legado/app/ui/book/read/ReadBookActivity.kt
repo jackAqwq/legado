@@ -261,7 +261,7 @@ class ReadBookActivity : BaseReadBookActivity(),
     //恢复跳转前进度对话框的交互结果
     private var confirmRestoreProcess: Boolean? = null
     private val networkChangedListener by lazy {
-        NetworkChangedListener(this)
+        NetworkChangedListener()
     }
     private var justInitData: Boolean = false
     private var syncDialog: AlertDialog? = null
@@ -1855,3 +1855,4 @@ class ReadBookActivity : BaseReadBookActivity(),
     }
 
 }
+

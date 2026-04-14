@@ -1,10 +1,8 @@
 package io.legado.app.base
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.os.Build
 import android.os.LocaleList
 import io.legado.app.constant.PreferKey
 import io.legado.app.utils.getPrefInt
@@ -16,18 +14,12 @@ import java.util.*
 @Suppress("unused")
 object AppContextWrapper {
 
-    @SuppressLint("ObsoleteSdkInt")
     fun wrap(context: Context): Context {
         val resources: Resources = context.resources
         val configuration: Configuration = resources.configuration
         val targetLocale = getSetLocale(context)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            configuration.setLocale(targetLocale)
-            configuration.setLocales(LocaleList(targetLocale))
-        } else {
-            @Suppress("DEPRECATION")
-            configuration.locale = targetLocale
-        }
+        configuration.setLocale(targetLocale)
+        configuration.setLocales(LocaleList(targetLocale))
         configuration.fontScale = getFontScale(context)
         return context.createConfigurationContext(configuration)
     }
@@ -43,32 +35,15 @@ object AppContextWrapper {
     /**
      * 当前系统语言
      */
-    @SuppressLint("ObsoleteSdkInt")
     private fun getSystemLocale(): Locale {
-        val locale: Locale
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) { //7.0有多语言设置获取顶部的语言
-            locale = sysConfiguration.locales.get(0)
-        } else {
-            @Suppress("DEPRECATION")
-            locale = sysConfiguration.locale
-        }
-        return locale
+        return sysConfiguration.locales[0]
     }
 
     /**
      * 当前App语言
      */
-    @SuppressLint("ObsoleteSdkInt")
     private fun getAppLocale(context: Context): Locale {
-        val locale: Locale
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = context.resources.configuration.locales[0]
-        } else {
-            @Suppress("DEPRECATION")
-            locale = context.resources.configuration.locale
-        }
-        return locale
-
+        return context.resources.configuration.locales[0]
     }
 
     /**

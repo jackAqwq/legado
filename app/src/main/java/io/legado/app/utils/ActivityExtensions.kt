@@ -3,7 +3,6 @@ package io.legado.app.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -49,35 +48,28 @@ fun AppCompatActivity.showDialogFragment(dialogFragment: DialogFragment) {
 val WindowManager.windowSize: DisplayMetrics
     get() {
         val displayMetrics = DisplayMetrics()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val windowMetrics: WindowMetrics = currentWindowMetrics
-            val insets = windowMetrics.windowInsets
-                .getInsetsIgnoringVisibility(
-                    WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-                )
-            val windowWidth = windowMetrics.bounds.width()
-            val windowHeight = windowMetrics.bounds.height()
-            var insetsWidth = insets.left + insets.right
-            var insetsHeight = insets.top + insets.bottom
-            if (windowWidth > windowHeight) {
-                val tmp = insetsWidth
-                insetsWidth = insetsHeight
-                insetsHeight = tmp
-            }
-            displayMetrics.widthPixels = windowWidth - insetsWidth
-            displayMetrics.heightPixels = windowHeight - insetsHeight
-        } else {
-            @Suppress("DEPRECATION")
-            defaultDisplay.getMetrics(displayMetrics)
+        val windowMetrics: WindowMetrics = currentWindowMetrics
+        val insets = windowMetrics.windowInsets
+            .getInsetsIgnoringVisibility(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+            )
+        val windowWidth = windowMetrics.bounds.width()
+        val windowHeight = windowMetrics.bounds.height()
+        var insetsWidth = insets.left + insets.right
+        var insetsHeight = insets.top + insets.bottom
+        if (windowWidth > windowHeight) {
+            val tmp = insetsWidth
+            insetsWidth = insetsHeight
+            insetsHeight = tmp
         }
+        displayMetrics.widthPixels = windowWidth - insetsWidth
+        displayMetrics.heightPixels = windowHeight - insetsHeight
         return displayMetrics
     }
 
 @Suppress("DEPRECATION")
 fun Activity.fullScreen() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        window.setDecorFitsSystemWindows(true)
-    }
+    window.setDecorFitsSystemWindows(true)
     window.decorView.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     window.clearFlags(
@@ -109,34 +101,29 @@ fun Activity.setStatusBarColorAuto(
     setLightStatusBar(isLightBar)
 }
 
-@SuppressLint("ObsoleteSdkInt")
 fun Activity.setLightStatusBar(isLightBar: Boolean) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        window.insetsController?.let {
-            if (isLightBar) {
-                it.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                )
-            } else {
-                it.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                )
-            }
+    window.insetsController?.let {
+        if (isLightBar) {
+            it.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+        } else {
+            it.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
         }
     }
     @Suppress("DEPRECATION")
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val decorView = window.decorView
-        val systemUiVisibility = decorView.systemUiVisibility
-        if (isLightBar) {
-            decorView.systemUiVisibility =
-                systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        } else {
-            decorView.systemUiVisibility =
-                systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
-        }
+    val decorView = window.decorView
+    val systemUiVisibility = decorView.systemUiVisibility
+    if (isLightBar) {
+        decorView.systemUiVisibility =
+            systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+    } else {
+        decorView.systemUiVisibility =
+            systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
     }
 }
 
@@ -147,32 +134,28 @@ fun Activity.setLightStatusBar(isLightBar: Boolean) {
 fun Activity.setNavigationBarColorAuto(@ColorInt color: Int) {
     val isLightBor = ColorUtils.isColorLight(color)
     window.navigationBarColor = color
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        window.insetsController?.let {
-            if (isLightBor) {
-                it.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                )
-            } else {
-                it.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-                )
-            }
+    window.insetsController?.let {
+        if (isLightBor) {
+            it.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            )
+        } else {
+            it.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            )
         }
     }
     @Suppress("DEPRECATION")
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val decorView = window.decorView
-        var systemUiVisibility = decorView.systemUiVisibility
-        systemUiVisibility = if (isLightBor) {
-            systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        } else {
-            systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
-        }
-        decorView.systemUiVisibility = systemUiVisibility
+    val decorView = window.decorView
+    var systemUiVisibility = decorView.systemUiVisibility
+    systemUiVisibility = if (isLightBor) {
+        systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+    } else {
+        systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
     }
+    decorView.systemUiVisibility = systemUiVisibility
 }
 
 fun Activity.keepScreenOn(on: Boolean) {

@@ -1,9 +1,7 @@
 package io.legado.app.base
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.Menu
@@ -12,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.addCallback
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import io.legado.app.R
@@ -50,14 +47,7 @@ abstract class BaseActivity<VB : ViewBinding>(
     protected abstract val binding: VB
 
     val isInMultiWindow: Boolean
-        @SuppressLint("ObsoleteSdkInt")
-        get() {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                isInMultiWindowMode
-            } else {
-                false
-            }
-        }
+        get() = isInMultiWindowMode
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(AppContextWrapper.wrap(newBase))
@@ -75,7 +65,6 @@ abstract class BaseActivity<VB : ViewBinding>(
         return super.onCreateView(parent, name, context, attrs)
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         window.decorView.disableAutoFill()
         initTheme()
@@ -83,10 +72,8 @@ abstract class BaseActivity<VB : ViewBinding>(
         setupSystemBar()
         setContentView(binding.root)
         upBackgroundImage()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            findViewById<TitleBar>(R.id.title_bar)
-                ?.onMultiWindowModeChanged(isInMultiWindowMode, fullScreen)
-        }
+        findViewById<TitleBar>(R.id.title_bar)
+            ?.onMultiWindowModeChanged(isInMultiWindowMode, fullScreen)
         onBackPressedDispatcher.addCallback(this) {
             finish()
         }
@@ -94,7 +81,6 @@ abstract class BaseActivity<VB : ViewBinding>(
         onActivityCreated(savedInstanceState)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
         super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
         findViewById<TitleBar>(R.id.title_bar)

@@ -6,9 +6,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.content.pm.ApplicationInfo
 import android.content.res.Configuration
-import android.os.Build
 import com.github.liuyueyi.quick.transfer.constants.TransType
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.jeremyliao.liveeventbus.logger.DefaultLogger
@@ -59,7 +57,6 @@ import io.legado.app.utils.isDebuggable
 import io.legado.app.utils.putPrefLong
 import kotlinx.coroutines.launch
 import org.chromium.base.ThreadUtils
-import splitties.init.appCtx
 import splitties.systemservices.notificationManager
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -113,10 +110,7 @@ open class App : Application() {
             // 监控初始化
             AppFreezeMonitor.init(this@App)
             DispatchersMonitor.init()
-            
-            // 安装GMS TLS提供程序
-            installGmsTlsProvider(appCtx)
-            
+
             // 初始化封面
             BookCover.toString()
             
@@ -168,43 +162,9 @@ open class App : Application() {
     }
 
     /**
-     * 尝试在安装了GMS的设备上(GMS或者MicroG)使用GMS内置的Conscrypt
-     * 作为首选JCE提供程序，而使Okhttp在低版本Android上
-     * 能够启用TLSv1.3
-     * https://f-droid.org/zh_Hans/2020/05/29/android-updates-and-tls-connections.html
-     * https://developer.android.google.cn/reference/javax/net/ssl/SSLSocket
-     *
-     * @param context
-     * @return
-     */
-    private fun installGmsTlsProvider(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return
-        }
-        try {
-            val gmsPackageName = "com.google.android.gms"
-            val appInfo = packageManager.getApplicationInfo(gmsPackageName, 0)
-            if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0) {
-                return
-            }
-            val gms = context.createPackageContext(
-                gmsPackageName,
-                CONTEXT_INCLUDE_CODE or CONTEXT_IGNORE_SECURITY
-            )
-            gms.classLoader
-                .loadClass("com.google.android.gms.common.security.ProviderInstallerImpl")
-                .getMethod("insertProvider", Context::class.java)
-                .invoke(null, gms)
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
      * 创建通知ID
      */
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val downloadChannel = NotificationChannel(
             channelIdDownload,
             getString(R.string.action_download),
