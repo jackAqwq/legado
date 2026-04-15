@@ -7,7 +7,6 @@ import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.util.TypedValue
@@ -210,38 +209,10 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
                         }
                     sheet.background = shapeDrawable
                     sheet.clipToOutline = true
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                        currentWebView.outlineProvider =
-                            object : android.view.ViewOutlineProvider() {
-                                override fun getOutline(
-                                    view: View,
-                                    outline: android.graphics.Outline
-                                ) {
-                                    outline.setRoundRect(0, 0, view.width, view.height, radius)
-                                }
-                            }
-                        currentWebView.clipToOutline = true
-                        binding.customWebView.outlineProvider =
-                            object : android.view.ViewOutlineProvider() {
-                                override fun getOutline(
-                                    view: View,
-                                    outline: android.graphics.Outline
-                                ) {
-                                    outline.setRoundRect(0, 0, view.width, view.height, radius)
-                                }
-                            }
-                        binding.customWebView.clipToOutline = true
-                    }
                 } else { //取消圆角
                     sheet.backgroundTintList = null
                     sheet.background = null
                     sheet.clipToOutline = false
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                        currentWebView.outlineProvider = null
-                        currentWebView.clipToOutline = false
-                        binding.customWebView.outlineProvider = null
-                        binding.customWebView.clipToOutline = false
-                    }
                 }
             }
         }
@@ -345,14 +316,12 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
 
         val scrollNoDraggable = config.scrollNoDraggable ?: if (first) true else null
         scrollNoDraggable?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (it) {
-                    currentWebView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                        behavior?.isDraggable = scrollY == 0
-                    }
-                } else {
-                    currentWebView.setOnScrollChangeListener(null)
+            if (it) {
+                currentWebView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+                    behavior?.isDraggable = scrollY == 0
                 }
+            } else {
+                currentWebView.setOnScrollChangeListener(null)
             }
         }
 
@@ -430,10 +399,8 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
                             sheet.layoutParams = layoutParams
                         }
                         setLongClickSaveImg()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            currentWebView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                                behavior?.isDraggable = scrollY == 0
-                            }
+                        currentWebView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+                            behavior?.isDraggable = scrollY == 0
                         }
                     }
                 }

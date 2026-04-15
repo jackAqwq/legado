@@ -53,6 +53,7 @@ import io.legado.app.ui.login.SourceLoginActivity
 import io.legado.app.ui.rss.favorites.RssFavoritesDialog
 import io.legado.app.utils.ACache
 import io.legado.app.utils.NetworkUtils
+import io.legado.app.utils.RegexMatcherCache
 import io.legado.app.utils.gone
 import io.legado.app.utils.invisible
 import io.legado.app.utils.isTrue
@@ -74,7 +75,6 @@ import org.apache.commons.text.StringEscapeUtils
 import org.jsoup.Jsoup
 import splitties.views.bottomPadding
 import java.io.ByteArrayInputStream
-import java.util.regex.PatternSyntaxException
 import io.legado.app.ui.about.AppLogDialog
 import io.legado.app.ui.rss.article.ReadRecordDialog
 import io.legado.app.ui.rss.source.edit.RssSourceEditActivity
@@ -128,6 +128,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         }
     }
     private val rssJsExtensions by lazy { RssJsExtensions(this, viewModel.rssSource) }
+    private val regexMatcherCache = RegexMatcherCache()
 
     private val refreshNameList: MutableList<String> by lazy { mutableListOf() }
     private fun refresh() {
@@ -639,25 +640,23 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
             val blacklist = source.contentBlacklist?.splitNotBlank(",")
             if (!blacklist.isNullOrEmpty()) {
                 blacklist.forEach {
-                    try {
-                        if (url.startsWith(it) || url.matches(it.toRegex())) {
-                            return createEmptyResource()
-                        }
-                    } catch (e: PatternSyntaxException) {
-                        AppLog.put("黑名单规则正则语法错误 源名称:${source.sourceName} 正则:$it", e)
+                    val regexMatched = regexMatcherCache.matches(url, it) { pattern, throwable ->
+                        AppLog.put("黑名单规则正则语法错误 源名称:${source.sourceName} 正则:$pattern", throwable)
+                    }
+                    if (url.startsWith(it) || regexMatched) {
+                        return createEmptyResource()
                     }
                 }
             } else {
                 val whitelist = source.contentWhitelist?.splitNotBlank(",")
                 if (!whitelist.isNullOrEmpty()) {
                     whitelist.forEach {
-                        try {
-                            if (url.startsWith(it) || url.matches(it.toRegex())) {
-                                return super.shouldInterceptRequest(view, request)
-                            }
-                        } catch (e: PatternSyntaxException) {
-                            val msg = "白名单规则正则语法错误 源名称:${source.sourceName} 正则:$it"
-                            AppLog.put(msg, e)
+                        val regexMatched = regexMatcherCache.matches(url, it) { pattern, throwable ->
+                            val msg = "白名单规则正则语法错误 源名称:${source.sourceName} 正则:$pattern"
+                            AppLog.put(msg, throwable)
+                        }
+                        if (url.startsWith(it) || regexMatched) {
+                            return super.shouldInterceptRequest(view, request)
                         }
                     }
                     return createEmptyResource()

@@ -3,7 +3,6 @@ package io.legado.app.ui.config
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -79,9 +78,6 @@ class ThemeConfigFragment : PreferenceFragment(),
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.pref_config_theme)
-        if (Build.VERSION.SDK_INT < 26) {
-            preferenceScreen.removePreferenceRecursively(PreferKey.launcherIcon)
-        }
         upPreferenceSummary(PreferKey.bgImage, getPrefString(PreferKey.bgImage))
         upPreferenceSummary(PreferKey.bgImageN, getPrefString(PreferKey.bgImageN))
         upPreferenceSummary(PreferKey.barElevation, AppConfig.elevation.toString())

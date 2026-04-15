@@ -1,7 +1,6 @@
 package io.legado.app.utils
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.webkit.WebSettings
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
@@ -12,13 +11,11 @@ import io.legado.app.help.config.AppConfig
  */
 @SuppressLint("RequiresFeature")
 fun WebSettings.setDarkeningAllowed(allow: Boolean) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        kotlin.runCatching {
-            WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, allow)
-            return
-        }.onFailure {
-            it.printOnDebug()
-        }
+    kotlin.runCatching {
+        WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, allow)
+        return
+    }.onFailure {
+        it.printOnDebug()
     }
     if (allow) {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {

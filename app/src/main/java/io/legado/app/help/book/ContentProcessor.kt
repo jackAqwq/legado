@@ -18,7 +18,9 @@ import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.CancellationException
 import splitties.init.appCtx
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 
 class ContentProcessor private constructor(
@@ -27,24 +29,41 @@ class ContentProcessor private constructor(
 ) {
 
     companion object {
-        private val processors = hashMapOf<String, WeakReference<ContentProcessor>>()
+        private const val CLEANUP_TRIGGER_INTERVAL = 64
+        private val processors = ConcurrentHashMap<String, WeakReference<ContentProcessor>>()
+        private val getCounter = AtomicInteger(0)
 
         fun get(book: Book) = get(book.name, book.origin)
 
         fun get(bookName: String, bookOrigin: String): ContentProcessor {
-            val processorWr = processors[bookName + bookOrigin]
-            var processor: ContentProcessor? = processorWr?.get()
+            val cacheKey = bookName + bookOrigin
+            var processor = processors.compute(cacheKey) { _, processorRef ->
+                val cached = processorRef?.get()
+                if (cached != null) {
+                    return@compute processorRef
+                }
+                WeakReference(ContentProcessor(bookName, bookOrigin))
+            }?.get()
             if (processor == null) {
                 processor = ContentProcessor(bookName, bookOrigin)
-                processors[bookName + bookOrigin] = WeakReference(processor)
+                processors[cacheKey] = WeakReference(processor)
             }
+            maybeCleanupStaleProcessors()
             return processor
         }
 
         fun upReplaceRules() {
+            maybeCleanupStaleProcessors(force = true)
             processors.forEach {
                 it.value.get()?.upReplaceRules()
             }
+        }
+
+        private fun maybeCleanupStaleProcessors(force: Boolean = false) {
+            if (!force && getCounter.incrementAndGet() % CLEANUP_TRIGGER_INTERVAL != 0) {
+                return
+            }
+            processors.entries.removeIf { it.value.get() == null }
         }
 
     }

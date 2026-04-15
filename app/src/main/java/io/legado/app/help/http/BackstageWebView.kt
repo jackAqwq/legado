@@ -30,6 +30,7 @@ import io.legado.app.help.webView.WebJsExtensions.Companion.nameSource
 import io.legado.app.help.webView.WebViewPool
 import io.legado.app.model.Debug
 import io.legado.app.utils.get
+import io.legado.app.utils.RegexMatcherCache
 import io.legado.app.utils.runOnUI
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Runnable
@@ -64,6 +65,7 @@ class BackstageWebView(
 ) {
 
     private val mHandler = Handler(Looper.getMainLooper())
+    private val regexMatcherCache = RegexMatcherCache()
     private var callback: Callback? = null
     private var pooledWebView: PooledWebView? = null
 
@@ -318,7 +320,7 @@ class BackstageWebView(
 
         private fun shouldOverrideUrlLoading(requestUrl: String): Boolean {
             overrideUrlRegex?.let {
-                if (requestUrl.matches(it.toRegex())) {
+                if (regexMatcherCache.matches(requestUrl, it)) {
                     try {
                         val response = StrResponse(url!!, requestUrl)
                         callback?.onResult(response)
@@ -334,7 +336,7 @@ class BackstageWebView(
 
         override fun onLoadResource(view: WebView, resUrl: String) {
             sourceRegex?.let {
-                if (resUrl.matches(it.toRegex())) {
+                if (regexMatcherCache.matches(resUrl, it)) {
                     try {
                         val response = StrResponse(url!!, resUrl)
                         callback?.onResult(response)

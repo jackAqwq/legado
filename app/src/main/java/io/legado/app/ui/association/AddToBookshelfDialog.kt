@@ -23,6 +23,7 @@ import io.legado.app.ui.book.info.BookInfoActivity
 import io.legado.app.utils.GSON
 import io.legado.app.utils.NetworkUtils
 import io.legado.app.utils.fromJsonObject
+import io.legado.app.utils.RegexMatcherCache
 import io.legado.app.utils.setLayout
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.toastOnUi
@@ -109,6 +110,7 @@ class AddToBookshelfDialog() : BaseDialogFragment(R.layout.dialog_add_to_bookshe
         val loadStateLiveData = MutableLiveData<Boolean>()
         val loadErrorLiveData = MutableLiveData<String>()
         var book: Book? = null
+        private val regexMatcherCache = RegexMatcherCache()
 
         fun load(bookUrl: String, success: (book: Book) -> Unit) {
             execute {
@@ -139,7 +141,7 @@ class AddToBookshelfDialog() : BaseDialogFragment(R.layout.dialog_add_to_bookshe
                 appDb.bookSourceDao.hasBookUrlPattern.forEach { source ->
                     try {
                         val bs = source.getBookSource()!!
-                        if (bookUrl.matches(bs.bookUrlPattern!!.toRegex())) {
+                        if (regexMatcherCache.matches(bookUrl, bs.bookUrlPattern)) {
                             getBookInfo(bookUrl, bs)?.let { book ->
                                 return@execute book
                             }

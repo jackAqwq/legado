@@ -20,6 +20,7 @@ import io.legado.app.utils.GSON
 import io.legado.app.utils.GSONStrict
 import io.legado.app.utils.HtmlFormatter
 import io.legado.app.utils.NetworkUtils
+import io.legado.app.utils.RegexMatcherCache
 import io.legado.app.utils.StringUtils.wordCountFormat
 import io.legado.app.utils.fromJsonArray
 import kotlinx.coroutines.currentCoroutineContext
@@ -30,6 +31,7 @@ import splitties.init.appCtx
  * 获取书籍列表
  */
 object BookList {
+    private val regexMatcherCache = RegexMatcherCache()
 
     @Throws(Exception::class)
     suspend fun analyzeBookList(
@@ -59,25 +61,23 @@ object BookList {
         if (!isSearch) {
             checkExploreJson(bookSource)
         }
-        if (isSearch) bookSource.bookUrlPattern?.let {
+        if (isSearch && regexMatcherCache.matches(baseUrl, bookSource.bookUrlPattern)) {
             currentCoroutineContext().ensureActive()
-            if (baseUrl.matches(it.toRegex())) {
-                Debug.log(bookSource.bookSourceUrl, "≡链接为详情页")
-                getInfoItem(
-                    bookSource,
-                    analyzeRule,
-                    analyzeUrl,
-                    body,
-                    baseUrl,
-                    ruleData.getVariable(),
-                    isRedirect,
-                    filter
-                )?.let { searchBook ->
-                    searchBook.infoHtml = body
-                    bookList.add(searchBook)
-                }
-                return bookList
+            Debug.log(bookSource.bookSourceUrl, "≡链接为详情页")
+            getInfoItem(
+                bookSource,
+                analyzeRule,
+                analyzeUrl,
+                body,
+                baseUrl,
+                ruleData.getVariable(),
+                isRedirect,
+                filter
+            )?.let { searchBook ->
+                searchBook.infoHtml = body
+                bookList.add(searchBook)
             }
+            return bookList
         }
         val collections: List<Any>
         var reverse = false

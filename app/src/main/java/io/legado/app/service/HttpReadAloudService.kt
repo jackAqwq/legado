@@ -41,6 +41,7 @@ import io.legado.app.ui.book.read.page.entities.TextChapter
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.MD5Utils
 import io.legado.app.utils.printOnDebug
+import io.legado.app.utils.RegexMatcherCache
 import io.legado.app.utils.servicePendingIntent
 import io.legado.app.utils.toastOnUi
 import kotlinx.coroutines.CancellationException
@@ -94,6 +95,7 @@ class HttpReadAloudService : BaseReadAloudService(),
     private var downloadErrorNo: Int = 0
     private var playErrorNo = 0
     private val downloadTaskActiveLock = Mutex()
+    private val regexMatcherCache = RegexMatcherCache()
 
     override fun onCreate() {
         super.onCreate()
@@ -368,7 +370,14 @@ class HttpReadAloudService : BaseReadAloudService(),
                     if (contentType == "application/json" || contentType.startsWith("text/")) {
                         throw NoStackTraceException(response.body.string())
                     } else if (ct?.isNotBlank() == true) {
-                        if (!contentType.matches(ct.toRegex())) {
+                        var invalidPatternError: Throwable? = null
+                        val contentTypeMatched = regexMatcherCache.matches(contentType, ct) { _, throwable ->
+                            invalidPatternError = throwable
+                        }
+                        invalidPatternError?.let {
+                            throw NoStackTraceException("TTS Content-Type 正则语法错误: ${it.localizedMessage}")
+                        }
+                        if (!contentTypeMatched) {
                             throw NoStackTraceException(
                                 "TTS服务器返回错误：" + response.body.string()
                             )

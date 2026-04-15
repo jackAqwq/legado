@@ -17,23 +17,23 @@ object ContentHelp {
     fun reSegment(content: String, chapterName: String): String {
         var content1 = content
         val dict = makeDict(content1)
-        var p = content1
-            .replace("&quot;".toRegex(), "“")
-            .replace("[:：]['\"‘”“]+".toRegex(), "：“")
-            .replace("[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
-            .split("\n(\\s*)".toRegex()).toTypedArray()
+        val normalizedParagraphs = content1
+            .replace(HTML_QUOTATION_REGEX, "“")
+            .replace(COLON_WITH_QUOTES_REGEX, "：“")
+            .replace(ADJACENT_QUOTES_WITH_TAIL_SPACE_REGEX, "”\n“")
+            .split(LINE_BREAK_WITH_SPACES_REGEX)
 
         //初始化StringBuilder的长度,在原content的长度基础上做冗余
         var buffer = StringBuilder((content1.length * 1.15).toInt())
         //          章节的文本格式为章节标题-空行-首段，所以处理段落时需要略过第一行文本。
         buffer.append("  ")
-        if (chapterName.trim { it <= ' ' } != p[0].trim { it <= ' ' }) {
+        if (chapterName.trim { it <= ' ' } != normalizedParagraphs[0].trim { it <= ' ' }) {
             // 去除段落内空格。unicode 3000 象形字间隔（中日韩符号和标点），不包含在\s内
-            buffer.append(p[0].replace("[\u3000\\s]+".toRegex(), ""))
+            buffer.append(normalizedParagraphs[0].replace(INNER_SPACES_PLUS_REGEX, ""))
         }
 
         //如果原文存在分段错误，需要把段落重新黏合
-        for (i in 1 until p.size) {
+        for (i in 1 until normalizedParagraphs.size) {
             if (match(MARK_SENTENCES_END, buffer.last())
                 || (match(MARK_QUOTATION_RIGHT, buffer.last())
                         && match(MARK_SENTENCES_END, buffer[buffer.lastIndex - 1]))
@@ -42,33 +42,33 @@ object ContentHelp {
             }
             // 段落开头以外的地方不应该有空格
             // 去除段落内空格。unicode 3000 象形字间隔（中日韩符号和标点），不包含在\s内
-            buffer.append(p[i].replace("[\u3000\\s]".toRegex(), ""))
+            buffer.append(normalizedParagraphs[i].replace(INNER_SPACES_REGEX, ""))
         }
         //     预分段预处理
         //         ”“处理为”\n“。
         //         ”。“处理为”。\n“。不考虑“？”  “！”的情况。
         // ”。xxx处理为 ”。\n xxx
-        p = buffer.toString()
-            .replace("[\"”“]+\\s*[\"”“]+".toRegex(), "”\n“")
-            .replace("[\"”“]+(？。！?!~)[\"”“]+".toRegex(), "”$1\n“")
-            .replace("[\"”“]+(？。！?!~)([^\"”“])".toRegex(), "”$1\n$2")
+        val preSegmentParagraphs = buffer.toString()
+            .replace(ADJACENT_QUOTES_REGEX, "”\n“")
+            .replace(QUOTES_AROUND_END_PUNCTUATION_REGEX, "”$1\n“")
+            .replace(QUOTE_END_PUNCTUATION_WITH_CONTENT_REGEX, "”$1\n$2")
             .replace(
-                "([问说喊唱叫骂道着答])[\\.。]".toRegex(),
+                DIALOG_VERB_WITH_DOT_REGEX,
                 "$1。\n"
             )
-            .split("\n".toRegex()).toTypedArray()
+            .split(NEW_LINE_REGEX)
         buffer = StringBuilder((content1.length * 1.15).toInt())
-        for (s in p) {
+        for (s in preSegmentParagraphs) {
             buffer.append("\n")
             buffer.append(findNewLines(s, dict))
         }
         buffer = reduceLength(buffer)
         content1 = (buffer.toString() //         处理章节头部空格和换行
-            .replaceFirst("^\\s+".toRegex(), "")
-            .replace("\\s*[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex(), "”\n“")
-            .replace("[:：][”“\"\\s]+".toRegex(), "：“")
-            .replace("\n[\"“”]([^\n\"“”]+)([,:，：][\"”“])([^\n\"“”]+)".toRegex(), "\n$1：“$3")
-            .replace("\n(\\s*)".toRegex(), "\n"))
+            .replaceFirst(LEADING_WHITESPACE_REGEX, "")
+            .replace(ADJACENT_QUOTES_WITH_OPTIONAL_PREFIX_SPACE_REGEX, "”\n“")
+            .replace(COLON_WITH_OPENING_QUOTES_REGEX, "：“")
+            .replace(NEW_LINE_QUOTE_COLON_FIX_REGEX, "\n$1：“$3")
+            .replace(LINE_BREAK_WITH_SPACES_REGEX, "\n"))
         return content1
     }
 
@@ -82,7 +82,7 @@ object ContentHelp {
      * @return
      */
     private fun reduceLength(str: StringBuilder): StringBuilder {
-        val p = str.toString().split("\n".toRegex()).toTypedArray()
+        val p = str.toString().split(NEW_LINE_REGEX).toMutableList()
         val l = p.size
         val b = BooleanArray(l)
         for (i in 0 until l) {
@@ -478,16 +478,7 @@ object ContentHelp {
      * @return 词条列表
      */
     private fun makeDict(str: String): List<String> {
-
-        // 引号中间不包含任何标点
-        val patten = Pattern.compile(
-            """
-          (?<=["'”“])([^
-          \p{P}]{1,$WORD_MAX_LENGTH})(?=["'”“])
-          """.trimIndent()
-        )
-        //Pattern patten = Pattern.compile("(?<=[\"'”“])([^\n\"'”“]{1,16})(?=[\"'”“])");
-        val matcher = patten.matcher(str)
+        val matcher = DICT_WORD_PATTERN.matcher(str)
         val cache: MutableList<String> = ArrayList()
         val dict: MutableList<String> = ArrayList()
         while (matcher.find()) {
@@ -619,10 +610,31 @@ object ContentHelp {
     //  引号
     private const val MARK_QUOTATION = "\"“”"
     private const val MARK_QUOTATION_RIGHT = "\"”"
-    private val PARAGRAPH_DIAGLOG = "^[\"”“][^\"”“]+[\"”“]$".toRegex()
 
     //  限制字典的长度
     private const val WORD_MAX_LENGTH = 16
+    private val PARAGRAPH_DIAGLOG = "^[\"”“][^\"”“]+[\"”“]$".toRegex()
+    private val HTML_QUOTATION_REGEX = "&quot;".toRegex()
+    private val COLON_WITH_QUOTES_REGEX = "[:：]['\"‘”“]+".toRegex()
+    private val ADJACENT_QUOTES_WITH_TAIL_SPACE_REGEX = "[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex()
+    private val LINE_BREAK_WITH_SPACES_REGEX = "\n(\\s*)".toRegex()
+    private val INNER_SPACES_PLUS_REGEX = "[\u3000\\s]+".toRegex()
+    private val INNER_SPACES_REGEX = "[\u3000\\s]".toRegex()
+    private val ADJACENT_QUOTES_REGEX = "[\"”“]+\\s*[\"”“]+".toRegex()
+    private val QUOTES_AROUND_END_PUNCTUATION_REGEX = "[\"”“]+(？。！?!~)[\"”“]+".toRegex()
+    private val QUOTE_END_PUNCTUATION_WITH_CONTENT_REGEX = "[\"”“]+(？。！?!~)([^\"”“])".toRegex()
+    private val DIALOG_VERB_WITH_DOT_REGEX = "([问说喊唱叫骂道着答])[\\.。]".toRegex()
+    private val NEW_LINE_REGEX = "\n".toRegex()
+    private val LEADING_WHITESPACE_REGEX = "^\\s+".toRegex()
+    private val ADJACENT_QUOTES_WITH_OPTIONAL_PREFIX_SPACE_REGEX = "\\s*[\"”“]+\\s*[\"”“][\\s\"”“]*".toRegex()
+    private val COLON_WITH_OPENING_QUOTES_REGEX = "[:：][”“\"\\s]+".toRegex()
+    private val NEW_LINE_QUOTE_COLON_FIX_REGEX = "\n[\"“”]([^\n\"“”]+)([,:，：][\"”“])([^\n\"“”]+)".toRegex()
+    private val DICT_WORD_PATTERN = Pattern.compile(
+        """
+          (?<=["'”“])([^
+          \p{P}]{1,$WORD_MAX_LENGTH})(?=["'”“])
+          """.trimIndent()
+    )
 
     private fun match(rule: String, chr: Char): Boolean {
         return rule.indexOf(chr) != -1
