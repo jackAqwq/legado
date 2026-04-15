@@ -638,8 +638,8 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                     ByteArrayInputStream("(() => {$JS_INJECTION\n$preloadJs\n})();".toByteArray())
                 )
             }
-            val blacklist = source.contentBlacklist?.splitNotBlank(",")
-            val whitelist = source.contentWhitelist?.splitNotBlank(",")
+            val blacklist = source.contentBlacklist?.splitNotBlank(",")?.toList()
+            val whitelist = source.contentWhitelist?.splitNotBlank(",")?.toList()
             return when (
                 resourceFilter.decide(
                     url = url,

@@ -45,12 +45,14 @@ internal class ReadBookRenderLayer(
         resetPageOffset: Boolean,
         success: (() -> Unit)?,
         onSeekBarProgress: () -> Unit
-    ) = withContext(Main.immediate) {
-        activity.binding.readView.upContent(relativePosition, resetPageOffset)
-        if (relativePosition == 0) {
-            onSeekBarProgress()
+    ) {
+        withContext(Main.immediate) {
+            activity.binding.readView.upContent(relativePosition, resetPageOffset)
+            if (relativePosition == 0) {
+                onSeekBarProgress()
+            }
+            success?.invoke()
         }
-        success?.invoke()
     }
 
     fun upPageAnim(upRecorder: Boolean) {

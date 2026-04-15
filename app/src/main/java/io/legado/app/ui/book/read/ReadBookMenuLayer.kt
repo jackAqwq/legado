@@ -42,8 +42,8 @@ internal class ReadBookMenuLayer(
         val menu = menu ?: return
         val book = ReadBook.book ?: return
         val onLine = !book.isLocal
-        for (i in 0 until menu.size) {
-            val item = menu[i]
+        for (i in 0 until menu.size()) {
+            val item = menu.getItem(i)
             when (item.groupId) {
                 R.id.menu_group_on_line -> item.isVisible = onLine
                 R.id.menu_group_local -> item.isVisible = !onLine

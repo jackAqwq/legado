@@ -198,7 +198,7 @@ internal class ReadBookInputLayer(
 
     fun showTextActionMenu() {
         val navigationBarHeight =
-            if (!ReadBookConfig.hideNavigationBar && navigationBarGravity == Gravity.BOTTOM)
+            if (!ReadBookConfig.hideNavigationBar && activity.navigationBarGravity == Gravity.BOTTOM)
                 activity.binding.navigationBar.height else 0
         textActionMenu.show(
             activity.binding.textMenuPosition,

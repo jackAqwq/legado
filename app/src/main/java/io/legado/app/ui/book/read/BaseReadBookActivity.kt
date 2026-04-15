@@ -55,8 +55,8 @@ import java.time.format.DateTimeFormatter
 abstract class BaseReadBookActivity :
     VMBaseActivity<ActivityBookReadBinding, ReadBookViewModel>(imageBg = false) {
 
-    override val binding by viewBinding(ActivityBookReadBinding::inflate)
-    override val viewModel by viewModels<ReadBookViewModel>()
+    public override val binding by viewBinding(ActivityBookReadBinding::inflate)
+    public override val viewModel by viewModels<ReadBookViewModel>()
     protected val menuLayoutIsVisible
         get() = bottomDialog > 0 || binding.readMenu.isVisible || binding.searchMenu.bottomMenuVisible
 
