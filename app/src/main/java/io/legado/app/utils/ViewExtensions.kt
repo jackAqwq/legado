@@ -8,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Picture
-import android.os.Build
 import android.text.Spanned
 import android.text.style.ImageSpan
 import android.view.MotionEvent
@@ -80,9 +79,7 @@ fun EditText.showSoftInput() = run {
 }
 
 fun View.disableAutoFill() = run {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        this.importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
-    }
+    this.importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
 }
 
 fun View.applyTint(

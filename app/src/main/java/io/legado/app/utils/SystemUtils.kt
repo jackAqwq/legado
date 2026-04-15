@@ -1,6 +1,5 @@
 package io.legado.app.utils
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -14,10 +13,7 @@ import splitties.systemservices.powerManager
 @Suppress("unused")
 object SystemUtils {
 
-    @SuppressLint("ObsoleteSdkInt")
     fun ignoreBatteryOptimization(activity: Activity) {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) return
-
         val hasIgnored = powerManager.isIgnoringBatteryOptimizations(activity.packageName)
         //  判断当前APP是否有加入电池优化的白名单，如果没有，弹出加入电池优化的白名单的设置对话框。
         if (!hasIgnored) {
