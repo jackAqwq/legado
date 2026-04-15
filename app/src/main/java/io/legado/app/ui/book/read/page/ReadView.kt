@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.RectF
-import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
@@ -110,6 +109,7 @@ class ReadView(context: Context, attrs: AttributeSet) :
     private val brRect = RectF()
     private val boundary by lazy { BreakIterator.getWordInstance(Locale.getDefault()) }
     private val upProgressThrottle = throttle(200) { post { upProgress() } }
+    private var mandatoryGestureBottomInset = 0
     val autoPager = AutoPager(this)
     val isAutoPage get() = autoPager.isRunning
 
@@ -152,6 +152,13 @@ class ReadView(context: Context, attrs: AttributeSet) :
         }
     }
 
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        mandatoryGestureBottomInset = insets.getInsetsIgnoringVisibility(
+            WindowInsets.Type.mandatorySystemGestures()
+        ).bottom
+        return super.onApplyWindowInsets(insets)
+    }
+
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
         pageDelegate?.onDraw(canvas)
@@ -172,19 +179,15 @@ class ReadView(context: Context, attrs: AttributeSet) :
      */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val insets = this.rootWindowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.mandatorySystemGestures()
-            )
-            val height = activity?.windowManager?.currentWindowMetrics?.bounds?.height()
-            if (height != null) {
-                if (event.y > height.minus(insets.bottom)
-                    && event.action != MotionEvent.ACTION_UP
-                    && event.action != MotionEvent.ACTION_CANCEL
-                ) {
-                    return true
-                }
-            }
+        if (ReadViewTouchBounds.shouldIgnoreTouchForMandatoryGestures(
+                y = event.y,
+                viewHeight = height,
+                insetBottom = mandatoryGestureBottomInset
+            ) &&
+            event.action != MotionEvent.ACTION_UP &&
+            event.action != MotionEvent.ACTION_CANCEL
+        ) {
+            return true
         }
 
         //在多点触控时，事件不走ACTION_DOWN分支而产生的特殊事件处理
