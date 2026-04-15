@@ -179,6 +179,7 @@ android {
 
 dependencies {
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.bundles.androidTest)
     //kotlin
     //noinspection GradleDependency,DifferentStdlibGradleVersion
