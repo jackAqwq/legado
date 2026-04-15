@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.apache.commons.text.similarity.JaccardSimilarity
 import splitties.init.appCtx
@@ -46,6 +47,7 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.regex.Pattern
 import java.util.zip.ZipFile
 import kotlin.math.abs
@@ -54,13 +56,45 @@ import kotlin.math.min
 
 @Suppress("unused", "ConstPropertyName")
 object BookHelp {
+    private data class DownloadImageLock(
+        val mutex: Mutex = Mutex(),
+        val references: AtomicInteger = AtomicInteger(0)
+    )
+
     private val downloadDir: File = appCtx.externalFiles
     private const val cacheFolderName = "book_cache"
     private const val cacheImageFolderName = "images"
     private const val cacheEpubFolderName = "epub"
-    private val downloadImages = ConcurrentHashMap<String, Mutex>()
+    private val downloadImageLocks = ConcurrentHashMap<String, DownloadImageLock>()
 
     val cachePath = FileUtils.getPath(downloadDir, cacheFolderName)
+
+    private fun acquireDownloadImageLock(src: String): DownloadImageLock {
+        while (true) {
+            val existing = downloadImageLocks[src]
+            if (existing != null) {
+                existing.references.incrementAndGet()
+                if (downloadImageLocks[src] === existing) {
+                    return existing
+                }
+                if (existing.references.decrementAndGet() == 0) {
+                    downloadImageLocks.remove(src, existing)
+                }
+                continue
+            }
+            val newLock = DownloadImageLock()
+            newLock.references.set(1)
+            if (downloadImageLocks.putIfAbsent(src, newLock) == null) {
+                return newLock
+            }
+        }
+    }
+
+    private fun releaseDownloadImageLock(src: String, lock: DownloadImageLock) {
+        if (lock.references.decrementAndGet() == 0) {
+            downloadImageLocks.remove(src, lock)
+        }
+    }
 
     fun clearCache() {
         FileUtils.delete(
@@ -225,39 +259,37 @@ object BookHelp {
         if (isImageExist(book, src)) {
             return
         }
-        val mutex = synchronized(this) {
-            downloadImages.getOrPut(src) { Mutex() }
-        }
-        mutex.lock()
+        val imageLock = acquireDownloadImageLock(src)
         try {
-            if (isImageExist(book, src)) {
-                return
-            }
-            val analyzeUrl = AnalyzeUrl(
-                src, source = bookSource, coroutineContext = currentCoroutineContext()
-            )
-            val bytes = analyzeUrl.getByteArrayAwait()
-            //某些图片被加密，需要进一步解密
-            runScriptWithContext {
-                ImageUtils.decode(
-                    src, bytes, isCover = false, bookSource, book
-                )
-            }?.let {
-                if (!checkImage(it)) {
-                    // 如果部分图片失效，每次进入正文都会花很长时间再次获取图片数据
-                    // 所以无论如何都要将数据写入到文件里
-                    // throw NoStackTraceException("数据异常")
-                    AppLog.put("${book.name} ${chapter?.title} 图片 $src 下载错误 数据异常")
+            imageLock.mutex.withLock {
+                if (isImageExist(book, src)) {
+                    return@withLock
                 }
-                writeImage(book, src, it)
+                val analyzeUrl = AnalyzeUrl(
+                    src, source = bookSource, coroutineContext = currentCoroutineContext()
+                )
+                val bytes = analyzeUrl.getByteArrayAwait()
+                //某些图片被加密，需要进一步解密
+                runScriptWithContext {
+                    ImageUtils.decode(
+                        src, bytes, isCover = false, bookSource, book
+                    )
+                }?.let {
+                    if (!checkImage(it)) {
+                        // 如果部分图片失效，每次进入正文都会花很长时间再次获取图片数据
+                        // 所以无论如何都要将数据写入到文件里
+                        // throw NoStackTraceException("数据异常")
+                        AppLog.put("${book.name} ${chapter?.title} 图片 $src 下载错误 数据异常")
+                    }
+                    writeImage(book, src, it)
+                }
             }
         } catch (e: Exception) {
             currentCoroutineContext().ensureActive()
             val msg = "${book.name} ${chapter?.title} 图片 $src 下载失败\n${e.localizedMessage}"
             AppLog.put(msg, e)
         } finally {
-            downloadImages.remove(src)
-            mutex.unlock()
+            releaseDownloadImageLock(src, imageLock)
         }
     }
 
