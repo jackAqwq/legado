@@ -688,20 +688,10 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 val mimeType = contentType?.toString()?.substringBefore(";") ?: "text/html"
                 val charset = contentType?.charset() ?: Charsets.UTF_8
                 val charsetSre = charset.name()
-                val bodyText = body.text().let { originalText ->
-                    val headIndex = originalText.indexOf("<head", ignoreCase = true)
-                    if (headIndex >= 0) {
-                        val closingHeadIndex = originalText.indexOf('>', startIndex = headIndex)
-                        if (closingHeadIndex >= 0) {
-                            val insertPos = closingHeadIndex + 1
-                            StringBuilder(originalText).insert(insertPos, JS_URL).toString()
-                        } else {
-                            originalText
-                        }
-                    } else {
-                        originalText
-                    }
-                }
+                val bodyText = RssHtmlHeadInjector.insertAfterHeadOpenTag(
+                    html = body.text(),
+                    snippet = JS_URL
+                )
                 return WebResourceResponse(
                     mimeType,
                     charsetSre,
