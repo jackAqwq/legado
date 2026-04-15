@@ -833,29 +833,12 @@ class ReadBookActivity : BaseReadBookActivity(),
             val urlOptionMap = GSON.fromJsonObject<Map<String, String>>(urlOptionStr).getOrNull()
             val click = urlOptionMap?.get("click")
             if (click != null) {
-                Coroutine.async(lifecycleScope,IO) {
-                    val source = ReadBook.bookSource ?: return@async
-                    val java = SourceLoginJsExtensions(this@ReadBookActivity, source, BookType.text)
-                    val book = ReadBook.book ?: return@async
-                    val chapter = appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex) ?: throw Exception("no find chapter")
-                    runScriptWithContext {
-                        source.evalJS(click) {
-                            put("java", java)
-                            put("book", book)
-                            put("chapter", chapter)
-                            put("result", src)
-                        }
-                    }
-                }.onError {
-                    AppLog.put("执行图片链接click键值出错\n${it.localizedMessage}", it, true)
-                }
+                runImageClickActionAsync(click, src)
                 return true
             }
             val jsStr = urlOptionMap?.get("js") ?: return false
             Coroutine.async(lifecycleScope, IO) {
-                val source = ReadBook.bookSource ?: return@async
-                val book = ReadBook.book ?: return@async
-                val chapter = appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex) ?: throw Exception("no find chapter")
+                val (source, book, chapter) = getCurrentReadContext() ?: return@async
                 val urlNoOption = src.take(urlMatcher.start())
                 AnalyzeRule(book, source).apply {
                     setCoroutineContext(coroutineContext)
@@ -872,11 +855,13 @@ class ReadBookActivity : BaseReadBookActivity(),
     }
 
     override fun clickImg(click: String, src: String) {
+        runImageClickActionAsync(click, src)
+    }
+
+    private fun runImageClickActionAsync(click: String, src: String) {
         Coroutine.async(lifecycleScope,IO) {
-            val source = ReadBook.bookSource ?: return@async
+            val (source, book, chapter) = getCurrentReadContext() ?: return@async
             val java = SourceLoginJsExtensions(this@ReadBookActivity, source, BookType.text)
-            val book = ReadBook.book ?: return@async
-            val chapter = appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex) ?: throw Exception("no find chapter")
             runScriptWithContext {
                 source.evalJS(click) {
                     put("java", java)
@@ -890,6 +875,37 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
+    private fun getCurrentReadContext(): Triple<BookSource, Book, BookChapter>? {
+        val source = ReadBook.bookSource ?: return null
+        val book = ReadBook.book ?: return null
+        val chapter = appDb.bookChapterDao.getChapter(book.bookUrl, ReadBook.durChapterIndex)
+            ?: throw Exception("no find chapter")
+        return Triple(source, book, chapter)
+    }
+
+    private fun readAloudFromCurrentPositionOrDefault() {
+        if (!tryReadAloudFromCurrentPosition()) {
+            ReadBook.readAloud()
+        }
+    }
+
+    private fun tryReadAloudFromCurrentPosition(): Boolean {
+        if (ReadBook.pageAnim() != 3) {
+            return false
+        }
+        val pos = binding.readView.getReadAloudPos() ?: return false
+        val (index, line) = pos
+        if (ReadBook.durChapterIndex != index) {
+            ReadBook.openChapter(index, line.chapterPosition, false) {
+                ReadBook.readAloud(startPos = line.pagePosition)
+            }
+        } else {
+            ReadBook.durChapterPos = line.chapterPosition
+            ReadBook.readAloud(startPos = line.pagePosition)
+        }
+        return true
+    }
+
 
     /**
      * 朗读按钮
@@ -899,45 +915,14 @@ class ReadBookActivity : BaseReadBookActivity(),
         when {
             !BaseReadAloudService.isRun -> {
                 ReadAloud.upReadAloudClass()
-                val scrollPageAnim = ReadBook.pageAnim() == 3
-                if (scrollPageAnim) {
-                    val pos = binding.readView.getReadAloudPos()
-                    if (pos != null) {
-                        val (index, line) = pos
-                        if (ReadBook.durChapterIndex != index) {
-                            ReadBook.openChapter(index, line.chapterPosition, false) {
-                                ReadBook.readAloud(startPos = line.pagePosition)
-                            }
-                        } else {
-                            ReadBook.durChapterPos = line.chapterPosition
-                            ReadBook.readAloud(startPos = line.pagePosition)
-                        }
-                    } else {
-                        ReadBook.readAloud()
-                    }
-                } else {
-                    ReadBook.readAloud()
-                }
+                readAloudFromCurrentPositionOrDefault()
             }
 
             BaseReadAloudService.pause -> {
                 val scrollPageAnim = ReadBook.pageAnim() == 3
                 if (scrollPageAnim && pageChanged) {
                     pageChanged = false
-                    val pos = binding.readView.getReadAloudPos()
-                    if (pos != null) {
-                        val (index, line) = pos
-                        if (ReadBook.durChapterIndex != index) {
-                            ReadBook.openChapter(index, line.chapterPosition, false) {
-                                ReadBook.readAloud(startPos = line.pagePosition)
-                            }
-                        } else {
-                            ReadBook.durChapterPos = line.chapterPosition
-                            ReadBook.readAloud(startPos = line.pagePosition)
-                        }
-                    } else {
-                        ReadBook.readAloud()
-                    }
+                    readAloudFromCurrentPositionOrDefault()
                 } else {
                     ReadAloud.resume(this)
                 }
