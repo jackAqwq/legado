@@ -65,7 +65,7 @@ import androidx.core.view.size
 import io.legado.app.constant.AppConst.imagePathKey
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.http.newCallResponse
+import io.legado.app.help.http.newCallResponseBlocking
 import io.legado.app.help.http.newCallResponseBody
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.http.text
@@ -84,7 +84,6 @@ import io.legado.app.utils.get
 import io.legado.app.utils.writeBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayInputStream
 import java.lang.ref.WeakReference
 import java.net.URLDecoder
@@ -787,9 +786,8 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
                     if (url.startsWith("data:text/html;") || request.method == "POST") {
                         return super.shouldInterceptRequest(view, request)
                     }
-                    return runBlocking(IO) {
-                        getModifiedContentWithJs(url, request) ?: super.shouldInterceptRequest(view, request)
-                    }
+                    return getModifiedContentWithJs(url, request)
+                        ?: super.shouldInterceptRequest(view, request)
                 }
             } else if (!jsInjected && url == nameUrl) {
                 jsInjected = true
@@ -803,10 +801,10 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
             return super.shouldInterceptRequest(view, request)
         }
         private val webCookieManager by lazy { android.webkit.CookieManager.getInstance() }
-        private suspend fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
+        private fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
             try {
                 val cookie = webCookieManager.getCookie(url)
-                val res = okHttpClient.newCallResponse {
+                val res = okHttpClient.newCallResponseBlocking {
                     url(url)
                     method(request.method, null)
                     if (!cookie.isNullOrEmpty()) {

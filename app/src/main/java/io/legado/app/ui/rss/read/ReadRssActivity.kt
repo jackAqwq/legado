@@ -78,7 +78,6 @@ import io.legado.app.ui.about.AppLogDialog
 import io.legado.app.ui.rss.article.ReadRecordDialog
 import io.legado.app.ui.rss.source.edit.RssSourceEditActivity
 import io.legado.app.utils.StartActivityContract
-import kotlinx.coroutines.runBlocking
 import androidx.core.net.toUri
 import io.legado.app.exception.NoStackTraceException
 import io.legado.app.help.webView.WebJsExtensions.Companion.basicJs
@@ -86,7 +85,7 @@ import io.legado.app.help.webView.WebJsExtensions.Companion.nameBasic
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameCache
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameJava
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameSource
-import io.legado.app.help.http.newCallResponse
+import io.legado.app.help.http.newCallResponseBlocking
 import io.legado.app.help.webView.PooledWebView
 import io.legado.app.help.webView.WebJsExtensions.Companion.JS_INJECTION
 import io.legado.app.help.webView.WebJsExtensions.Companion.JS_URL
@@ -95,7 +94,6 @@ import io.legado.app.help.webView.WebViewPool
 import io.legado.app.help.webView.WebViewPool.BLANK_HTML
 import io.legado.app.help.webView.WebViewPool.DATA_HTML
 import io.legado.app.model.Download
-import kotlinx.coroutines.Dispatchers.IO
 import java.lang.ref.WeakReference
 import splitties.systemservices.powerManager
 import java.net.URLDecoder
@@ -627,9 +625,8 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 if (RssWebInterceptDecider.shouldSkipMainFrameRewrite(url, request.method)) {
                     return super.shouldInterceptRequest(view, request)
                 }
-                return runBlocking(IO) {
-                    getModifiedContentWithJs(url, request) ?: super.shouldInterceptRequest(view, request)
-                }
+                return getModifiedContentWithJs(url, request)
+                    ?: super.shouldInterceptRequest(view, request)
             }
             if (RssWebInterceptDecider.shouldInjectPreloadScript(
                     jsInjected = jsInjected,
@@ -667,10 +664,10 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
             }
         }
 
-        private suspend fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
+        private fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
             try {
                 val cookie = webCookieManager.getCookie(url)
-                val res = okHttpClient.newCallResponse {
+                val res = okHttpClient.newCallResponseBlocking {
                     url(url)
                     method(request.method, null)
                     if (!cookie.isNullOrEmpty()) {
