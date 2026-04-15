@@ -686,6 +686,24 @@ object ReadBook : CoroutineScope by MainScope() {
         loadingChapters.remove(index)
     }
 
+    private suspend fun buildTextChapter(
+        book: Book,
+        chapter: BookChapter,
+        content: String
+    ): TextChapter {
+        val contentProcessor = ContentProcessor.get(book.name, book.origin)
+        val displayTitle = chapter.getDisplayTitle(
+            contentProcessor.getTitleReplaceRules(),
+            book.getUseReplaceRule(),
+            replaceBook = book.toReplaceBook()
+        )
+        val contents = contentProcessor
+            .getContent(book, chapter, content, includeTitle = false)
+        return ChapterProvider.getTextChapterAsync(
+            this, book, chapter, displayTitle, contents, simulatedChapterSize
+        )
+    }
+
     /**
      * 内容加载完成
      */
@@ -700,23 +718,13 @@ object ReadBook : CoroutineScope by MainScope() {
         success: (() -> Unit)? = null
     ) {
         removeLoading(chapter.index)
-        if (canceled || chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
+        if (canceled || !ReadBookLoadDecider.isChapterInRenderWindow(chapter.index, durChapterIndex)) {
             return
         }
         chapterLoadingJobs[chapter.index]?.cancel()
         val job = Coroutine.async(this, start = CoroutineStart.LAZY) {
-            val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val displayTitle = chapter.getDisplayTitle(
-                contentProcessor.getTitleReplaceRules(),
-                book.getUseReplaceRule(),
-                replaceBook = book.toReplaceBook()
-            )
-            val contents = contentProcessor
-                .getContent(book, chapter, content, includeTitle = false)
+            val textChapter = buildTextChapter(book, chapter, content)
             ensureActive()
-            val textChapter = ChapterProvider.getTextChapterAsync(
-                this, book, chapter, displayTitle, contents, simulatedChapterSize
-            )
             when (val offset = chapter.index - durChapterIndex) {
                 0 -> curChapterLoadingLock.withLock {
                     withContext(Main) {
@@ -733,10 +741,14 @@ object ReadBook : CoroutineScope by MainScope() {
                             }
                             available = true
                         }
-                        if (upContent && isScroll) {
-                            if (max(index - 3, 0) < durPageIndex) {
-                                callBack?.upContent(offset, false)
-                            }
+                        if (ReadBookLoadDecider.shouldUpdateForScroll(
+                                upContent = upContent,
+                                isScrollMode = isScroll,
+                                layoutPageIndex = index,
+                                durPageIndex = durPageIndex
+                            )
+                        ) {
+                            callBack?.upContent(offset, false)
                         }
                         callBack?.onLayoutPageCompleted(index, page)
                     }
@@ -760,7 +772,7 @@ object ReadBook : CoroutineScope by MainScope() {
                         nextTextChapter = textChapter
                     }
                     for (page in textChapter.layoutChannel) {
-                        if (page.index > 1) {
+                        if (!ReadBookLoadDecider.shouldRenderNextPreviewPage(page.index)) {
                             continue
                         }
                         if (upContent) callBack?.upContent(offset, resetPageOffset)
@@ -790,21 +802,11 @@ object ReadBook : CoroutineScope by MainScope() {
         resetPageOffset: Boolean
     ) {
         removeLoading(chapter.index)
-        if (chapter.index !in durChapterIndex - 1..durChapterIndex + 1) {
+        if (!ReadBookLoadDecider.isChapterInRenderWindow(chapter.index, durChapterIndex)) {
             return
         }
         kotlin.runCatching {
-            val contentProcessor = ContentProcessor.get(book.name, book.origin)
-            val displayTitle = chapter.getDisplayTitle(
-                contentProcessor.getTitleReplaceRules(),
-                book.getUseReplaceRule(),
-                replaceBook = book.toReplaceBook()
-            )
-            val contents = contentProcessor
-                .getContent(book, chapter, content, includeTitle = false)
-            val textChapter = ChapterProvider.getTextChapterAsync(
-                this@ReadBook, book, chapter, displayTitle, contents, simulatedChapterSize
-            )
+            val textChapter = buildTextChapter(book, chapter, content)
             when (val offset = chapter.index - durChapterIndex) {
                 0 -> {
                     curTextChapter?.cancelLayout()
@@ -821,10 +823,14 @@ object ReadBook : CoroutineScope by MainScope() {
                             }
                             available = true
                         }
-                        if (upContent && isScroll) {
-                            if (max(index - 3, 0) < durPageIndex) {
-                                callBack?.upContent(offset, false)
-                            }
+                        if (ReadBookLoadDecider.shouldUpdateForScroll(
+                                upContent = upContent,
+                                isScrollMode = isScroll,
+                                layoutPageIndex = index,
+                                durPageIndex = durPageIndex
+                            )
+                        ) {
+                            callBack?.upContent(offset, false)
                         }
                         callBack?.onLayoutPageCompleted(index, page)
                     }
@@ -848,7 +854,7 @@ object ReadBook : CoroutineScope by MainScope() {
                         nextTextChapter = textChapter
                     }
                     for (page in textChapter.layoutChannel) {
-                        if (page.index > 1) {
+                        if (!ReadBookLoadDecider.shouldRenderNextPreviewPage(page.index)) {
                             continue
                         }
                         if (upContent) callBack?.upContent(offset, resetPageOffset)
