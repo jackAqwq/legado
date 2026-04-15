@@ -1,7 +1,6 @@
 package io.legado.app.ui.main
 
 import android.app.Application
-import android.os.Build
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView.RecycledViewPool
@@ -220,13 +219,9 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
 
     fun postUpBooksLiveData(reset: Boolean = false) {
         if (AppConfig.showWaitUpCount) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                onUpBooksLiveData.postValue(waitUpTocBooks.size + onUpTocBooks.size)
-            } else {
-                var count = 0
-                onUpTocBooks.forEach { _ -> count++ }
-                onUpBooksLiveData.postValue(waitUpTocBooks.size + count)
-            }
+            onUpBooksLiveData.postValue(
+                MainViewModelApi35Logic.updatingBookCount(waitUpTocBooks.size, onUpTocBooks.size)
+            )
         } else if (reset) {
             onUpBooksLiveData.postValue(0)
         }
@@ -257,18 +252,13 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         cacheBookJob = viewModelScope.launch(upTocPool) {
             launch {
                 while (isActive && CacheBook.isRun) {
-                    val isOnUpTocBooksEmpty = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        onUpTocBooks.isEmpty()
-                    } else {
-                        var isEmpty = true
-                        onUpTocBooks.forEach { _ ->
-                            isEmpty = false
-                            return@forEach
-                        }
-                        isEmpty
-                    }
                     //有目录更新是不缓存,优先更新目录,现在更多网站限制并发
-                    CacheBook.setWorkingState(waitUpTocBooks.isEmpty() && isOnUpTocBooksEmpty)
+                    CacheBook.setWorkingState(
+                        MainViewModelApi35Logic.shouldEnableCacheBook(
+                            waitUpTocBooks.isEmpty(),
+                            onUpTocBooks.isEmpty()
+                        )
+                    )
                     delay(1000)
                 }
             }
@@ -302,4 +292,12 @@ class MainViewModel(application: Application) : BaseViewModel(application) {
         fun openImportUi(type: Int, source: String)
     }
 
+}
+
+internal object MainViewModelApi35Logic {
+    fun updatingBookCount(waitSize: Int, onUpSize: Int): Int = waitSize + onUpSize
+
+    fun shouldEnableCacheBook(waitIsEmpty: Boolean, onUpIsEmpty: Boolean): Boolean {
+        return waitIsEmpty && onUpIsEmpty
+    }
 }
