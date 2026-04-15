@@ -129,6 +129,7 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
     }
     private val rssJsExtensions by lazy { RssJsExtensions(this, viewModel.rssSource) }
     private val regexMatcherCache = RegexMatcherCache()
+    private val resourceFilter = RssResourceFilter(regexMatcherCache)
 
     private val refreshNameList: MutableList<String> by lazy { mutableListOf() }
     private fun refresh() {
@@ -638,31 +639,25 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 )
             }
             val blacklist = source.contentBlacklist?.splitNotBlank(",")
-            if (!blacklist.isNullOrEmpty()) {
-                blacklist.forEach {
-                    val regexMatched = regexMatcherCache.matches(url, it) { pattern, throwable ->
+            val whitelist = source.contentWhitelist?.splitNotBlank(",")
+            return when (
+                resourceFilter.decide(
+                    url = url,
+                    blacklist = blacklist,
+                    whitelist = whitelist,
+                    onInvalidBlacklistPattern = { pattern, throwable ->
                         AppLog.put("黑名单规则正则语法错误 源名称:${source.sourceName} 正则:$pattern", throwable)
+                    },
+                    onInvalidWhitelistPattern = { pattern, throwable ->
+                        val msg = "白名单规则正则语法错误 源名称:${source.sourceName} 正则:$pattern"
+                        AppLog.put(msg, throwable)
                     }
-                    if (url.startsWith(it) || regexMatched) {
-                        return createEmptyResource()
-                    }
-                }
-            } else {
-                val whitelist = source.contentWhitelist?.splitNotBlank(",")
-                if (!whitelist.isNullOrEmpty()) {
-                    whitelist.forEach {
-                        val regexMatched = regexMatcherCache.matches(url, it) { pattern, throwable ->
-                            val msg = "白名单规则正则语法错误 源名称:${source.sourceName} 正则:$pattern"
-                            AppLog.put(msg, throwable)
-                        }
-                        if (url.startsWith(it) || regexMatched) {
-                            return super.shouldInterceptRequest(view, request)
-                        }
-                    }
-                    return createEmptyResource()
-                }
+                )
+            ) {
+                RssResourceFilter.Decision.BLOCK -> createEmptyResource()
+                RssResourceFilter.Decision.ALLOW -> super.shouldInterceptRequest(view, request)
+                RssResourceFilter.Decision.PASS_THROUGH -> super.shouldInterceptRequest(view, request)
             }
-            return super.shouldInterceptRequest(view, request)
         }
 
         private suspend fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {

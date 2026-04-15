@@ -39,4 +39,15 @@ class BookSourceUrlMatcherTest {
         assertEquals(1, matcher.cachedPatternCount())
         assertEquals(0, matcher.invalidPatternCount())
     }
+
+    @Test
+    fun trims_pattern_before_match() {
+        val matcher = BookSourceUrlMatcher()
+        assertTrue(
+            matcher.matches(
+                "https://example.com/book/123",
+                "  https://example\\.com/book/\\d+  "
+            )
+        )
+    }
 }
