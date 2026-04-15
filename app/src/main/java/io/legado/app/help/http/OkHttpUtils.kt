@@ -42,6 +42,23 @@ suspend fun OkHttpClient.newCallResponse(
     return response!!
 }
 
+fun OkHttpClient.newCallResponseBlocking(
+    retry: Int = 0,
+    builder: Request.Builder.() -> Unit
+): Response {
+    val requestBuilder = Request.Builder()
+    requestBuilder.apply(builder)
+    var response: Response? = null
+    for (i in 0..retry) {
+        response?.close()
+        response = newCall(requestBuilder.build()).execute()
+        if (response.isSuccessful || i == retry) {
+            return response
+        }
+    }
+    return response!!
+}
+
 suspend fun OkHttpClient.newCallResponseBody(
     retry: Int = 0,
     builder: Request.Builder.() -> Unit
