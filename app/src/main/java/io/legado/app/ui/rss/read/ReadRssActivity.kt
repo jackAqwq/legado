@@ -64,7 +64,6 @@ import io.legado.app.utils.setOnApplyWindowInsetsListenerCompat
 import io.legado.app.utils.setTintMutate
 import io.legado.app.utils.share
 import io.legado.app.utils.showDialogFragment
-import io.legado.app.utils.splitNotBlank
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.textArray
 import io.legado.app.utils.toastOnUi
@@ -619,17 +618,25 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         ): WebResourceResponse? {
             val url = request.url.toString()
             val source = viewModel.rssSource ?: return super.shouldInterceptRequest(view, request)
-            if (request.isForMainFrame) {
-                if (viewModel.hasPreloadJs) {
-                    jsInjected = false
-                    if (url.startsWith("data:text/html;") || request.method == "POST") {
-                        return super.shouldInterceptRequest(view, request)
-                    }
-                    return runBlocking(IO) {
-                        getModifiedContentWithJs(url, request) ?: super.shouldInterceptRequest(view, request)
-                    }
+            if (RssWebInterceptDecider.shouldInterceptMainFrameRewrite(
+                    isForMainFrame = request.isForMainFrame,
+                    hasPreloadJs = viewModel.hasPreloadJs
+                )
+            ) {
+                jsInjected = false
+                if (RssWebInterceptDecider.shouldSkipMainFrameRewrite(url, request.method)) {
+                    return super.shouldInterceptRequest(view, request)
                 }
-            } else if (!jsInjected && url == nameUrl) {
+                return runBlocking(IO) {
+                    getModifiedContentWithJs(url, request) ?: super.shouldInterceptRequest(view, request)
+                }
+            }
+            if (RssWebInterceptDecider.shouldInjectPreloadScript(
+                    jsInjected = jsInjected,
+                    requestUrl = url,
+                    preloadScriptUrl = nameUrl
+                )
+            ) {
                 jsInjected = true
                 val preloadJs = source.preloadJs ?: ""
                 return WebResourceResponse(
@@ -638,8 +645,8 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                     ByteArrayInputStream("(() => {$JS_INJECTION\n$preloadJs\n})();".toByteArray())
                 )
             }
-            val blacklist = source.contentBlacklist?.splitNotBlank(",")?.toList()
-            val whitelist = source.contentWhitelist?.splitNotBlank(",")?.toList()
+            val blacklist = RssWebInterceptDecider.parseRuleList(source.contentBlacklist)
+            val whitelist = RssWebInterceptDecider.parseRuleList(source.contentWhitelist)
             return when (
                 resourceFilter.decide(
                     url = url,
