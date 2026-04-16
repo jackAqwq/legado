@@ -961,6 +961,8 @@
     <string name="less_than">Less than</string>
     <string name="check_source_config_summary">Check timeout: %1$ss\nCheck item:%2$s</string>
     <string name="record_debug_log">Record debug log</string>
+    <string name="performance_metrics_title">Performance benchmark metrics</string>
+    <string name="performance_metrics_summary">Collect startup, page flip, and RSS interception latency for local export</string>
     <string name="sub_dir">Sub dir</string>
     <string name="general">General</string>
     <string name="use_replace">Use replace</string>

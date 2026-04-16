@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Base64
 import android.util.TypedValue
 import android.view.Gravity
@@ -69,6 +70,7 @@ import io.legado.app.help.http.newCallResponseBlocking
 import io.legado.app.help.http.newCallResponseBody
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.http.text
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.help.webView.WebJsExtensions.Companion.JS_URL
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameUrl
 import io.legado.app.help.webView.WebViewPool.BLANK_HTML
@@ -802,6 +804,8 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
         }
         private val webCookieManager by lazy { android.webkit.CookieManager.getInstance() }
         private fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
+            val startTime = SystemClock.elapsedRealtime()
+            var success = false
             try {
                 val cookie = webCookieManager.getCookie(url)
                 val res = okHttpClient.newCallResponseBlocking {
@@ -836,13 +840,21 @@ class BottomWebViewDialog() : BottomSheetDialogFragment(R.layout.dialog_web_view
                         originalText
                     }
                 }
-                return WebResourceResponse(
+                val response = WebResourceResponse(
                     mimeType,
                     charsetSre,
                     ByteArrayInputStream(bodyText.toByteArray(charset))
                 )
+                success = true
+                return response
             } catch (_: Exception) {
                 return null
+            } finally {
+                PerformanceMetricsTracker.recordRssInterceptDuration(
+                    durationMs = SystemClock.elapsedRealtime() - startTime,
+                    source = "BottomWebViewDialog",
+                    success = success
+                )
             }
         }
     }

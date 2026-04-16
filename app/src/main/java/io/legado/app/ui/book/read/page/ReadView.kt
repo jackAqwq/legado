@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.RectF
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
@@ -14,6 +15,7 @@ import io.legado.app.constant.PageAnim
 import io.legado.app.data.entities.BookProgress
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.ReadBookConfig
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.model.ReadAloud
 import io.legado.app.model.ReadBook
 import io.legado.app.service.BaseReadAloudService
@@ -196,6 +198,7 @@ class ReadView(context: Context, attrs: AttributeSet) :
         }
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                PerformanceMetricsTracker.markPageFlipGestureStart(SystemClock.elapsedRealtime())
                 callBack.screenOffTimerStart()
                 if (isTextSelected) {
                     curPage.cancelSelect()
@@ -716,6 +719,7 @@ class ReadView(context: Context, attrs: AttributeSet) :
     }
 
     fun onPageChange() {
+        PerformanceMetricsTracker.markPageFlipCompleted(SystemClock.elapsedRealtime())
         autoPager.reset()
         submitRenderTask()
     }

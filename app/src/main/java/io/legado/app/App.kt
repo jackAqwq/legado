@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.os.SystemClock
 import com.github.liuyueyi.quick.transfer.constants.TransType
 import com.jeremyliao.liveeventbus.LiveEventBus
 import com.jeremyliao.liveeventbus.logger.DefaultLogger
@@ -43,6 +44,7 @@ import io.legado.app.help.config.ThemeConfig.applyDayNightInit
 import io.legado.app.help.coroutine.Coroutine
 import io.legado.app.help.http.Cronet
 import io.legado.app.help.http.ObsoleteUrlFactory
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.help.http.okHttpClient
 import io.legado.app.help.rhino.NativeBaseSource
 import io.legado.app.help.source.SourceHelp
@@ -68,6 +70,7 @@ open class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        PerformanceMetricsTracker.markAppOnCreateStart(SystemClock.elapsedRealtime())
         // 必须在主线程执行的初始化
         CrashHandler(this)
         if (isDebuggable) {

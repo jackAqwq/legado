@@ -3,6 +3,7 @@
 package io.legado.app.ui.main
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.text.format.DateUtils
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import io.legado.app.help.book.BookHelp
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.config.LocalConfig
 import io.legado.app.help.coroutine.Coroutine
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.help.storage.Backup
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.primaryColor
@@ -123,6 +125,9 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
+        binding.root.post {
+            PerformanceMetricsTracker.markMainUiReady(SystemClock.elapsedRealtime())
+        }
         lifecycleScope.launch {
             //隐私协议
             if (!privacyPolicy()) return@launch

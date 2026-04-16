@@ -93,6 +93,7 @@ import io.legado.app.help.webView.WebJsExtensions.Companion.nameUrl
 import io.legado.app.help.webView.WebViewPool
 import io.legado.app.help.webView.WebViewPool.BLANK_HTML
 import io.legado.app.help.webView.WebViewPool.DATA_HTML
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.model.Download
 import java.lang.ref.WeakReference
 import splitties.systemservices.powerManager
@@ -665,6 +666,8 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         }
 
         private fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
+            val startTime = SystemClock.elapsedRealtime()
+            var success = false
             try {
                 val cookie = webCookieManager.getCookie(url)
                 val res = okHttpClient.newCallResponseBlocking {
@@ -689,13 +692,21 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                     html = body.text(),
                     snippet = JS_URL
                 )
-                return WebResourceResponse(
+                val response = WebResourceResponse(
                     mimeType,
                     charsetSre,
                     ByteArrayInputStream(bodyText.toByteArray(charset))
                 )
+                success = true
+                return response
             } catch (_: Exception) {
                 return null
+            } finally {
+                PerformanceMetricsTracker.recordRssInterceptDuration(
+                    durationMs = SystemClock.elapsedRealtime() - startTime,
+                    source = "ReadRssActivity",
+                    success = success
+                )
             }
         }
 
