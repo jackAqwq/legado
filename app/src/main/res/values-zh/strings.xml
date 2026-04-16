@@ -964,10 +964,13 @@
     <string name="view_performance_metrics_read">查看阅读指标</string>
     <string name="view_performance_metrics_rss">查看 RSS 指标</string>
     <string name="copy_performance_metrics_recent_20">复制最近 20 条指标</string>
+    <string name="view_performance_metrics_slowest_20">查看最慢 20 条指标</string>
+    <string name="copy_performance_metrics_slowest_20">复制最慢 20 条指标</string>
     <string name="clear_performance_metrics">清理性能指标</string>
     <string name="performance_metrics_title_startup">启动指标</string>
     <string name="performance_metrics_title_read">阅读指标</string>
     <string name="performance_metrics_title_rss">RSS 指标</string>
+    <string name="performance_metrics_title_slowest_20">最慢 20 条指标</string>
     <string name="sub_dir">子文件夹</string>
     <string name="general">全局</string>
     <string name="use_replace">使用替换</string>

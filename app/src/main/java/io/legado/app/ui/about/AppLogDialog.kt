@@ -86,6 +86,17 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 copyPerformanceMetrics(limit = 20)
             }
 
+            R.id.menu_view_perf_metrics_slowest_20 -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_slowest_20),
+                    slowestTopLimit = 20
+                )
+            }
+
+            R.id.menu_copy_perf_metrics_slowest_20 -> {
+                copyPerformanceMetrics(slowestTopLimit = 20)
+            }
+
             R.id.menu_clear_perf_metrics -> {
                 PerformanceMetricsTracker.clearMetrics()
             }
@@ -101,23 +112,60 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     private fun showPerformanceMetrics(
         title: String = getString(R.string.performance_metrics_title),
         namePrefix: String? = null,
-        limit: Int? = null
+        limit: Int? = null,
+        slowestTopLimit: Int? = null
     ) {
-        val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
-            lines = PerformanceMetricsTracker.exportLines(
+        val lines = if (slowestTopLimit != null) {
+            PerformanceMetricsTracker.exportSlowLines(
+                limit = slowestTopLimit,
+                namePrefix = namePrefix
+            )
+        } else {
+            PerformanceMetricsTracker.exportLines(
                 namePrefix = namePrefix,
                 limit = limit
             )
+        }
+        val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
+            lines = lines,
+            summary = if (slowestTopLimit == null) {
+                PerformanceMetricsTracker.buildSummary(
+                    namePrefix = namePrefix,
+                    limit = limit
+                )
+            } else {
+                null
+            }
         )
         showDialogFragment(TextDialog(title, text))
     }
 
-    private fun copyPerformanceMetrics(namePrefix: String? = null, limit: Int? = null) {
-        val text = PerformanceMetricsSnapshotPresenter.buildCopyText(
-            lines = PerformanceMetricsTracker.exportLines(
+    private fun copyPerformanceMetrics(
+        namePrefix: String? = null,
+        limit: Int? = null,
+        slowestTopLimit: Int? = null
+    ) {
+        val lines = if (slowestTopLimit != null) {
+            PerformanceMetricsTracker.exportSlowLines(
+                limit = slowestTopLimit,
+                namePrefix = namePrefix
+            )
+        } else {
+            PerformanceMetricsTracker.exportLines(
                 namePrefix = namePrefix,
                 limit = limit
             )
+        }
+        val text = PerformanceMetricsSnapshotPresenter.buildCopyText(
+            lines = lines,
+            summary = if (slowestTopLimit == null) {
+                PerformanceMetricsTracker.buildSummary(
+                    namePrefix = namePrefix,
+                    limit = limit
+                )
+            } else {
+                null
+            }
         )
         requireContext().sendToClip(text)
     }

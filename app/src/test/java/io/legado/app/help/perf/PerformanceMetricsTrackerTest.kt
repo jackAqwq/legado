@@ -175,4 +175,62 @@ class PerformanceMetricsTrackerTest {
         assertTrue(grouped.read.first().contains("read.page_flip"))
         assertTrue(grouped.rss.first().contains("rss.intercept"))
     }
+
+    @Test
+    fun export_slow_lines_should_return_top_n_in_desc_order() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 10,
+            source = "A",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 70,
+            source = "B",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 30,
+            source = "C",
+            success = true
+        )
+
+        val top2 = PerformanceMetricsTracker.exportSlowLines(limit = 2)
+
+        assertEquals(2, top2.size)
+        assertTrue(top2[0].contains("|70ms|"))
+        assertTrue(top2[1].contains("|30ms|"))
+    }
+
+    @Test
+    fun build_summary_should_compute_count_avg_and_p95() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 10,
+            source = "A",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 20,
+            source = "B",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 100,
+            source = "C",
+            success = true
+        )
+
+        val summary = PerformanceMetricsTracker.buildSummary(namePrefix = "rss.")
+
+        assertEquals(3, summary.count)
+        assertEquals(43, summary.avgDurationMs)
+        assertEquals(100, summary.p95DurationMs)
+    }
 }

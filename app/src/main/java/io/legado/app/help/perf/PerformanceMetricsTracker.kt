@@ -3,6 +3,7 @@ package io.legado.app.help.perf
 import io.legado.app.constant.AppLog
 import io.legado.app.help.config.AppConfig
 import kotlin.math.max
+import kotlin.math.ceil
 
 internal data class PerformanceMetricRecord(
     val timestampMs: Long,
@@ -103,6 +104,41 @@ internal object PerformanceMetricsTracker {
             limit = limit
         )
         return filteredRecords.map(::toExportLine)
+    }
+
+    fun exportSlowLines(limit: Int = 20, namePrefix: String? = null): List<String> {
+        if (limit <= 0) return emptyList()
+        return selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = null
+        )
+            .sortedByDescending { it.durationMs }
+            .take(limit)
+            .map(::toExportLine)
+    }
+
+    fun buildSummary(namePrefix: String? = null, limit: Int? = null): PerformanceMetricsSummary {
+        val selected = selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = limit
+        )
+        if (selected.isEmpty()) {
+            return PerformanceMetricsSummary(
+                count = 0,
+                avgDurationMs = 0L,
+                p95DurationMs = 0L
+            )
+        }
+        val sortedDurations = selected.map { it.durationMs }.sorted()
+        val p95Index = (ceil(sortedDurations.size * 0.95).toInt() - 1)
+            .coerceIn(0, sortedDurations.lastIndex)
+        return PerformanceMetricsSummary(
+            count = sortedDurations.size,
+            avgDurationMs = sortedDurations.sum() / sortedDurations.size,
+            p95DurationMs = sortedDurations[p95Index]
+        )
     }
 
     fun exportGroupedLines(limit: Int? = null): PerformanceMetricsGroupedLines {

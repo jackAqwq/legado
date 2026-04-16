@@ -31,4 +31,21 @@ class PerformanceMetricsSnapshotPresenterTest {
         assertTrue(text.contains("generated_at_ms=400"))
         assertTrue(text.contains("No performance metrics recorded."))
     }
+
+    @Test
+    fun build_preview_text_should_include_summary_when_provided() {
+        val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
+            lines = listOf("100|rss.intercept|80ms|source=ReadRssActivity,result=success"),
+            generatedAtMs = 500,
+            summary = PerformanceMetricsSummary(
+                count = 1,
+                avgDurationMs = 80,
+                p95DurationMs = 80
+            )
+        )
+
+        assertTrue(text.contains("summary.count=1"))
+        assertTrue(text.contains("summary.avg_duration_ms=80"))
+        assertTrue(text.contains("summary.p95_duration_ms=80"))
+    }
 }
