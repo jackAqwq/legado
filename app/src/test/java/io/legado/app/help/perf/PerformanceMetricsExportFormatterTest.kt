@@ -31,4 +31,21 @@ class PerformanceMetricsExportFormatterTest {
         assertTrue(text.contains("generated_at_ms=5678"))
         assertTrue(text.contains("No performance metrics recorded."))
     }
+
+    @Test
+    fun include_summary_block_when_summary_provided() {
+        val text = PerformanceMetricsExportFormatter.toText(
+            lines = listOf("1|read.page_flip|50ms|result=success"),
+            generatedAtMs = 2000L,
+            summary = PerformanceMetricsSummary(
+                count = 1,
+                avgDurationMs = 50,
+                p95DurationMs = 50
+            )
+        )
+
+        assertTrue(text.contains("summary.count=1"))
+        assertTrue(text.contains("summary.avg_duration_ms=50"))
+        assertTrue(text.contains("summary.p95_duration_ms=50"))
+    }
 }

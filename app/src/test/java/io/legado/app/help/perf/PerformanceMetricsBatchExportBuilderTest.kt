@@ -21,6 +21,9 @@ class PerformanceMetricsBatchExportBuilderTest {
         assertEquals("performance_metrics_startup.txt", entries[1].fileName)
         assertEquals("performance_metrics_read.txt", entries[2].fileName)
         assertEquals("performance_metrics_rss.txt", entries[3].fileName)
+        assertTrue(entries[0].text.contains("summary.count=1"))
+        assertTrue(entries[0].text.contains("summary.avg_duration_ms=50"))
+        assertTrue(entries[0].text.contains("summary.p95_duration_ms=50"))
     }
 
     @Test
@@ -35,6 +38,37 @@ class PerformanceMetricsBatchExportBuilderTest {
 
         val readEntry = entries.first { it.fileName == "performance_metrics_read.txt" }
         assertTrue(readEntry.text.contains("generated_at_ms=5678"))
+        assertTrue(readEntry.text.contains("summary.count=0"))
+        assertTrue(readEntry.text.contains("summary.avg_duration_ms=0"))
+        assertTrue(readEntry.text.contains("summary.p95_duration_ms=0"))
         assertTrue(readEntry.text.contains("No performance metrics recorded."))
+    }
+
+    @Test
+    fun build_entries_should_calculate_p95_for_group_lines() {
+        val entries = PerformanceMetricsBatchExportBuilder.buildEntries(
+            allLines = listOf(
+                "1|read.page_flip|10ms|result=success",
+                "2|read.page_flip|20ms|result=success",
+                "3|read.page_flip|30ms|result=success",
+                "4|read.page_flip|40ms|result=success",
+                "5|read.page_flip|100ms|result=success"
+            ),
+            startupLines = emptyList(),
+            readLines = listOf(
+                "1|read.page_flip|10ms|result=success",
+                "2|read.page_flip|20ms|result=success",
+                "3|read.page_flip|30ms|result=success",
+                "4|read.page_flip|40ms|result=success",
+                "5|read.page_flip|100ms|result=success"
+            ),
+            rssLines = emptyList(),
+            generatedAtMs = 9999L
+        )
+
+        val readEntry = entries.first { it.fileName == "performance_metrics_read.txt" }
+        assertTrue(readEntry.text.contains("summary.count=5"))
+        assertTrue(readEntry.text.contains("summary.avg_duration_ms=40"))
+        assertTrue(readEntry.text.contains("summary.p95_duration_ms=100"))
     }
 }

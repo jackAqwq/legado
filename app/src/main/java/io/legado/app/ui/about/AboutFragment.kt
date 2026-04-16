@@ -225,11 +225,12 @@ class AboutFragment : PreferenceFragmentCompat() {
                 error("create dir failed: ${dir.absolutePath}")
             }
             val generatedAtMs = System.currentTimeMillis()
+            val groupedLines = PerformanceMetricsTracker.exportGroupedLines()
             val entries = PerformanceMetricsBatchExportBuilder.buildEntries(
-                allLines = PerformanceMetricsTracker.exportLines(),
-                startupLines = PerformanceMetricsTracker.exportLines(namePrefix = "startup."),
-                readLines = PerformanceMetricsTracker.exportLines(namePrefix = "read."),
-                rssLines = PerformanceMetricsTracker.exportLines(namePrefix = "rss."),
+                allLines = groupedLines.all,
+                startupLines = groupedLines.startup,
+                readLines = groupedLines.read,
+                rssLines = groupedLines.rss,
                 generatedAtMs = generatedAtMs
             )
             entries.forEach { entry ->

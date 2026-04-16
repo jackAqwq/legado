@@ -11,6 +11,13 @@ internal data class PerformanceMetricRecord(
     val details: String
 )
 
+internal data class PerformanceMetricsGroupedLines(
+    val all: List<String>,
+    val startup: List<String>,
+    val read: List<String>,
+    val rss: List<String>
+)
+
 internal object PerformanceMetricsTracker {
 
     internal const val MAX_RECORDS = 200
@@ -95,9 +102,30 @@ internal object PerformanceMetricsTracker {
             namePrefix = namePrefix,
             limit = limit
         )
-        return filteredRecords.map { record ->
-            "${record.timestampMs}|${record.name}|${record.durationMs}ms|${record.details}"
+        return filteredRecords.map(::toExportLine)
+    }
+
+    fun exportGroupedLines(limit: Int? = null): PerformanceMetricsGroupedLines {
+        val source = snapshot()
+        val all = ArrayList<String>(source.size)
+        val startup = ArrayList<String>()
+        val read = ArrayList<String>()
+        val rss = ArrayList<String>()
+        source.forEach { record ->
+            val line = toExportLine(record)
+            all.add(line)
+            when {
+                record.name.startsWith("startup.") -> startup.add(line)
+                record.name.startsWith("read.") -> read.add(line)
+                record.name.startsWith("rss.") -> rss.add(line)
+            }
         }
+        return PerformanceMetricsGroupedLines(
+            all = withLimit(all, limit),
+            startup = withLimit(startup, limit),
+            read = withLimit(read, limit),
+            rss = withLimit(rss, limit)
+        )
     }
 
     private fun selectRecords(
@@ -123,6 +151,17 @@ internal object PerformanceMetricsTracker {
         }
         enabledProvider = { AppConfig.recordPerformanceMetrics }
         logSink = { AppLog.putDebug(it) }
+    }
+
+    private fun toExportLine(record: PerformanceMetricRecord): String {
+        return "${record.timestampMs}|${record.name}|${record.durationMs}ms|${record.details}"
+    }
+
+    private fun withLimit(lines: List<String>, limit: Int?): List<String> {
+        if (limit != null && limit > 0 && lines.size > limit) {
+            return lines.takeLast(limit)
+        }
+        return lines
     }
 
     private fun record(name: String, durationMs: Long, details: String) {

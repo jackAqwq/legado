@@ -148,4 +148,31 @@ class PerformanceMetricsTrackerTest {
         assertTrue(PerformanceMetricsTracker.snapshot().isEmpty())
         assertTrue(PerformanceMetricsTracker.exportLines().isEmpty())
     }
+
+    @Test
+    fun export_grouped_lines_should_split_metrics_by_prefix() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.markAppOnCreateStart(uptimeMs = 100)
+        PerformanceMetricsTracker.markMainUiReady(uptimeMs = 150)
+        PerformanceMetricsTracker.markPageFlipGestureStart(uptimeMs = 200)
+        PerformanceMetricsTracker.markPageFlipCompleted(uptimeMs = 260)
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 90,
+            source = "ReadRssActivity",
+            success = true
+        )
+
+        val grouped = PerformanceMetricsTracker.exportGroupedLines()
+
+        assertEquals(3, grouped.all.size)
+        assertEquals(1, grouped.startup.size)
+        assertEquals(1, grouped.read.size)
+        assertEquals(1, grouped.rss.size)
+        assertTrue(grouped.startup.first().contains("startup.main_ui_ready"))
+        assertTrue(grouped.read.first().contains("read.page_flip"))
+        assertTrue(grouped.rss.first().contains("rss.intercept"))
+    }
 }
