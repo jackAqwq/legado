@@ -778,77 +778,13 @@ class TextChapterLayout(
         textLine: TextLine,
         lineWidth: Int
     ) {
-        if (columns.isEmpty()) return
-        // 计算当前行的总宽度
-        val firstCol = columns.first()
-        val lastCol = columns.last()
-        val currentWidth = lastCol.end - firstCol.start
-        // 计算剩余空间
-        val residualWidth = lineWidth - currentWidth
-
-        if (residualWidth <= 0) {
+        val result = HtmlLineJustifier.justify(columns, lineWidth) ?: return
+        if (result.wordSpacing <= 0f && columns.isNotEmpty() && columns.last().end - columns.first().start >= lineWidth) {
             textLine.addColumns(columns)
             return
         }
-
-        // 统计空格数量
-        val spaceCount = columns.count {
-            (it as? TextBaseColumn)?.charData == " "
-        }
-
-        if (spaceCount > 1) {
-            // 多个空格：调整空格间距
-            val spaceIncrement = residualWidth / spaceCount
-            textLine.wordSpacing = spaceIncrement
-
-            // 重新计算字符位置
-            var currentX = firstCol.start
-            for (i in columns.indices) {
-                val col = columns[i]
-                val width = col.end - col.start
-
-                if ((col as? TextBaseColumn)?.charData == " " && i != columns.lastIndex) {
-                    // 空格，增加额外的间距
-                    col.start = currentX
-                    col.end = currentX + width + spaceIncrement
-                    currentX = col.end
-                } else {
-                    // 非空格或最后一个字符
-                    col.start = currentX
-                    col.end = currentX + width
-                    currentX = col.end
-                }
-
-                textLine.addColumn(col)
-            }
-        } else {
-            // 没有或只有一个空格：调整字符间距
-            val gapCount = columns.lastIndex
-            if (gapCount > 0) {
-                val charIncrement = residualWidth / gapCount
-                var currentX = firstCol.start
-                for (i in columns.indices) {
-                    val col = columns[i]
-                    val width = col.end - col.start
-
-                    if (i != columns.lastIndex) {
-                        // 非最后一个字符，增加额外的间距
-                        col.start = currentX
-                        col.end = currentX + width + charIncrement
-                        currentX = col.end
-                    } else {
-                        // 最后一个字符，不增加额外间距
-                        col.start = currentX
-                        col.end = currentX + width
-                    }
-
-                    textLine.addColumn(col)
-                }
-            } else {
-                // 只有一个字符，不需要调整
-                textLine.addColumns(columns)
-            }
-        }
+        textLine.wordSpacing = result.wordSpacing
+        columns.forEach(textLine::addColumn)
     }
 
     private fun extractTextSize(spanned: Spanned, index: Int, defaultSize: Float): Float {

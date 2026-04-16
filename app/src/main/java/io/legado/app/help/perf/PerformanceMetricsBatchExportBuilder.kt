@@ -16,6 +16,8 @@ internal object PerformanceMetricsBatchExportBuilder {
     private const val FILE_RSS = "performance_metrics_rss.txt"
     private const val FILE_RSS_SOURCE_RESULT_SUMMARY =
         "performance_metrics_rss_source_result_summary.txt"
+    private const val FILE_RSS_FAILURE_SUMMARY =
+        "performance_metrics_rss_failure_summary.txt"
     private const val FILE_RSS_FAILURE_SLOWEST_20 =
         "performance_metrics_rss_failure_slowest_20.txt"
 
@@ -25,6 +27,7 @@ internal object PerformanceMetricsBatchExportBuilder {
         readLines: List<String>,
         rssLines: List<String>,
         rssSourceResultSummaryLines: List<String> = emptyList(),
+        rssFailureSummaryLines: List<String> = emptyList(),
         rssFailureSlowestLines: List<String> = emptyList(),
         generatedAtMs: Long = System.currentTimeMillis()
     ): List<PerformanceMetricsExportEntry> {
@@ -65,6 +68,14 @@ internal object PerformanceMetricsBatchExportBuilder {
                 fileName = FILE_RSS_SOURCE_RESULT_SUMMARY,
                 text = PerformanceMetricsExportFormatter.toText(
                     lines = rssSourceResultSummaryLines,
+                    generatedAtMs = generatedAtMs,
+                    summary = null
+                )
+            ),
+            PerformanceMetricsExportEntry(
+                fileName = FILE_RSS_FAILURE_SUMMARY,
+                text = PerformanceMetricsExportFormatter.toText(
+                    lines = rssFailureSummaryLines,
                     generatedAtMs = generatedAtMs,
                     summary = null
                 )

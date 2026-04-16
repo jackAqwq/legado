@@ -974,6 +974,7 @@
     <string name="view_performance_metrics_rss_result_summary">View RSS result summary</string>
     <string name="view_performance_metrics_rss_success">View RSS success metrics</string>
     <string name="view_performance_metrics_rss_failure">View RSS failure metrics</string>
+    <string name="view_performance_metrics_rss_failure_summary">View RSS failure summary</string>
     <string name="view_performance_metrics_rss_source_result_summary">View RSS source + result summary</string>
     <string name="view_performance_metrics_rss_failure_slowest_20">View RSS failure slowest 20 metrics</string>
     <string name="copy_performance_metrics_rss_failure_slowest_20">Copy RSS failure slowest 20 metrics</string>
@@ -990,6 +991,7 @@
     <string name="performance_metrics_title_rss_result_summary">RSS result summary</string>
     <string name="performance_metrics_title_rss_success">RSS success metrics</string>
     <string name="performance_metrics_title_rss_failure">RSS failure metrics</string>
+    <string name="performance_metrics_title_rss_failure_summary">RSS failure summary</string>
     <string name="performance_metrics_title_rss_source_result_summary">RSS source + result summary</string>
     <string name="performance_metrics_title_rss_failure_slowest_20">RSS failure slowest 20 metrics</string>
     <string name="performance_metrics_title_slowest_20">Slowest 20 metrics</string>

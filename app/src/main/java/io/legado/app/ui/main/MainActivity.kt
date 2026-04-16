@@ -125,6 +125,10 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
+        PerformanceMetricsTracker.markStartupStage(
+            stageName = "main_activity_created",
+            uptimeMs = SystemClock.elapsedRealtime()
+        )
         binding.root.post {
             PerformanceMetricsTracker.markMainUiReady(SystemClock.elapsedRealtime())
         }
@@ -140,19 +144,18 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
             backupSync()
             //设置回调
             viewModel.setActivityCallback(this@MainActivity)
-            //自动更新书源
-            binding.viewPagerMain.postDelayed(1000) {
-                viewModel.ruleSubsUp()
-            }
-            //自动更新书籍
             val isAutoRefreshedBook = savedInstanceState?.getBoolean("isAutoRefreshedBook") ?: false
-            if (AppConfig.autoRefreshBook && !isAutoRefreshedBook) {
-                binding.viewPagerMain.postDelayed(2000) {
-                    viewModel.upAllBookToc()
+            MainStartupTaskPlanner.plan(
+                autoRefreshBook = AppConfig.autoRefreshBook,
+                alreadyAutoRefreshedBook = isAutoRefreshedBook
+            ).forEach { task ->
+                binding.viewPagerMain.postDelayed(task.delayMs) {
+                    when (task.type) {
+                        MainStartupTaskType.RULE_SUBS_UPDATE -> viewModel.ruleSubsUp()
+                        MainStartupTaskType.AUTO_REFRESH_BOOK -> viewModel.upAllBookToc()
+                        MainStartupTaskType.POST_LOAD -> viewModel.postLoad()
+                    }
                 }
-            }
-            binding.viewPagerMain.postDelayed(3000) {
-                viewModel.postLoad()
             }
         }
     }

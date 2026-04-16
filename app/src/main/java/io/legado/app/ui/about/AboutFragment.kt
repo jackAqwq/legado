@@ -234,6 +234,9 @@ class AboutFragment : PreferenceFragmentCompat() {
                 rssSourceResultSummaryLines = PerformanceMetricsTracker.exportSourceResultSummaryLines(
                     namePrefix = "rss."
                 ),
+                rssFailureSummaryLines = PerformanceMetricsTracker.exportFailureSummaryLines(
+                    namePrefix = "rss."
+                ),
                 rssFailureSlowestLines = PerformanceMetricsTracker.exportSlowLines(
                     limit = 20,
                     namePrefix = "rss.",

@@ -132,4 +132,30 @@ class PerformanceMetricsSnapshotPresenterTest {
         assertTrue(text.contains("source=BottomWebViewDialog|result=success"))
         assertTrue(text.contains("count=2"))
     }
+
+    @Test
+    fun build_failure_summary_text_should_include_failure_bucket_lines() {
+        val text = PerformanceMetricsSnapshotPresenter.buildFailureSummaryText(
+            summaries = listOf(
+                PerformanceMetricsFailureSummary(
+                    bucket = "http_500",
+                    count = 2,
+                    avgDurationMs = 65,
+                    p95DurationMs = 80
+                ),
+                PerformanceMetricsFailureSummary(
+                    bucket = "SocketTimeoutException",
+                    count = 1,
+                    avgDurationMs = 120,
+                    p95DurationMs = 120
+                )
+            ),
+            generatedAtMs = 900
+        )
+
+        assertTrue(text.contains("generated_at_ms=900"))
+        assertTrue(text.contains("bucket=http_500"))
+        assertTrue(text.contains("avg=65ms"))
+        assertTrue(text.contains("bucket=SocketTimeoutException"))
+    }
 }

@@ -81,6 +81,10 @@ open class App : Application() {
         registerActivityLifecycleCallbacks(LifecycleHelp)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(AppConfig)
         createNotificationChannels()
+        PerformanceMetricsTracker.markStartupStage(
+            stageName = "app_bootstrap_ready",
+            uptimeMs = SystemClock.elapsedRealtime()
+        )
         
         // 核心初始化 - 尽快完成
         Coroutine.async {
@@ -119,7 +123,10 @@ open class App : Application() {
             
             // 清除过期数据
             appDb.cacheDao.clearDeadline(System.currentTimeMillis())
-            if (getPrefBoolean(PreferKey.autoClearExpired, true)) {
+            if (AppStartupPolicy.shouldClearExpiredSearchBooks(
+                    getPrefBoolean(PreferKey.autoClearExpired, true)
+                )
+            ) {
                 val clearTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)
                 appDb.searchBookDao.clearExpired(clearTime)
             }
@@ -129,12 +136,14 @@ open class App : Application() {
             ReadBookConfig.clearBgAndCache()
             
             // 初始化简繁转换引擎
-            when (AppConfig.chineseConverterType) {
-                1 -> {
+            when (AppStartupPolicy.resolveChineseConverterPreloadMode(AppConfig.chineseConverterType)) {
+                ChineseConverterPreloadMode.TRADITIONAL_TO_SIMPLE -> {
                     ChineseUtils.fixT2sDict()
                     ChineseUtils.preLoad(true, TransType.TRADITIONAL_TO_SIMPLE)
                 }
-                2 -> ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
+                ChineseConverterPreloadMode.SIMPLE_TO_TRADITIONAL ->
+                    ChineseUtils.preLoad(true, TransType.SIMPLE_TO_TRADITIONAL)
+                null -> Unit
             }
             
             // 调整排序序号
@@ -143,7 +152,11 @@ open class App : Application() {
             // 同步阅读记录
             if (AppConfig.syncBookProgress) {
                 val now = System.currentTimeMillis()
-                if (shouldRunStartupBookProgressSync(now)) {
+                if (AppStartupPolicy.shouldRunStartupBookProgressSync(
+                        now = now,
+                        lastSyncTime = getPrefLong(PreferKey.syncBookProgressStartupLastTime, 0L)
+                    )
+                ) {
                     AppWebDav.downloadAllBookProgress()
                     putPrefLong(PreferKey.syncBookProgressStartupLastTime, now)
                 }
@@ -222,11 +235,6 @@ open class App : Application() {
         RhinoWrapFactory.register(ContentRule::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(BookChapter::class.java, ReadOnlyJavaObject.factory)
         RhinoWrapFactory.register(Book.ReadConfig::class.java, ReadOnlyJavaObject.factory)
-    }
-
-    private fun shouldRunStartupBookProgressSync(now: Long): Boolean {
-        val lastSyncTime = getPrefLong(PreferKey.syncBookProgressStartupLastTime, 0L)
-        return now - lastSyncTime >= TimeUnit.MINUTES.toMillis(30)
     }
 
     class EventLogger : DefaultLogger() {

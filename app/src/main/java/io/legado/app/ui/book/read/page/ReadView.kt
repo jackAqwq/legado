@@ -242,12 +242,19 @@ class ReadView(context: Context, attrs: AttributeSet) :
                 if (!pageDelegate!!.isMoved && !isMove) {
                     if (!longPressed && !pressOnTextSelected) {
                         if (!curPage.onClick(startX, startY)) {
-                            onSingleTapUp()
+                            val triggeredPageFlip = onSingleTapUp()
+                            if (!triggeredPageFlip) {
+                                PerformanceMetricsTracker.cancelPageFlipGesture()
+                            }
+                        } else {
+                            PerformanceMetricsTracker.cancelPageFlipGesture()
                         }
                         return true
                     }
+                    PerformanceMetricsTracker.cancelPageFlipGesture()
                 }
                 if (isTextSelected) {
+                    PerformanceMetricsTracker.cancelPageFlipGesture()
                     callBack.showTextActionMenu()
                 } else if (pageDelegate!!.isMoved) {
                     pageDelegate?.onTouch(event)
@@ -260,9 +267,12 @@ class ReadView(context: Context, attrs: AttributeSet) :
                 if (!pressDown) return true
                 pressDown = false
                 if (isTextSelected) {
+                    PerformanceMetricsTracker.cancelPageFlipGesture()
                     callBack.showTextActionMenu()
                 } else if (pageDelegate!!.isMoved) {
                     pageDelegate?.onTouch(event)
+                } else {
+                    PerformanceMetricsTracker.cancelPageFlipGesture()
                 }
                 pressOnTextSelected = false
                 autoPager.resume()
@@ -323,6 +333,7 @@ class ReadView(context: Context, attrs: AttributeSet) :
      * 长按选择
      */
     private fun onLongPress() {
+        PerformanceMetricsTracker.cancelPageFlipGesture()
         kotlin.runCatching {
             curPage.longPress(startX, startY) { textPos: TextPos ->
                 isTextSelected = true
@@ -396,11 +407,13 @@ class ReadView(context: Context, attrs: AttributeSet) :
     /**
      * 单击
      */
-    private fun onSingleTapUp() {
-        when {
-            isTextSelected -> Unit
+    private fun onSingleTapUp(): Boolean {
+        return when {
+            isTextSelected -> false
             mcRect.contains(startX, startY) -> if (!isAbortAnim) {
                 click(AppConfig.clickActionMC)
+            } else {
+                false
             }
 
             bcRect.contains(startX, startY) -> {
@@ -434,34 +447,73 @@ class ReadView(context: Context, attrs: AttributeSet) :
             trRect.contains(startX, startY) -> {
                 click(AppConfig.clickActionTR)
             }
+
+            else -> false
         }
     }
 
     /**
      * 点击
      */
-    private fun click(action: Int) {
-        when (action) {
+    private fun click(action: Int): Boolean {
+        return when (action) {
             0 -> {
                 pageDelegate?.dismissSnackBar()
                 callBack.showActionMenu()
+                false
             }
 
-            1 -> pageDelegate?.nextPageByAnim(defaultAnimationSpeed)
-            2 -> pageDelegate?.prevPageByAnim(defaultAnimationSpeed)
-            3 -> ReadBook.moveToNextChapter(true)
-            4 -> ReadBook.moveToPrevChapter(upContent = true, toLast = false)
-            5 -> ReadAloud.prevParagraph(context)
-            6 -> ReadAloud.nextParagraph(context)
-            7 -> callBack.addBookmark()
-            8 -> activity?.showDialogFragment(ContentEditDialog())
-            9 -> callBack.changeReplaceRuleState()
-            10 -> callBack.openChapterList()
-            11 -> callBack.openSearchActivity(null)
-            12 -> ReadBook.syncProgress(
+            1 -> {
+                pageDelegate?.nextPageByAnim(defaultAnimationSpeed)
+                true
+            }
+            2 -> {
+                pageDelegate?.prevPageByAnim(defaultAnimationSpeed)
+                true
+            }
+            3 -> {
+                ReadBook.moveToNextChapter(true)
+                false
+            }
+            4 -> {
+                ReadBook.moveToPrevChapter(upContent = true, toLast = false)
+                false
+            }
+            5 -> {
+                ReadAloud.prevParagraph(context)
+                false
+            }
+            6 -> {
+                ReadAloud.nextParagraph(context)
+                false
+            }
+            7 -> {
+                callBack.addBookmark()
+                false
+            }
+            8 -> {
+                activity?.showDialogFragment(ContentEditDialog())
+                false
+            }
+            9 -> {
+                callBack.changeReplaceRuleState()
+                false
+            }
+            10 -> {
+                callBack.openChapterList()
+                false
+            }
+            11 -> {
+                callBack.openSearchActivity(null)
+                false
+            }
+            12 -> {
+                ReadBook.syncProgress(
                 { progress -> callBack.sureNewProgress(progress) },
                 { context.longToastOnUi(context.getString(R.string.upload_book_success)) },
                 { context.longToastOnUi(context.getString(R.string.sync_book_progress_success)) })
+                false
+            }
 
             13 -> {
                 if (BaseReadAloudService.isPlay()) {
@@ -469,7 +521,10 @@ class ReadView(context: Context, attrs: AttributeSet) :
                 } else {
                     ReadAloud.resume(context)
                 }
+                false
             }
+
+            else -> false
         }
     }
 

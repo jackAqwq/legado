@@ -86,6 +86,8 @@ import io.legado.app.help.webView.WebJsExtensions.Companion.nameCache
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameJava
 import io.legado.app.help.webView.WebJsExtensions.Companion.nameSource
 import io.legado.app.help.http.newCallResponseBlocking
+import io.legado.app.help.webView.RssInjectedPageFetcher
+import io.legado.app.help.webView.RssInjectedPageHttpResponse
 import io.legado.app.help.webView.PooledWebView
 import io.legado.app.help.webView.WebJsExtensions.Companion.JS_INJECTION
 import io.legado.app.help.webView.WebJsExtensions.Companion.JS_URL
@@ -668,34 +670,51 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         private fun getModifiedContentWithJs(url: String, request: WebResourceRequest): WebResourceResponse? {
             val startTime = SystemClock.elapsedRealtime()
             var success = false
+            var failureType: String? = null
+            var statusCode: Int? = null
+            var responseContentType: String? = null
             try {
-                val cookie = webCookieManager.getCookie(url)
-                val res = okHttpClient.newCallResponseBlocking {
-                    url(url)
-                    method(request.method, null)
-                    if (!cookie.isNullOrEmpty()) {
-                        addHeader("Cookie", cookie)
+                val outcome = RssInjectedPageFetcher.fetch(
+                    url = url,
+                    method = request.method,
+                    requestHeaders = request.requestHeaders?.toMap().orEmpty(),
+                    cookie = webCookieManager.getCookie(url),
+                    snippet = JS_URL
+                ) { pageRequest ->
+                    val res = okHttpClient.newCallResponseBlocking {
+                        url(pageRequest.url)
+                        method(pageRequest.method, null)
+                        if (!pageRequest.cookie.isNullOrEmpty()) {
+                            addHeader("Cookie", pageRequest.cookie)
+                        }
+                        pageRequest.requestHeaders.forEach { (key, value) ->
+                            addHeader(key, value)
+                        }
                     }
-                    request.requestHeaders?.forEach { (key, value) ->
-                        addHeader(key, value)
-                    }
+                    val body = res.body
+                    val contentType = body.contentType()
+                    RssInjectedPageHttpResponse(
+                        statusCode = res.code,
+                        mimeType = contentType?.toString()?.substringBefore(";") ?: "text/html",
+                        charset = contentType?.charset() ?: Charsets.UTF_8,
+                        contentType = contentType?.toString(),
+                        bodyText = body.text(),
+                        setCookies = res.headers("Set-Cookie")
+                    )
                 }
-                res.headers("Set-Cookie").forEach { setCookie ->
+                val result = outcome.result ?: run {
+                    failureType = outcome.failureType
+                    return null
+                }
+                result.setCookies.forEach { setCookie ->
                     webCookieManager.setCookie(url, setCookie)
                 }
-                val body = res.body
-                val contentType = body.contentType()
-                val mimeType = contentType?.toString()?.substringBefore(";") ?: "text/html"
-                val charset = contentType?.charset() ?: Charsets.UTF_8
-                val charsetSre = charset.name()
-                val bodyText = RssHtmlHeadInjector.insertAfterHeadOpenTag(
-                    html = body.text(),
-                    snippet = JS_URL
-                )
+                statusCode = result.statusCode
+                responseContentType = result.contentType
                 val response = WebResourceResponse(
-                    mimeType,
-                    charsetSre,
-                    ByteArrayInputStream(bodyText.toByteArray(charset))
+                    result.mimeType,
+                    result.charset.name(),
+                    ByteArrayInputStream(result.bodyText.toByteArray(result.charset))
                 )
                 success = true
                 return response
@@ -705,7 +724,10 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
                 PerformanceMetricsTracker.recordRssInterceptDuration(
                     durationMs = SystemClock.elapsedRealtime() - startTime,
                     source = "ReadRssActivity",
-                    success = success
+                    success = success,
+                    failureType = failureType,
+                    statusCode = statusCode,
+                    contentType = responseContentType
                 )
             }
         }

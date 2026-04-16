@@ -84,11 +84,10 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
      */
     fun setContent(textPage: TextPage) {
         this.textPage = textPage
-        // 非滑动翻页动画需要同步重绘，不然翻页可能会出现闪烁
-        if (isScroll) {
-            postInvalidate()
-        } else {
-            invalidate()
+        when (RenderInvalidateGate.forContentUpdate(isScroll).viewMode) {
+            RenderInvalidateMode.POST_INVALIDATE -> postInvalidate()
+            RenderInvalidateMode.INVALIDATE -> invalidate()
+            RenderInvalidateMode.NONE -> Unit
         }
     }
 
@@ -198,8 +197,16 @@ class ContentTextView(context: Context, attrs: AttributeSet?) : View(context, at
             ) {
                 invalidate = true
             }
-            if (invalidate) {
-                postInvalidate()
+            val invalidateDecision = RenderInvalidateGate.forPreRender(
+                hasUpdates = invalidate,
+                delegateCanInvalidate = pageDelegate?.shouldPostInvalidateAfterRenderPass() == true
+            )
+            when (invalidateDecision.viewMode) {
+                RenderInvalidateMode.POST_INVALIDATE -> postInvalidate()
+                RenderInvalidateMode.INVALIDATE -> invalidate()
+                RenderInvalidateMode.NONE -> Unit
+            }
+            if (invalidateDecision.invalidateDelegate) {
                 pageDelegate?.postInvalidate()
             }
         }

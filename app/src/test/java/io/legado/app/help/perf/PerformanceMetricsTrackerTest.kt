@@ -22,6 +22,7 @@ class PerformanceMetricsTrackerTest {
         assertEquals("startup.main_ui_ready", records[0].name)
         assertEquals(65, records[0].durationMs)
         assertTrue(records[0].details.contains("stage=main_activity"))
+        assertEquals("main_activity", records[0].detailEntries["stage"])
         assertTrue(logs.any { it.contains("startup.main_ui_ready") })
     }
 
@@ -58,6 +59,46 @@ class PerformanceMetricsTrackerTest {
         assertEquals("read.page_flip", records[0].name)
         assertEquals(33, records[0].durationMs)
         assertTrue(records[0].details.contains("result=success"))
+    }
+
+    @Test
+    fun cancel_page_flip_metric_should_clear_pending_start_without_recording() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.markPageFlipGestureStart(uptimeMs = 1000)
+        PerformanceMetricsTracker.cancelPageFlipGesture()
+        PerformanceMetricsTracker.markPageFlipCompleted(uptimeMs = 1033)
+
+        assertTrue(PerformanceMetricsTracker.snapshot().isEmpty())
+    }
+
+    @Test
+    fun record_startup_stage_metrics_without_clearing_main_ui_ready_start() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.markAppOnCreateStart(uptimeMs = 100)
+        PerformanceMetricsTracker.markStartupStage(
+            stageName = "app_bootstrap_ready",
+            uptimeMs = 130
+        )
+        PerformanceMetricsTracker.markStartupStage(
+            stageName = "main_activity_created",
+            uptimeMs = 160
+        )
+        PerformanceMetricsTracker.markMainUiReady(uptimeMs = 190)
+
+        val records = PerformanceMetricsTracker.snapshot()
+        assertEquals(3, records.size)
+        assertEquals("startup.app_bootstrap_ready", records[0].name)
+        assertEquals(30, records[0].durationMs)
+        assertEquals("startup.main_activity_created", records[1].name)
+        assertEquals(60, records[1].durationMs)
+        assertEquals("startup.main_ui_ready", records[2].name)
+        assertEquals(90, records[2].durationMs)
     }
 
     @Test
@@ -391,5 +432,70 @@ class PerformanceMetricsTrackerTest {
         }
         assertEquals(1, webFailure.count)
         assertEquals(80, webFailure.avgDurationMs)
+    }
+
+    @Test
+    fun build_failure_summaries_should_group_failed_rss_metrics_by_bucket() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 80,
+            source = "ReadRssActivity",
+            success = false,
+            failureType = "SocketTimeoutException"
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 40,
+            source = "BottomWebViewDialog",
+            success = false,
+            statusCode = 500,
+            contentType = "text/html"
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 20,
+            source = "BottomWebViewDialog",
+            success = true
+        )
+
+        val summaries = PerformanceMetricsTracker.buildFailureSummaries(namePrefix = "rss.")
+
+        assertEquals(2, summaries.size)
+        val statusSummary = summaries.first { it.bucket == "http_500" }
+        assertEquals(1, statusSummary.count)
+        assertEquals(40, statusSummary.avgDurationMs)
+        val timeoutSummary = summaries.first { it.bucket == "SocketTimeoutException" }
+        assertEquals(1, timeoutSummary.count)
+        assertEquals(80, timeoutSummary.avgDurationMs)
+    }
+
+    @Test
+    fun export_lines_should_support_failure_bucket_filter() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 80,
+            source = "ReadRssActivity",
+            success = false,
+            failureType = "SocketTimeoutException"
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 40,
+            source = "BottomWebViewDialog",
+            success = false,
+            statusCode = 500
+        )
+
+        val http500Only = PerformanceMetricsTracker.exportLines(
+            namePrefix = "rss.",
+            result = "failure",
+            failureBucket = "http_500"
+        )
+
+        assertEquals(1, http500Only.size)
+        assertTrue(http500Only.first().contains("statusCode=500"))
     }
 }

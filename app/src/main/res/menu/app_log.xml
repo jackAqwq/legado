@@ -60,6 +60,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_view_perf_metrics_rss_failure_summary"
+        android:title="@string/view_performance_metrics_rss_failure_summary"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_view_perf_metrics_rss_source_result_summary"
         android:title="@string/view_performance_metrics_rss_source_result_summary"
         app:showAsAction="never" />

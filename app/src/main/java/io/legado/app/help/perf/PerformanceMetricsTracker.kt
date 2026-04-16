@@ -9,8 +9,11 @@ internal data class PerformanceMetricRecord(
     val timestampMs: Long,
     val name: String,
     val durationMs: Long,
-    val details: String
+    val detailEntries: PerformanceMetricDetails
 )
+
+internal val PerformanceMetricRecord.details: String
+    get() = detailEntries.encode()
 
 internal data class PerformanceMetricsGroupedLines(
     val all: List<String>,
@@ -36,6 +39,13 @@ internal data class PerformanceMetricsResultSummary(
 internal data class PerformanceMetricsSourceResultSummary(
     val source: String,
     val result: String,
+    val count: Int,
+    val avgDurationMs: Long,
+    val p95DurationMs: Long
+)
+
+internal data class PerformanceMetricsFailureSummary(
+    val bucket: String,
     val count: Int,
     val avgDurationMs: Long,
     val p95DurationMs: Long
@@ -73,7 +83,24 @@ internal object PerformanceMetricsTracker {
         record(
             name = "startup.main_ui_ready",
             durationMs = uptimeMs - startUptimeMs,
-            details = "stage=main_activity"
+            detailEntries = PerformanceMetricDetails.of(
+                "stage" to "main_activity"
+            )
+        )
+    }
+
+    fun markStartupStage(stageName: String, uptimeMs: Long) {
+        if (!enabledProvider()) return
+        if (stageName.isBlank()) return
+        val startUptimeMs = synchronized(lock) {
+            appOnCreateStartUptimeMs
+        } ?: return
+        record(
+            name = "startup.$stageName",
+            durationMs = uptimeMs - startUptimeMs,
+            detailEntries = PerformanceMetricDetails.of(
+                "stage" to stageName
+            )
         )
     }
 
@@ -94,16 +121,37 @@ internal object PerformanceMetricsTracker {
         record(
             name = "read.page_flip",
             durationMs = uptimeMs - startUptimeMs,
-            details = "result=$result"
+            detailEntries = PerformanceMetricDetails.of(
+                "result" to result
+            )
         )
     }
 
-    fun recordRssInterceptDuration(durationMs: Long, source: String, success: Boolean) {
+    fun cancelPageFlipGesture() {
+        synchronized(lock) {
+            pageFlipStartUptimeMs = null
+        }
+    }
+
+    fun recordRssInterceptDuration(
+        durationMs: Long,
+        source: String,
+        success: Boolean,
+        failureType: String? = null,
+        statusCode: Int? = null,
+        contentType: String? = null
+    ) {
         if (!enabledProvider()) return
         record(
             name = "rss.intercept",
             durationMs = durationMs,
-            details = "source=$source,result=${if (success) "success" else "failure"}"
+            detailEntries = PerformanceMetricDetails.of(
+                "source" to source,
+                "result" to if (success) "success" else "failure",
+                "failureType" to failureType,
+                "statusCode" to statusCode?.toString(),
+                "contentType" to contentType
+            )
         )
     }
 
@@ -123,14 +171,16 @@ internal object PerformanceMetricsTracker {
         namePrefix: String? = null,
         limit: Int? = null,
         source: String? = null,
-        result: String? = null
+        result: String? = null,
+        failureBucket: String? = null
     ): List<String> {
         val filteredRecords = selectRecords(
             source = snapshot(),
             namePrefix = namePrefix,
             limit = limit,
             sourceFilter = source,
-            resultFilter = result
+            resultFilter = result,
+            failureBucketFilter = failureBucket
         )
         return filteredRecords.map(::toExportLine)
     }
@@ -139,7 +189,8 @@ internal object PerformanceMetricsTracker {
         limit: Int = 20,
         namePrefix: String? = null,
         source: String? = null,
-        result: String? = null
+        result: String? = null,
+        failureBucket: String? = null
     ): List<String> {
         if (limit <= 0) return emptyList()
         return selectRecords(
@@ -147,7 +198,8 @@ internal object PerformanceMetricsTracker {
             namePrefix = namePrefix,
             limit = null,
             sourceFilter = source,
-            resultFilter = result
+            resultFilter = result,
+            failureBucketFilter = failureBucket
         )
             .sortedByDescending { it.durationMs }
             .take(limit)
@@ -158,14 +210,16 @@ internal object PerformanceMetricsTracker {
         namePrefix: String? = null,
         limit: Int? = null,
         source: String? = null,
-        result: String? = null
+        result: String? = null,
+        failureBucket: String? = null
     ): PerformanceMetricsSummary {
         val selected = selectRecords(
             source = snapshot(),
             namePrefix = namePrefix,
             limit = limit,
             sourceFilter = source,
-            resultFilter = result
+            resultFilter = result,
+            failureBucketFilter = failureBucket
         )
         return buildSummaryFromRecords(selected)
     }
@@ -179,11 +233,12 @@ internal object PerformanceMetricsTracker {
             namePrefix = namePrefix,
             limit = limit,
             sourceFilter = null,
-            resultFilter = null
+            resultFilter = null,
+            failureBucketFilter = null
         )
         val grouped = linkedMapOf<String, MutableList<PerformanceMetricRecord>>()
         selected.forEach { record ->
-            val source = detailValue(record.details, "source") ?: return@forEach
+            val source = record.detailEntries["source"] ?: return@forEach
             grouped.getOrPut(source) { mutableListOf() }.add(record)
         }
         return grouped.map { (source, records) ->
@@ -206,11 +261,12 @@ internal object PerformanceMetricsTracker {
             namePrefix = namePrefix,
             limit = limit,
             sourceFilter = null,
-            resultFilter = null
+            resultFilter = null,
+            failureBucketFilter = null
         )
         val grouped = linkedMapOf<String, MutableList<PerformanceMetricRecord>>()
         selected.forEach { record ->
-            val result = detailValue(record.details, "result") ?: return@forEach
+            val result = record.detailEntries["result"] ?: return@forEach
             grouped.getOrPut(result) { mutableListOf() }.add(record)
         }
         return grouped.map { (result, records) ->
@@ -233,12 +289,13 @@ internal object PerformanceMetricsTracker {
             namePrefix = namePrefix,
             limit = limit,
             sourceFilter = null,
-            resultFilter = null
+            resultFilter = null,
+            failureBucketFilter = null
         )
         val grouped = linkedMapOf<Pair<String, String>, MutableList<PerformanceMetricRecord>>()
         selected.forEach { record ->
-            val source = detailValue(record.details, "source") ?: return@forEach
-            val result = detailValue(record.details, "result") ?: return@forEach
+            val source = record.detailEntries["source"] ?: return@forEach
+            val result = record.detailEntries["result"] ?: return@forEach
             grouped.getOrPut(source to result) { mutableListOf() }.add(record)
         }
         return grouped.map { (key, records) ->
@@ -259,6 +316,43 @@ internal object PerformanceMetricsTracker {
     ): List<String> {
         return buildSourceResultSummaries(namePrefix, limit).map { summary ->
             "source=${summary.source}|result=${summary.result}|count=${summary.count}|avg=${summary.avgDurationMs}ms|p95=${summary.p95DurationMs}ms"
+        }
+    }
+
+    fun buildFailureSummaries(
+        namePrefix: String = "rss.",
+        limit: Int? = null
+    ): List<PerformanceMetricsFailureSummary> {
+        val selected = selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = limit,
+            sourceFilter = null,
+            resultFilter = "failure",
+            failureBucketFilter = null
+        )
+        val grouped = linkedMapOf<String, MutableList<PerformanceMetricRecord>>()
+        selected.forEach { record ->
+            val bucket = failureBucketOf(record) ?: return@forEach
+            grouped.getOrPut(bucket) { mutableListOf() }.add(record)
+        }
+        return grouped.map { (bucket, records) ->
+            val summary = buildSummaryFromRecords(records)
+            PerformanceMetricsFailureSummary(
+                bucket = bucket,
+                count = summary.count,
+                avgDurationMs = summary.avgDurationMs,
+                p95DurationMs = summary.p95DurationMs
+            )
+        }.sortedByDescending { it.avgDurationMs }
+    }
+
+    fun exportFailureSummaryLines(
+        namePrefix: String = "rss.",
+        limit: Int? = null
+    ): List<String> {
+        return buildFailureSummaries(namePrefix, limit).map { summary ->
+            "bucket=${summary.bucket}|count=${summary.count}|avg=${summary.avgDurationMs}ms|p95=${summary.p95DurationMs}ms"
         }
     }
 
@@ -290,17 +384,21 @@ internal object PerformanceMetricsTracker {
         namePrefix: String?,
         limit: Int?,
         sourceFilter: String?,
-        resultFilter: String?
+        resultFilter: String?,
+        failureBucketFilter: String?
     ): List<PerformanceMetricRecord> {
         var selected = source
         if (!namePrefix.isNullOrBlank()) {
             selected = selected.filter { it.name.startsWith(namePrefix) }
         }
         if (!sourceFilter.isNullOrBlank()) {
-            selected = selected.filter { detailValue(it.details, "source") == sourceFilter }
+            selected = selected.filter { it.detailEntries["source"] == sourceFilter }
         }
         if (!resultFilter.isNullOrBlank()) {
-            selected = selected.filter { detailValue(it.details, "result") == resultFilter }
+            selected = selected.filter { it.detailEntries["result"] == resultFilter }
+        }
+        if (!failureBucketFilter.isNullOrBlank()) {
+            selected = selected.filter { failureBucketOf(it) == failureBucketFilter }
         }
         if (limit != null && limit > 0 && selected.size > limit) {
             selected = selected.takeLast(limit)
@@ -347,23 +445,31 @@ internal object PerformanceMetricsTracker {
         )
     }
 
-    private fun detailValue(details: String, key: String): String? {
-        val token = "$key="
-        val start = details.indexOf(token)
-        if (start < 0) return null
-        val valueStart = start + token.length
-        val valueEnd = details.indexOf(',', valueStart).takeIf { it >= 0 } ?: details.length
-        if (valueStart >= valueEnd) return null
-        return details.substring(valueStart, valueEnd)
+    private fun failureBucketOf(record: PerformanceMetricRecord): String? {
+        val result = record.detailEntries["result"]
+        if (result != "failure") {
+            return null
+        }
+        record.detailEntries["statusCode"]?.takeIf(String::isNotBlank)?.let { statusCode ->
+            return "http_$statusCode"
+        }
+        record.detailEntries["failureType"]?.takeIf(String::isNotBlank)?.let { failureType ->
+            return failureType
+        }
+        return "unknown"
     }
 
-    private fun record(name: String, durationMs: Long, details: String) {
+    private fun record(
+        name: String,
+        durationMs: Long,
+        detailEntries: PerformanceMetricDetails = PerformanceMetricDetails.empty()
+    ) {
         val safeDurationMs = max(0L, durationMs)
         val record = PerformanceMetricRecord(
             timestampMs = System.currentTimeMillis(),
             name = name,
             durationMs = safeDurationMs,
-            details = details
+            detailEntries = detailEntries
         )
         synchronized(lock) {
             if (records.size >= MAX_RECORDS) {
@@ -372,7 +478,14 @@ internal object PerformanceMetricsTracker {
             records.addLast(record)
         }
         runCatching {
-            logSink("[Perf] $name duration=${safeDurationMs}ms $details")
+            val detailText = record.details
+            logSink(
+                if (detailText.isBlank()) {
+                    "[Perf] $name duration=${safeDurationMs}ms"
+                } else {
+                    "[Perf] $name duration=${safeDurationMs}ms $detailText"
+                }
+            )
         }
     }
 }

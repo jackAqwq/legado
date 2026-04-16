@@ -133,6 +133,10 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 )
             }
 
+            R.id.menu_view_perf_metrics_rss_failure_summary -> {
+                showRssFailureSummary()
+            }
+
             R.id.menu_view_perf_metrics_rss_failure_slowest_20 -> {
                 showPerformanceMetrics(
                     title = getString(R.string.performance_metrics_title_rss_failure_slowest_20),
@@ -247,6 +251,18 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
         showDialogFragment(
             TextDialog(
                 getString(R.string.performance_metrics_title_rss_source_result_summary),
+                text
+            )
+        )
+    }
+
+    private fun showRssFailureSummary() {
+        val text = PerformanceMetricsSnapshotPresenter.buildFailureSummaryText(
+            summaries = PerformanceMetricsTracker.buildFailureSummaries(namePrefix = "rss.")
+        )
+        showDialogFragment(
+            TextDialog(
+                getString(R.string.performance_metrics_title_rss_failure_summary),
                 text
             )
         )
