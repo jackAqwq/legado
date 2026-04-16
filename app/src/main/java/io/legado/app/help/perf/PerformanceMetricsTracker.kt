@@ -81,8 +81,38 @@ internal object PerformanceMetricsTracker {
         records.toList()
     }
 
-    fun exportLines(): List<String> = snapshot().map { record ->
-        "${record.timestampMs}|${record.name}|${record.durationMs}ms|${record.details}"
+    fun clearMetrics() {
+        synchronized(lock) {
+            records.clear()
+            appOnCreateStartUptimeMs = null
+            pageFlipStartUptimeMs = null
+        }
+    }
+
+    fun exportLines(namePrefix: String? = null, limit: Int? = null): List<String> {
+        val filteredRecords = selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = limit
+        )
+        return filteredRecords.map { record ->
+            "${record.timestampMs}|${record.name}|${record.durationMs}ms|${record.details}"
+        }
+    }
+
+    private fun selectRecords(
+        source: List<PerformanceMetricRecord>,
+        namePrefix: String?,
+        limit: Int?
+    ): List<PerformanceMetricRecord> {
+        var selected = source
+        if (!namePrefix.isNullOrBlank()) {
+            selected = selected.filter { it.name.startsWith(namePrefix) }
+        }
+        if (limit != null && limit > 0 && selected.size > limit) {
+            selected = selected.takeLast(limit)
+        }
+        return selected
     }
 
     internal fun resetForTest() {

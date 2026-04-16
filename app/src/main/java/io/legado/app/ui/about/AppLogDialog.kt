@@ -54,19 +54,40 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_view_perf_metrics -> {
-                val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
-                    lines = PerformanceMetricsTracker.exportLines()
-                )
-                showDialogFragment(
-                    TextDialog(getString(R.string.performance_metrics_title), text)
-                )
+                showPerformanceMetrics()
             }
 
             R.id.menu_copy_perf_metrics -> {
-                val text = PerformanceMetricsSnapshotPresenter.buildCopyText(
-                    lines = PerformanceMetricsTracker.exportLines()
+                copyPerformanceMetrics()
+            }
+
+            R.id.menu_view_perf_metrics_startup -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_startup),
+                    namePrefix = "startup."
                 )
-                requireContext().sendToClip(text)
+            }
+
+            R.id.menu_view_perf_metrics_read -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_read),
+                    namePrefix = "read."
+                )
+            }
+
+            R.id.menu_view_perf_metrics_rss -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_rss),
+                    namePrefix = "rss."
+                )
+            }
+
+            R.id.menu_copy_perf_metrics_recent_20 -> {
+                copyPerformanceMetrics(limit = 20)
+            }
+
+            R.id.menu_clear_perf_metrics -> {
+                PerformanceMetricsTracker.clearMetrics()
             }
 
             R.id.menu_clear -> {
@@ -75,6 +96,30 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
             }
         }
         return true
+    }
+
+    private fun showPerformanceMetrics(
+        title: String = getString(R.string.performance_metrics_title),
+        namePrefix: String? = null,
+        limit: Int? = null
+    ) {
+        val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
+            lines = PerformanceMetricsTracker.exportLines(
+                namePrefix = namePrefix,
+                limit = limit
+            )
+        )
+        showDialogFragment(TextDialog(title, text))
+    }
+
+    private fun copyPerformanceMetrics(namePrefix: String? = null, limit: Int? = null) {
+        val text = PerformanceMetricsSnapshotPresenter.buildCopyText(
+            lines = PerformanceMetricsTracker.exportLines(
+                namePrefix = namePrefix,
+                limit = limit
+            )
+        )
+        requireContext().sendToClip(text)
     }
 
     inner class LogAdapter(context: Context) :

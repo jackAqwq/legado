@@ -100,4 +100,52 @@ class PerformanceMetricsTrackerTest {
         assertTrue(lines.first().contains("rss.intercept"))
         assertTrue(lines.first().contains("BottomWebViewDialog"))
     }
+
+    @Test
+    fun export_lines_support_prefix_and_limit() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.markAppOnCreateStart(uptimeMs = 100)
+        PerformanceMetricsTracker.markMainUiReady(uptimeMs = 180)
+        PerformanceMetricsTracker.markPageFlipGestureStart(uptimeMs = 200)
+        PerformanceMetricsTracker.markPageFlipCompleted(uptimeMs = 240)
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 50,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 70,
+            source = "BottomWebViewDialog",
+            success = false
+        )
+
+        val rssOnlyRecentOne = PerformanceMetricsTracker.exportLines(
+            namePrefix = "rss.",
+            limit = 1
+        )
+        assertEquals(1, rssOnlyRecentOne.size)
+        assertTrue(rssOnlyRecentOne.first().contains("BottomWebViewDialog"))
+    }
+
+    @Test
+    fun clear_metrics_should_remove_all_records() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 10,
+            source = "ReadRssActivity",
+            success = true
+        )
+        assertFalse(PerformanceMetricsTracker.snapshot().isEmpty())
+
+        PerformanceMetricsTracker.clearMetrics()
+
+        assertTrue(PerformanceMetricsTracker.snapshot().isEmpty())
+        assertTrue(PerformanceMetricsTracker.exportLines().isEmpty())
+    }
 }

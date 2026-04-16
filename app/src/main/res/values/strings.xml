@@ -965,6 +965,14 @@
     <string name="performance_metrics_summary">Collect startup, page flip, and RSS interception latency for local export</string>
     <string name="view_performance_metrics">View performance metrics</string>
     <string name="copy_performance_metrics">Copy performance metrics</string>
+    <string name="view_performance_metrics_startup">View startup metrics</string>
+    <string name="view_performance_metrics_read">View read metrics</string>
+    <string name="view_performance_metrics_rss">View RSS metrics</string>
+    <string name="copy_performance_metrics_recent_20">Copy recent 20 metrics</string>
+    <string name="clear_performance_metrics">Clear performance metrics</string>
+    <string name="performance_metrics_title_startup">Startup metrics</string>
+    <string name="performance_metrics_title_read">Read metrics</string>
+    <string name="performance_metrics_title_rss">RSS metrics</string>
     <string name="sub_dir">Sub dir</string>
     <string name="general">General</string>
     <string name="use_replace">Use replace</string>
