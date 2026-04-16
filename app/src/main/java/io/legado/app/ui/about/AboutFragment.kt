@@ -14,7 +14,7 @@ import io.legado.app.constant.AppLog
 import io.legado.app.help.CrashHandler
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.coroutine.Coroutine
-import io.legado.app.help.perf.PerformanceMetricsExportFormatter
+import io.legado.app.help.perf.PerformanceMetricsBatchExportBuilder
 import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.ui.widget.dialog.TextDialog
@@ -171,13 +171,13 @@ class AboutFragment : PreferenceFragmentCompat() {
         val logFiles = File(cacheDir, "logs")
         val crashFiles = File(cacheDir, "crash")
         val logcatFile = File(cacheDir, "logcat.txt")
-        val perfMetricsFile = File(cacheDir, PerformanceMetricsExportFormatter.FILE_NAME)
+        val perfMetricsDir = File(cacheDir, PerformanceMetricsBatchExportBuilder.DIR_NAME)
 
         dumpLogcat(logcatFile)
-        dumpPerformanceMetrics(perfMetricsFile)
+        dumpPerformanceMetrics(perfMetricsDir)
 
         val zipFile = File(cacheDir, "logs.zip")
-        ZipUtils.zipFiles(arrayListOf(logFiles, crashFiles, logcatFile, perfMetricsFile), zipFile)
+        ZipUtils.zipFiles(arrayListOf(logFiles, crashFiles, logcatFile, perfMetricsDir), zipFile)
 
         doc.find("logs.zip")?.delete()
 
@@ -188,7 +188,7 @@ class AboutFragment : PreferenceFragmentCompat() {
                 }
         }
         zipFile.delete()
-        perfMetricsFile.delete()
+        perfMetricsDir.deleteRecursively()
     }
 
     private fun copyHeapDump(doc: FileDoc): Boolean {
@@ -216,12 +216,25 @@ class AboutFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun dumpPerformanceMetrics(file: File) {
+    private fun dumpPerformanceMetrics(dir: File) {
         runCatching {
-            val text = PerformanceMetricsExportFormatter.toText(
-                lines = PerformanceMetricsTracker.exportLines()
+            if (dir.exists()) {
+                dir.deleteRecursively()
+            }
+            if (!dir.exists() && !dir.mkdirs()) {
+                error("create dir failed: ${dir.absolutePath}")
+            }
+            val generatedAtMs = System.currentTimeMillis()
+            val entries = PerformanceMetricsBatchExportBuilder.buildEntries(
+                allLines = PerformanceMetricsTracker.exportLines(),
+                startupLines = PerformanceMetricsTracker.exportLines(namePrefix = "startup."),
+                readLines = PerformanceMetricsTracker.exportLines(namePrefix = "read."),
+                rssLines = PerformanceMetricsTracker.exportLines(namePrefix = "rss."),
+                generatedAtMs = generatedAtMs
             )
-            file.writeText(text)
+            entries.forEach { entry ->
+                File(dir, entry.fileName).writeText(entry.text)
+            }
         }.onFailure {
             AppLog.put("导出性能基准记录失败\n${it.localizedMessage}", it)
         }
