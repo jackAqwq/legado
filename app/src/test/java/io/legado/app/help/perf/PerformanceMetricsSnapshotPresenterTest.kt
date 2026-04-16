@@ -76,4 +76,32 @@ class PerformanceMetricsSnapshotPresenterTest {
         assertTrue(text.contains("p95=60ms"))
         assertTrue(text.contains("source=BottomWebViewDialog"))
     }
+
+    @Test
+    fun build_result_summary_text_should_include_result_aggregation_lines() {
+        val text = PerformanceMetricsSnapshotPresenter.buildResultSummaryText(
+            summaries = listOf(
+                PerformanceMetricsResultSummary(
+                    result = "success",
+                    count = 2,
+                    avgDurationMs = 25,
+                    p95DurationMs = 30
+                ),
+                PerformanceMetricsResultSummary(
+                    result = "failure",
+                    count = 1,
+                    avgDurationMs = 90,
+                    p95DurationMs = 90
+                )
+            ),
+            generatedAtMs = 700
+        )
+
+        assertTrue(text.contains("generated_at_ms=700"))
+        assertTrue(text.contains("result=success"))
+        assertTrue(text.contains("count=2"))
+        assertTrue(text.contains("avg=25ms"))
+        assertTrue(text.contains("p95=30ms"))
+        assertTrue(text.contains("result=failure"))
+    }
 }

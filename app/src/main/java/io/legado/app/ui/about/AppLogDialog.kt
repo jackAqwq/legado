@@ -32,6 +32,8 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
     private companion object {
         private const val RSS_SOURCE_READ_RSS_ACTIVITY = "ReadRssActivity"
         private const val RSS_SOURCE_BOTTOM_WEBVIEW_DIALOG = "BottomWebViewDialog"
+        private const val RSS_RESULT_SUCCESS = "success"
+        private const val RSS_RESULT_FAILURE = "failure"
     }
 
     private val binding by viewBinding(DialogRecyclerViewBinding::bind)
@@ -91,6 +93,10 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 showRssSourceSummary()
             }
 
+            R.id.menu_view_perf_metrics_rss_result_summary -> {
+                showRssResultSummary()
+            }
+
             R.id.menu_view_perf_metrics_rss_read_rss_activity -> {
                 showPerformanceMetrics(
                     title = getString(R.string.performance_metrics_title_rss_read_rss_activity),
@@ -104,6 +110,22 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                     title = getString(R.string.performance_metrics_title_rss_bottom_webview_dialog),
                     namePrefix = "rss.",
                     sourceFilter = RSS_SOURCE_BOTTOM_WEBVIEW_DIALOG
+                )
+            }
+
+            R.id.menu_view_perf_metrics_rss_success -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_rss_success),
+                    namePrefix = "rss.",
+                    resultFilter = RSS_RESULT_SUCCESS
+                )
+            }
+
+            R.id.menu_view_perf_metrics_rss_failure -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_rss_failure),
+                    namePrefix = "rss.",
+                    resultFilter = RSS_RESULT_FAILURE
                 )
             }
 
@@ -139,19 +161,22 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
         namePrefix: String? = null,
         limit: Int? = null,
         slowestTopLimit: Int? = null,
-        sourceFilter: String? = null
+        sourceFilter: String? = null,
+        resultFilter: String? = null
     ) {
         val lines = if (slowestTopLimit != null) {
             PerformanceMetricsTracker.exportSlowLines(
                 limit = slowestTopLimit,
                 namePrefix = namePrefix,
-                source = sourceFilter
+                source = sourceFilter,
+                result = resultFilter
             )
         } else {
             PerformanceMetricsTracker.exportLines(
                 namePrefix = namePrefix,
                 limit = limit,
-                source = sourceFilter
+                source = sourceFilter,
+                result = resultFilter
             )
         }
         val text = PerformanceMetricsSnapshotPresenter.buildPreviewText(
@@ -160,7 +185,8 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 PerformanceMetricsTracker.buildSummary(
                     namePrefix = namePrefix,
                     limit = limit,
-                    source = sourceFilter
+                    source = sourceFilter,
+                    result = resultFilter
                 )
             } else {
                 null
@@ -181,23 +207,38 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
         )
     }
 
+    private fun showRssResultSummary() {
+        val text = PerformanceMetricsSnapshotPresenter.buildResultSummaryText(
+            summaries = PerformanceMetricsTracker.buildResultSummaries(namePrefix = "rss.")
+        )
+        showDialogFragment(
+            TextDialog(
+                getString(R.string.performance_metrics_title_rss_result_summary),
+                text
+            )
+        )
+    }
+
     private fun copyPerformanceMetrics(
         namePrefix: String? = null,
         limit: Int? = null,
         slowestTopLimit: Int? = null,
-        sourceFilter: String? = null
+        sourceFilter: String? = null,
+        resultFilter: String? = null
     ) {
         val lines = if (slowestTopLimit != null) {
             PerformanceMetricsTracker.exportSlowLines(
                 limit = slowestTopLimit,
                 namePrefix = namePrefix,
-                source = sourceFilter
+                source = sourceFilter,
+                result = resultFilter
             )
         } else {
             PerformanceMetricsTracker.exportLines(
                 namePrefix = namePrefix,
                 limit = limit,
-                source = sourceFilter
+                source = sourceFilter,
+                result = resultFilter
             )
         }
         val text = PerformanceMetricsSnapshotPresenter.buildCopyText(
@@ -206,7 +247,8 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 PerformanceMetricsTracker.buildSummary(
                     namePrefix = namePrefix,
                     limit = limit,
-                    source = sourceFilter
+                    source = sourceFilter,
+                    result = resultFilter
                 )
             } else {
                 null

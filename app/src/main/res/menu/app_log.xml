@@ -45,6 +45,21 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_view_perf_metrics_rss_result_summary"
+        android:title="@string/view_performance_metrics_rss_result_summary"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_view_perf_metrics_rss_success"
+        android:title="@string/view_performance_metrics_rss_success"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_view_perf_metrics_rss_failure"
+        android:title="@string/view_performance_metrics_rss_failure"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_copy_perf_metrics_recent_20"
         android:title="@string/copy_performance_metrics_recent_20"
         app:showAsAction="never" />

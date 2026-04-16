@@ -294,4 +294,65 @@ class PerformanceMetricsTrackerTest {
         assertEquals(100, webViewSummary.avgDurationMs)
         assertEquals(100, webViewSummary.p95DurationMs)
     }
+
+    @Test
+    fun export_lines_should_support_result_filter() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 20,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 80,
+            source = "BottomWebViewDialog",
+            success = false
+        )
+
+        val failedOnly = PerformanceMetricsTracker.exportLines(
+            namePrefix = "rss.",
+            result = "failure"
+        )
+
+        assertEquals(1, failedOnly.size)
+        assertTrue(failedOnly.first().contains("result=failure"))
+    }
+
+    @Test
+    fun build_result_summaries_should_group_by_success_and_failure() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 10,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 30,
+            source = "BottomWebViewDialog",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 90,
+            source = "BottomWebViewDialog",
+            success = false
+        )
+
+        val summaries = PerformanceMetricsTracker.buildResultSummaries(namePrefix = "rss.")
+
+        assertEquals(2, summaries.size)
+        val successSummary = summaries.first { it.result == "success" }
+        assertEquals(2, successSummary.count)
+        assertEquals(20, successSummary.avgDurationMs)
+        assertEquals(30, successSummary.p95DurationMs)
+        val failureSummary = summaries.first { it.result == "failure" }
+        assertEquals(1, failureSummary.count)
+        assertEquals(90, failureSummary.avgDurationMs)
+        assertEquals(90, failureSummary.p95DurationMs)
+    }
 }
