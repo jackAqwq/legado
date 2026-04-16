@@ -231,6 +231,14 @@ class AboutFragment : PreferenceFragmentCompat() {
                 startupLines = groupedLines.startup,
                 readLines = groupedLines.read,
                 rssLines = groupedLines.rss,
+                rssSourceResultSummaryLines = PerformanceMetricsTracker.exportSourceResultSummaryLines(
+                    namePrefix = "rss."
+                ),
+                rssFailureSlowestLines = PerformanceMetricsTracker.exportSlowLines(
+                    limit = 20,
+                    namePrefix = "rss.",
+                    result = "failure"
+                ),
                 generatedAtMs = generatedAtMs
             )
             entries.forEach { entry ->

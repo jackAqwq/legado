@@ -969,6 +969,9 @@
     <string name="view_performance_metrics_rss_result_summary">查看 RSS 结果摘要</string>
     <string name="view_performance_metrics_rss_success">查看 RSS 成功指标</string>
     <string name="view_performance_metrics_rss_failure">查看 RSS 失败指标</string>
+    <string name="view_performance_metrics_rss_source_result_summary">查看 RSS 来源+结果摘要</string>
+    <string name="view_performance_metrics_rss_failure_slowest_20">查看 RSS 失败最慢 20 条指标</string>
+    <string name="copy_performance_metrics_rss_failure_slowest_20">复制 RSS 失败最慢 20 条指标</string>
     <string name="copy_performance_metrics_recent_20">复制最近 20 条指标</string>
     <string name="view_performance_metrics_slowest_20">查看最慢 20 条指标</string>
     <string name="copy_performance_metrics_slowest_20">复制最慢 20 条指标</string>
@@ -982,6 +985,8 @@
     <string name="performance_metrics_title_rss_result_summary">RSS 结果摘要</string>
     <string name="performance_metrics_title_rss_success">RSS 成功指标</string>
     <string name="performance_metrics_title_rss_failure">RSS 失败指标</string>
+    <string name="performance_metrics_title_rss_source_result_summary">RSS 来源+结果摘要</string>
+    <string name="performance_metrics_title_rss_failure_slowest_20">RSS 失败最慢 20 条指标</string>
     <string name="performance_metrics_title_slowest_20">最慢 20 条指标</string>
     <string name="sub_dir">子文件夹</string>
     <string name="general">全局</string>

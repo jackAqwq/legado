@@ -60,6 +60,21 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_view_perf_metrics_rss_source_result_summary"
+        android:title="@string/view_performance_metrics_rss_source_result_summary"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_view_perf_metrics_rss_failure_slowest_20"
+        android:title="@string/view_performance_metrics_rss_failure_slowest_20"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_copy_perf_metrics_rss_failure_slowest_20"
+        android:title="@string/copy_performance_metrics_rss_failure_slowest_20"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_copy_perf_metrics_recent_20"
         android:title="@string/copy_performance_metrics_recent_20"
         app:showAsAction="never" />

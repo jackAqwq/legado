@@ -104,4 +104,32 @@ class PerformanceMetricsSnapshotPresenterTest {
         assertTrue(text.contains("p95=30ms"))
         assertTrue(text.contains("result=failure"))
     }
+
+    @Test
+    fun build_source_result_summary_text_should_include_2d_aggregation_lines() {
+        val text = PerformanceMetricsSnapshotPresenter.buildSourceResultSummaryText(
+            summaries = listOf(
+                PerformanceMetricsSourceResultSummary(
+                    source = "ReadRssActivity",
+                    result = "failure",
+                    count = 1,
+                    avgDurationMs = 40,
+                    p95DurationMs = 40
+                ),
+                PerformanceMetricsSourceResultSummary(
+                    source = "BottomWebViewDialog",
+                    result = "success",
+                    count = 2,
+                    avgDurationMs = 30,
+                    p95DurationMs = 35
+                )
+            ),
+            generatedAtMs = 800
+        )
+
+        assertTrue(text.contains("generated_at_ms=800"))
+        assertTrue(text.contains("source=ReadRssActivity|result=failure"))
+        assertTrue(text.contains("source=BottomWebViewDialog|result=success"))
+        assertTrue(text.contains("count=2"))
+    }
 }

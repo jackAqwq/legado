@@ -355,4 +355,41 @@ class PerformanceMetricsTrackerTest {
         assertEquals(90, failureSummary.avgDurationMs)
         assertEquals(90, failureSummary.p95DurationMs)
     }
+
+    @Test
+    fun build_source_result_summaries_should_group_by_source_and_result() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 40,
+            source = "ReadRssActivity",
+            success = false
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 20,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 80,
+            source = "BottomWebViewDialog",
+            success = false
+        )
+
+        val summaries = PerformanceMetricsTracker.buildSourceResultSummaries(namePrefix = "rss.")
+
+        assertEquals(3, summaries.size)
+        val readFailure = summaries.first {
+            it.source == "ReadRssActivity" && it.result == "failure"
+        }
+        assertEquals(1, readFailure.count)
+        assertEquals(40, readFailure.avgDurationMs)
+        val webFailure = summaries.first {
+            it.source == "BottomWebViewDialog" && it.result == "failure"
+        }
+        assertEquals(1, webFailure.count)
+        assertEquals(80, webFailure.avgDurationMs)
+    }
 }

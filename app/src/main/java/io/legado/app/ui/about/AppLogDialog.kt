@@ -97,6 +97,10 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 showRssResultSummary()
             }
 
+            R.id.menu_view_perf_metrics_rss_source_result_summary -> {
+                showRssSourceResultSummary()
+            }
+
             R.id.menu_view_perf_metrics_rss_read_rss_activity -> {
                 showPerformanceMetrics(
                     title = getString(R.string.performance_metrics_title_rss_read_rss_activity),
@@ -125,6 +129,23 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
                 showPerformanceMetrics(
                     title = getString(R.string.performance_metrics_title_rss_failure),
                     namePrefix = "rss.",
+                    resultFilter = RSS_RESULT_FAILURE
+                )
+            }
+
+            R.id.menu_view_perf_metrics_rss_failure_slowest_20 -> {
+                showPerformanceMetrics(
+                    title = getString(R.string.performance_metrics_title_rss_failure_slowest_20),
+                    namePrefix = "rss.",
+                    slowestTopLimit = 20,
+                    resultFilter = RSS_RESULT_FAILURE
+                )
+            }
+
+            R.id.menu_copy_perf_metrics_rss_failure_slowest_20 -> {
+                copyPerformanceMetrics(
+                    namePrefix = "rss.",
+                    slowestTopLimit = 20,
                     resultFilter = RSS_RESULT_FAILURE
                 )
             }
@@ -214,6 +235,18 @@ class AppLogDialog : BaseDialogFragment(R.layout.dialog_recycler_view),
         showDialogFragment(
             TextDialog(
                 getString(R.string.performance_metrics_title_rss_result_summary),
+                text
+            )
+        )
+    }
+
+    private fun showRssSourceResultSummary() {
+        val text = PerformanceMetricsSnapshotPresenter.buildSourceResultSummaryText(
+            summaries = PerformanceMetricsTracker.buildSourceResultSummaries(namePrefix = "rss.")
+        )
+        showDialogFragment(
+            TextDialog(
+                getString(R.string.performance_metrics_title_rss_source_result_summary),
                 text
             )
         )

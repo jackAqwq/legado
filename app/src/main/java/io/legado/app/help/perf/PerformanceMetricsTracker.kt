@@ -33,6 +33,14 @@ internal data class PerformanceMetricsResultSummary(
     val p95DurationMs: Long
 )
 
+internal data class PerformanceMetricsSourceResultSummary(
+    val source: String,
+    val result: String,
+    val count: Int,
+    val avgDurationMs: Long,
+    val p95DurationMs: Long
+)
+
 internal object PerformanceMetricsTracker {
 
     internal const val MAX_RECORDS = 200
@@ -214,6 +222,44 @@ internal object PerformanceMetricsTracker {
                 p95DurationMs = summary.p95DurationMs
             )
         }.sortedByDescending { it.avgDurationMs }
+    }
+
+    fun buildSourceResultSummaries(
+        namePrefix: String = "rss.",
+        limit: Int? = null
+    ): List<PerformanceMetricsSourceResultSummary> {
+        val selected = selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = limit,
+            sourceFilter = null,
+            resultFilter = null
+        )
+        val grouped = linkedMapOf<Pair<String, String>, MutableList<PerformanceMetricRecord>>()
+        selected.forEach { record ->
+            val source = detailValue(record.details, "source") ?: return@forEach
+            val result = detailValue(record.details, "result") ?: return@forEach
+            grouped.getOrPut(source to result) { mutableListOf() }.add(record)
+        }
+        return grouped.map { (key, records) ->
+            val summary = buildSummaryFromRecords(records)
+            PerformanceMetricsSourceResultSummary(
+                source = key.first,
+                result = key.second,
+                count = summary.count,
+                avgDurationMs = summary.avgDurationMs,
+                p95DurationMs = summary.p95DurationMs
+            )
+        }.sortedByDescending { it.avgDurationMs }
+    }
+
+    fun exportSourceResultSummaryLines(
+        namePrefix: String = "rss.",
+        limit: Int? = null
+    ): List<String> {
+        return buildSourceResultSummaries(namePrefix, limit).map { summary ->
+            "source=${summary.source}|result=${summary.result}|count=${summary.count}|avg=${summary.avgDurationMs}ms|p95=${summary.p95DurationMs}ms"
+        }
     }
 
     fun exportGroupedLines(limit: Int? = null): PerformanceMetricsGroupedLines {

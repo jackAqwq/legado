@@ -14,12 +14,18 @@ internal object PerformanceMetricsBatchExportBuilder {
     private const val FILE_STARTUP = "performance_metrics_startup.txt"
     private const val FILE_READ = "performance_metrics_read.txt"
     private const val FILE_RSS = "performance_metrics_rss.txt"
+    private const val FILE_RSS_SOURCE_RESULT_SUMMARY =
+        "performance_metrics_rss_source_result_summary.txt"
+    private const val FILE_RSS_FAILURE_SLOWEST_20 =
+        "performance_metrics_rss_failure_slowest_20.txt"
 
     fun buildEntries(
         allLines: List<String>,
         startupLines: List<String>,
         readLines: List<String>,
         rssLines: List<String>,
+        rssSourceResultSummaryLines: List<String> = emptyList(),
+        rssFailureSlowestLines: List<String> = emptyList(),
         generatedAtMs: Long = System.currentTimeMillis()
     ): List<PerformanceMetricsExportEntry> {
         return listOf(
@@ -53,6 +59,22 @@ internal object PerformanceMetricsBatchExportBuilder {
                     lines = rssLines,
                     generatedAtMs = generatedAtMs,
                     summary = buildSummary(rssLines)
+                )
+            ),
+            PerformanceMetricsExportEntry(
+                fileName = FILE_RSS_SOURCE_RESULT_SUMMARY,
+                text = PerformanceMetricsExportFormatter.toText(
+                    lines = rssSourceResultSummaryLines,
+                    generatedAtMs = generatedAtMs,
+                    summary = null
+                )
+            ),
+            PerformanceMetricsExportEntry(
+                fileName = FILE_RSS_FAILURE_SLOWEST_20,
+                text = PerformanceMetricsExportFormatter.toText(
+                    lines = rssFailureSlowestLines,
+                    generatedAtMs = generatedAtMs,
+                    summary = buildSummary(rssFailureSlowestLines)
                 )
             )
         )
