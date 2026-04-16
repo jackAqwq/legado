@@ -14,6 +14,8 @@ import io.legado.app.constant.AppLog
 import io.legado.app.help.CrashHandler
 import io.legado.app.help.config.AppConfig
 import io.legado.app.help.coroutine.Coroutine
+import io.legado.app.help.perf.PerformanceMetricsExportFormatter
+import io.legado.app.help.perf.PerformanceMetricsTracker
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.ui.widget.dialog.TextDialog
 import io.legado.app.ui.widget.dialog.WaitDialog
@@ -169,11 +171,13 @@ class AboutFragment : PreferenceFragmentCompat() {
         val logFiles = File(cacheDir, "logs")
         val crashFiles = File(cacheDir, "crash")
         val logcatFile = File(cacheDir, "logcat.txt")
+        val perfMetricsFile = File(cacheDir, PerformanceMetricsExportFormatter.FILE_NAME)
 
         dumpLogcat(logcatFile)
+        dumpPerformanceMetrics(perfMetricsFile)
 
         val zipFile = File(cacheDir, "logs.zip")
-        ZipUtils.zipFiles(arrayListOf(logFiles, crashFiles, logcatFile), zipFile)
+        ZipUtils.zipFiles(arrayListOf(logFiles, crashFiles, logcatFile, perfMetricsFile), zipFile)
 
         doc.find("logs.zip")?.delete()
 
@@ -184,6 +188,7 @@ class AboutFragment : PreferenceFragmentCompat() {
                 }
         }
         zipFile.delete()
+        perfMetricsFile.delete()
     }
 
     private fun copyHeapDump(doc: FileDoc): Boolean {
@@ -208,6 +213,17 @@ class AboutFragment : PreferenceFragmentCompat() {
             }
         } catch (e: Exception) {
             AppLog.put("保存Logcat失败\n$e", e)
+        }
+    }
+
+    private fun dumpPerformanceMetrics(file: File) {
+        runCatching {
+            val text = PerformanceMetricsExportFormatter.toText(
+                lines = PerformanceMetricsTracker.exportLines()
+            )
+            file.writeText(text)
+        }.onFailure {
+            AppLog.put("导出性能基准记录失败\n${it.localizedMessage}", it)
         }
     }
 
