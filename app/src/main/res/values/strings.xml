@@ -968,6 +968,9 @@
     <string name="view_performance_metrics_startup">View startup metrics</string>
     <string name="view_performance_metrics_read">View read metrics</string>
     <string name="view_performance_metrics_rss">View RSS metrics</string>
+    <string name="view_performance_metrics_rss_source_summary">View RSS source summary</string>
+    <string name="view_performance_metrics_rss_read_rss_activity">View RSS ReadRssActivity metrics</string>
+    <string name="view_performance_metrics_rss_bottom_webview_dialog">View RSS BottomWebViewDialog metrics</string>
     <string name="copy_performance_metrics_recent_20">Copy recent 20 metrics</string>
     <string name="view_performance_metrics_slowest_20">View slowest 20 metrics</string>
     <string name="copy_performance_metrics_slowest_20">Copy slowest 20 metrics</string>
@@ -975,6 +978,9 @@
     <string name="performance_metrics_title_startup">Startup metrics</string>
     <string name="performance_metrics_title_read">Read metrics</string>
     <string name="performance_metrics_title_rss">RSS metrics</string>
+    <string name="performance_metrics_title_rss_source_summary">RSS source summary</string>
+    <string name="performance_metrics_title_rss_read_rss_activity">RSS ReadRssActivity metrics</string>
+    <string name="performance_metrics_title_rss_bottom_webview_dialog">RSS BottomWebViewDialog metrics</string>
     <string name="performance_metrics_title_slowest_20">Slowest 20 metrics</string>
     <string name="sub_dir">Sub dir</string>
     <string name="general">General</string>

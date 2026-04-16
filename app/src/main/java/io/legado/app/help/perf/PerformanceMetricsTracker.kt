@@ -19,6 +19,13 @@ internal data class PerformanceMetricsGroupedLines(
     val rss: List<String>
 )
 
+internal data class PerformanceMetricsSourceSummary(
+    val source: String,
+    val count: Int,
+    val avgDurationMs: Long,
+    val p95DurationMs: Long
+)
+
 internal object PerformanceMetricsTracker {
 
     internal const val MAX_RECORDS = 200
@@ -97,48 +104,75 @@ internal object PerformanceMetricsTracker {
         }
     }
 
-    fun exportLines(namePrefix: String? = null, limit: Int? = null): List<String> {
+    fun exportLines(
+        namePrefix: String? = null,
+        limit: Int? = null,
+        source: String? = null
+    ): List<String> {
         val filteredRecords = selectRecords(
             source = snapshot(),
             namePrefix = namePrefix,
-            limit = limit
+            limit = limit,
+            sourceFilter = source
         )
         return filteredRecords.map(::toExportLine)
     }
 
-    fun exportSlowLines(limit: Int = 20, namePrefix: String? = null): List<String> {
+    fun exportSlowLines(
+        limit: Int = 20,
+        namePrefix: String? = null,
+        source: String? = null
+    ): List<String> {
         if (limit <= 0) return emptyList()
         return selectRecords(
             source = snapshot(),
             namePrefix = namePrefix,
-            limit = null
+            limit = null,
+            sourceFilter = source
         )
             .sortedByDescending { it.durationMs }
             .take(limit)
             .map(::toExportLine)
     }
 
-    fun buildSummary(namePrefix: String? = null, limit: Int? = null): PerformanceMetricsSummary {
+    fun buildSummary(
+        namePrefix: String? = null,
+        limit: Int? = null,
+        source: String? = null
+    ): PerformanceMetricsSummary {
         val selected = selectRecords(
             source = snapshot(),
             namePrefix = namePrefix,
-            limit = limit
+            limit = limit,
+            sourceFilter = source
         )
-        if (selected.isEmpty()) {
-            return PerformanceMetricsSummary(
-                count = 0,
-                avgDurationMs = 0L,
-                p95DurationMs = 0L
-            )
+        return buildSummaryFromRecords(selected)
+    }
+
+    fun buildSourceSummaries(
+        namePrefix: String = "rss.",
+        limit: Int? = null
+    ): List<PerformanceMetricsSourceSummary> {
+        val selected = selectRecords(
+            source = snapshot(),
+            namePrefix = namePrefix,
+            limit = limit,
+            sourceFilter = null
+        )
+        val grouped = linkedMapOf<String, MutableList<PerformanceMetricRecord>>()
+        selected.forEach { record ->
+            val source = detailValue(record.details, "source") ?: return@forEach
+            grouped.getOrPut(source) { mutableListOf() }.add(record)
         }
-        val sortedDurations = selected.map { it.durationMs }.sorted()
-        val p95Index = (ceil(sortedDurations.size * 0.95).toInt() - 1)
-            .coerceIn(0, sortedDurations.lastIndex)
-        return PerformanceMetricsSummary(
-            count = sortedDurations.size,
-            avgDurationMs = sortedDurations.sum() / sortedDurations.size,
-            p95DurationMs = sortedDurations[p95Index]
-        )
+        return grouped.map { (source, records) ->
+            val summary = buildSummaryFromRecords(records)
+            PerformanceMetricsSourceSummary(
+                source = source,
+                count = summary.count,
+                avgDurationMs = summary.avgDurationMs,
+                p95DurationMs = summary.p95DurationMs
+            )
+        }.sortedByDescending { it.avgDurationMs }
     }
 
     fun exportGroupedLines(limit: Int? = null): PerformanceMetricsGroupedLines {
@@ -167,11 +201,15 @@ internal object PerformanceMetricsTracker {
     private fun selectRecords(
         source: List<PerformanceMetricRecord>,
         namePrefix: String?,
-        limit: Int?
+        limit: Int?,
+        sourceFilter: String?
     ): List<PerformanceMetricRecord> {
         var selected = source
         if (!namePrefix.isNullOrBlank()) {
             selected = selected.filter { it.name.startsWith(namePrefix) }
+        }
+        if (!sourceFilter.isNullOrBlank()) {
+            selected = selected.filter { detailValue(it.details, "source") == sourceFilter }
         }
         if (limit != null && limit > 0 && selected.size > limit) {
             selected = selected.takeLast(limit)
@@ -198,6 +236,34 @@ internal object PerformanceMetricsTracker {
             return lines.takeLast(limit)
         }
         return lines
+    }
+
+    private fun buildSummaryFromRecords(records: List<PerformanceMetricRecord>): PerformanceMetricsSummary {
+        if (records.isEmpty()) {
+            return PerformanceMetricsSummary(
+                count = 0,
+                avgDurationMs = 0L,
+                p95DurationMs = 0L
+            )
+        }
+        val sortedDurations = records.map { it.durationMs }.sorted()
+        val p95Index = (ceil(sortedDurations.size * 0.95).toInt() - 1)
+            .coerceIn(0, sortedDurations.lastIndex)
+        return PerformanceMetricsSummary(
+            count = sortedDurations.size,
+            avgDurationMs = sortedDurations.sum() / sortedDurations.size,
+            p95DurationMs = sortedDurations[p95Index]
+        )
+    }
+
+    private fun detailValue(details: String, key: String): String? {
+        val token = "$key="
+        val start = details.indexOf(token)
+        if (start < 0) return null
+        val valueStart = start + token.length
+        val valueEnd = details.indexOf(',', valueStart).takeIf { it >= 0 } ?: details.length
+        if (valueStart >= valueEnd) return null
+        return details.substring(valueStart, valueEnd)
     }
 
     private fun record(name: String, durationMs: Long, details: String) {

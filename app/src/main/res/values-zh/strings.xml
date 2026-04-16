@@ -963,6 +963,9 @@
     <string name="view_performance_metrics_startup">查看启动指标</string>
     <string name="view_performance_metrics_read">查看阅读指标</string>
     <string name="view_performance_metrics_rss">查看 RSS 指标</string>
+    <string name="view_performance_metrics_rss_source_summary">查看 RSS 来源摘要</string>
+    <string name="view_performance_metrics_rss_read_rss_activity">查看 RSS ReadRssActivity 指标</string>
+    <string name="view_performance_metrics_rss_bottom_webview_dialog">查看 RSS BottomWebViewDialog 指标</string>
     <string name="copy_performance_metrics_recent_20">复制最近 20 条指标</string>
     <string name="view_performance_metrics_slowest_20">查看最慢 20 条指标</string>
     <string name="copy_performance_metrics_slowest_20">复制最慢 20 条指标</string>
@@ -970,6 +973,9 @@
     <string name="performance_metrics_title_startup">启动指标</string>
     <string name="performance_metrics_title_read">阅读指标</string>
     <string name="performance_metrics_title_rss">RSS 指标</string>
+    <string name="performance_metrics_title_rss_source_summary">RSS 来源摘要</string>
+    <string name="performance_metrics_title_rss_read_rss_activity">RSS ReadRssActivity 指标</string>
+    <string name="performance_metrics_title_rss_bottom_webview_dialog">RSS BottomWebViewDialog 指标</string>
     <string name="performance_metrics_title_slowest_20">最慢 20 条指标</string>
     <string name="sub_dir">子文件夹</string>
     <string name="general">全局</string>

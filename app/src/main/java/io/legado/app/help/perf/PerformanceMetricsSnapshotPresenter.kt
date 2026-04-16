@@ -21,4 +21,14 @@ internal object PerformanceMetricsSnapshotPresenter {
     ): String {
         return buildPreviewText(lines, generatedAtMs, summary)
     }
+
+    fun buildSourceSummaryText(
+        summaries: List<PerformanceMetricsSourceSummary>,
+        generatedAtMs: Long = System.currentTimeMillis()
+    ): String {
+        val lines = summaries.map { summary ->
+            "source=${summary.source}|count=${summary.count}|avg=${summary.avgDurationMs}ms|p95=${summary.p95DurationMs}ms"
+        }
+        return buildPreviewText(lines = lines, generatedAtMs = generatedAtMs)
+    }
 }

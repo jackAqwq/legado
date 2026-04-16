@@ -233,4 +233,65 @@ class PerformanceMetricsTrackerTest {
         assertEquals(43, summary.avgDurationMs)
         assertEquals(100, summary.p95DurationMs)
     }
+
+    @Test
+    fun export_lines_should_support_source_filter() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 30,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 60,
+            source = "BottomWebViewDialog",
+            success = false
+        )
+
+        val readRssOnly = PerformanceMetricsTracker.exportLines(
+            namePrefix = "rss.",
+            source = "ReadRssActivity"
+        )
+
+        assertEquals(1, readRssOnly.size)
+        assertTrue(readRssOnly.first().contains("ReadRssActivity"))
+    }
+
+    @Test
+    fun build_source_summaries_should_group_by_source() {
+        PerformanceMetricsTracker.resetForTest()
+        PerformanceMetricsTracker.enabledProvider = { true }
+        PerformanceMetricsTracker.logSink = {}
+
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 10,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 30,
+            source = "ReadRssActivity",
+            success = true
+        )
+        PerformanceMetricsTracker.recordRssInterceptDuration(
+            durationMs = 100,
+            source = "BottomWebViewDialog",
+            success = true
+        )
+
+        val summaries = PerformanceMetricsTracker.buildSourceSummaries(namePrefix = "rss.")
+
+        assertEquals(2, summaries.size)
+        val readSummary = summaries.first { it.source == "ReadRssActivity" }
+        assertEquals(2, readSummary.count)
+        assertEquals(20, readSummary.avgDurationMs)
+        assertEquals(30, readSummary.p95DurationMs)
+        val webViewSummary = summaries.first { it.source == "BottomWebViewDialog" }
+        assertEquals(1, webViewSummary.count)
+        assertEquals(100, webViewSummary.avgDurationMs)
+        assertEquals(100, webViewSummary.p95DurationMs)
+    }
 }

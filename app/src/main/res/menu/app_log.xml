@@ -30,6 +30,21 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_view_perf_metrics_rss_source_summary"
+        android:title="@string/view_performance_metrics_rss_source_summary"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_view_perf_metrics_rss_read_rss_activity"
+        android:title="@string/view_performance_metrics_rss_read_rss_activity"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_view_perf_metrics_rss_bottom_webview_dialog"
+        android:title="@string/view_performance_metrics_rss_bottom_webview_dialog"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_copy_perf_metrics_recent_20"
         android:title="@string/copy_performance_metrics_recent_20"
         app:showAsAction="never" />
