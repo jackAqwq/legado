@@ -27,6 +27,10 @@ data class RssStar(
     override var variable: String? = null
 ) : BaseRssArticle {
 
+    @Ignore
+    @IgnoredOnParcel
+    var durPos: Int = 0
+
     @delegate:Transient
     @delegate:Ignore
     @IgnoredOnParcel
@@ -46,4 +50,6 @@ data class RssStar(
         group = group,
         variable = variable
     )
+
+    fun toRecord() = toRssArticle().toRecord()
 }

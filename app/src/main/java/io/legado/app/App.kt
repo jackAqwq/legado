@@ -64,7 +64,7 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 
-class App : Application() {
+open class App : Application() {
 
     private lateinit var oldConfig: Configuration
 

@@ -73,6 +73,11 @@ object AudioPlay : CoroutineScope by MainScope() {
         postEvent(EventBus.PLAY_MODE_CHANGED, playMode)
     }
 
+    fun setSpeed(speed: Float) {
+        AudioPlayService.playSpeed = speed
+        postEvent(EventBus.AUDIO_SPEED, speed)
+    }
+
     fun upData(book: Book) {
         AudioPlay.book = book
         chapterSize = appDb.bookChapterDao.getChapterCount(book.bookUrl)

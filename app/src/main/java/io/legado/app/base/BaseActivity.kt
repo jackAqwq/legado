@@ -48,7 +48,7 @@ abstract class BaseActivity<VB : ViewBinding>(
     private val imageBg: Boolean = true
 ) : AppCompatActivity() {
 
-    protected abstract val binding: VB
+    abstract val binding: VB
 
     val isInMultiWindow: Boolean
         @SuppressLint("ObsoleteSdkInt")

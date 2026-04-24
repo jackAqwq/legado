@@ -1470,7 +1470,7 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
-    private fun sureSyncProgress(progress: BookProgress) {
+    fun sureSyncProgress(progress: BookProgress) {
         alert(R.string.get_book_progress) {
             setMessage(R.string.current_progress_exceeds_cloud)
             okButton {
@@ -1478,6 +1478,10 @@ class ReadBookActivity : BaseReadBookActivity(),
             }
             noButton()
         }
+    }
+
+    fun isMenuLayoutVisibleForInput(): Boolean {
+        return binding.readMenu.visibility == View.VISIBLE || binding.searchMenu.visibility == View.VISIBLE
     }
 
     /* 进度条跳转到指定章节 */

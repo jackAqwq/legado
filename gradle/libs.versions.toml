@@ -1,12 +1,14 @@
 [versions]
 
 kotlin = "2.3.0"
-ksp = "2.3.4"
-agp = "8.13.2"
+ksp = "2.3.6"
+agp = "9.0.1"
 appcompat = "1.7.1"
 colorpicker = "1.1.0"
+composeBom = "2025.10.00"
 constraintlayout = "2.2.1"
 core = "1.17.0"
+danmaku = "0.9.25"
 flexbox = "3.0.0"
 fragment = "1.8.9"
 documentfile = "1.1.0"
@@ -14,6 +16,7 @@ documentfile = "1.1.0"
 libarchive = "1.1.6"
 glide = "5.0.5"
 gson = "2.13.2"
+gsyVideo = "11.3.0"
 jsonPath = "2.10.0"
 jsoupxpath = "2.5.3"
 coroutines = "1.10.2"
@@ -25,6 +28,7 @@ nanoHttpd = "2.3.1"
 okhttp = "5.3.2"
 preference = "1.2.1"
 quickChineseTransfer = "0.2.16"
+sora = "0.24.4"
 
 splitties = "3.0.0"
 desugar = "2.1.5"
@@ -78,6 +82,14 @@ firebaseBom = "33.2.0"
 activity-activity = { module = "androidx.activity:activity", version.ref = "activity" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
 #androidx-annotation-experimental = { group = "androidx.annotation", name = "annotation-experimental", version = "1.3.1" }
@@ -131,6 +143,8 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufJavalite" }
 
 quick-chinese-transfer-core = { module = "com.github.liuyueyi.quick-chinese-transfer:quick-transfer-core", version.ref = "quickChineseTransfer" }
+sora-editor = { module = "io.github.rosemoe:editor", version.ref = "sora" }
+sora-language-textmate = { module = "io.github.rosemoe:language-textmate", version.ref = "sora" }
 
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -161,10 +175,13 @@ androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 colorpicker = { module = "com.jaredrummler:colorpicker", version.ref = "colorpicker" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commonsText" }
+danmaku-flame-master = { module = "com.github.CarGuo.DanmakuFlameMaster:DanmakuFlameMaster", version.ref = "danmaku" }
 desugar = { group = "com.android.tools", name = "desugar_jdk_libs_nio", version.ref = "desugar" }
 
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+gsyvideoplayer-exo2 = { module = "io.github.carguo:gsyvideoplayer-exo2", version.ref = "gsyVideo" }
+gsyvideoplayer-java = { module = "io.github.carguo:gsyvideoplayer-java", version.ref = "gsyVideo" }
 json-path = { module = "com.jayway.jsonpath:json-path", version.ref = "jsonPath" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 jsoupxpath = { module = "cn.wanghaomiao:JsoupXpath", version.ref = "jsoupxpath" }
@@ -198,8 +215,8 @@ android-test = { id = "com.android.test", version.ref = "agp" }
 
 #androidx-benchmark = { id = "androidx.benchmark", version = "1.3.3" }
 
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }

@@ -20,13 +20,16 @@ enum class AppVariant {
     OFFICIAL,
     BETA_RELEASEA,
     BETA_RELEASE,
+    BETA_RELEASES,
     UNKNOWN;
 
     fun isBeta(): Boolean {
-        return this == BETA_RELEASE || this == BETA_RELEASEA
+        return this == BETA_RELEASE || this == BETA_RELEASEA || this == BETA_RELEASES
     }
 
 }
+
+typealias GiteeRelease = GithubRelease
 
 @Keep
 data class GithubRelease(

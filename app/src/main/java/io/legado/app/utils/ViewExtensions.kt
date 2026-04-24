@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.graphics.Picture
 import android.os.Build
 import android.text.Html
+import android.text.Spanned
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
@@ -41,6 +42,7 @@ import io.legado.app.help.config.AppConfig
 import io.legado.app.lib.theme.TintHelper
 import io.legado.app.utils.canvasrecorder.CanvasRecorder
 import io.legado.app.utils.canvasrecorder.record
+import io.noties.markwon.Markwon
 import splitties.systemservices.inputMethodManager
 import splitties.views.bottomPadding
 import splitties.views.topPadding
@@ -231,6 +233,36 @@ fun TextView.setHtml(html: String) {
     } else {
         @Suppress("DEPRECATION")
         text = Html.fromHtml(html)
+    }
+}
+
+@SuppressLint("ObsoleteSdkInt")
+fun TextView.setHtml(
+    html: String,
+    imageGetter: Html.ImageGetter?,
+    tagHandler: Html.TagHandler? = null,
+    imgOnLongClickListener: ((String) -> Unit)? = null,
+    imgOnClickListener: ((String) -> Unit)? = null
+) {
+    val formatted: Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT, imageGetter, tagHandler)
+    } else {
+        @Suppress("DEPRECATION")
+        Html.fromHtml(html, imageGetter, tagHandler)
+    }
+    text = formatted
+}
+
+fun TextView.setMarkdown(
+    markwon: Markwon,
+    markdown: CharSequence,
+    imgOnLongClickListener: ((String) -> Unit)? = null,
+    imgOnClickListener: ((String) -> Unit)? = null
+) {
+    if (markdown is String) {
+        markwon.setMarkdown(this, markdown)
+    } else {
+        text = markdown
     }
 }
 

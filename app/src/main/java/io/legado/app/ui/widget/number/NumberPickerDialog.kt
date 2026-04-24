@@ -19,6 +19,8 @@ class NumberPickerDialog(context: Context) {
         builder.setView(R.layout.dialog_number_picker)
     }
 
+    constructor(context: Context, _ignoredWrapSelectorWheel: Boolean) : this(context)
+
     fun setTitle(title: String): NumberPickerDialog {
         builder.setTitle(title)
         return this

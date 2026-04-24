@@ -111,6 +111,10 @@ object RuleBigDataHelp {
         return null
     }
 
+    fun getDanmakuFile(bookUrl: String, chapterUrl: String): String? {
+        return getChapterVariable(bookUrl, chapterUrl, "danmaku")
+    }
+
     fun putRssVariable(origin: String, link: String, key: String, value: String?) {
         val md5Origin = MD5Utils.md5Encode(origin)
         val md5Link = MD5Utils.md5Encode(link)

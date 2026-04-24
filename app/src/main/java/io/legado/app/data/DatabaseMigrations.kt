@@ -20,6 +20,7 @@ object DatabaseMigrations {
             migration_31_32, migration_32_33, migration_33_34, migration_34_35,
             migration_35_36, migration_36_37, migration_37_38, migration_38_39,
             migration_39_40, migration_40_41, migration_41_42, migration_42_43,
+            migration_74_75,
         )
     }
 
@@ -321,6 +322,14 @@ object DatabaseMigrations {
     private val migration_42_43 = object : Migration(42, 43) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE `chapters` ADD `isVolume` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
+    private val migration_74_75 = object : Migration(74, 75) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `rssReadRecords` ADD `origin` TEXT NOT NULL DEFAULT ''")
+            db.execSQL("ALTER TABLE `rssReadRecords` ADD `sort` TEXT NOT NULL DEFAULT ''")
+            db.execSQL("ALTER TABLE `rssReadRecords` ADD `type` INTEGER NOT NULL DEFAULT 0")
         }
     }
 

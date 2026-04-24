@@ -85,7 +85,7 @@ object ExoPlayerHelper {
     /**
      * 支持缓存的DataSource.Factory
      */
-    private val cacheDataSourceFactory by lazy {
+    val cacheDataSourceFactory by lazy {
         //使用自定义的CacheDataSource以支持设置UA
         CacheDataSource.Factory()
             .setCache(cache)

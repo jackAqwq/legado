@@ -41,6 +41,7 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
     var optimizeRender = CanvasRecorderFactory.isSupport
             && appCtx.getPrefBoolean(PreferKey.optimizeRender, false)
     var recordLog = appCtx.getPrefBoolean(PreferKey.recordLog)
+    var recordPerformanceMetrics = appCtx.getPrefBoolean(PreferKey.recordPerformanceMetrics, false)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
@@ -93,6 +94,9 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
                     && appCtx.getPrefBoolean(PreferKey.optimizeRender, false)
 
             PreferKey.recordLog -> recordLog = appCtx.getPrefBoolean(PreferKey.recordLog)
+
+            PreferKey.recordPerformanceMetrics -> recordPerformanceMetrics =
+                appCtx.getPrefBoolean(PreferKey.recordPerformanceMetrics, false)
 
         }
     }
@@ -224,6 +228,48 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
 
     val autoRefreshBook: Boolean
         get() = appCtx.getPrefBoolean(PreferKey.autoRefresh)
+
+    var editAutoComplete: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.editAutoComplete, true)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.editAutoComplete, value)
+        }
+
+    var editTheme: Int
+        get() = appCtx.getPrefInt(PreferKey.editTheme, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.editTheme, value)
+        }
+
+    var editThemeDark: Int
+        get() = appCtx.getPrefInt(PreferKey.editThemeDark, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.editThemeDark, value)
+        }
+
+    var editTemeAuto: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.editTemeAuto, true)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.editTemeAuto, value)
+        }
+
+    var editFontScale: Int
+        get() = appCtx.getPrefInt(PreferKey.editFontScale, 16)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.editFontScale, value)
+        }
+
+    var editAutoWrap: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.editAutoWrap, false)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.editAutoWrap, value)
+        }
+
+    var editNonPrintable: Int
+        get() = appCtx.getPrefInt(PreferKey.editNonPrintable, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.editNonPrintable, value)
+        }
 
     var enableReview: Boolean
         get() = BuildConfig.DEBUG && appCtx.getPrefBoolean(PreferKey.enableReview, false)

@@ -19,6 +19,8 @@
     <color name="background_card">@color/md_grey_100</color>
     <color name="background_menu">@color/md_grey_200</color>
     <color name="background_prefs">#7fffffff</color>
+    <color name="card_bg_water">#0F7AA8</color>
+    <color name="card_border_water">#3F9CC8</color>
 
     <color name="transparent">#00000000</color>
 

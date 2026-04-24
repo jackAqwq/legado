@@ -4,6 +4,7 @@ import android.os.Parcelable
 import android.text.TextUtils
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
@@ -96,6 +97,14 @@ data class BookSource(
     // 段评规则
     var ruleReview: ReviewRule? = null
 ) : Parcelable, BaseSource {
+
+    @get:Ignore
+    val customButton: Boolean
+        get() = !ruleContent?.callBackJs.isNullOrBlank()
+
+    @get:Ignore
+    val eventListener: Boolean
+        get() = !ruleContent?.callBackJs.isNullOrBlank()
 
     override fun getTag(): String {
         return bookSourceName

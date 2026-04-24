@@ -96,6 +96,23 @@ class ReadRssActivity : VMBaseActivity<ActivityRssReadBinding, ReadRssViewModel>
         return viewModel.rssSource
     }
 
+    companion object {
+        fun start(
+            context: android.content.Context,
+            origin: String,
+            title: String?,
+            link: String? = null,
+            sort: String? = null
+        ) {
+            context.startActivity<ReadRssActivity> {
+                putExtra("origin", origin)
+                putExtra("title", title)
+                putExtra("link", link)
+                putExtra("sort", sort)
+            }
+        }
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         viewModel.upStarMenuData.observe(this) { upStarMenu() }
         viewModel.upTtsMenuData.observe(this) { upTtsMenu(it) }

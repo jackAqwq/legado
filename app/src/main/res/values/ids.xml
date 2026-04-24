@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <item name="small_id" type="id" />
+    <item name="full_id" type="id" />
     <item name="tag" type="id" />
     <item name="tag1" type="id" />
     <item name="tag2" type="id" />
-
     <item name="menu_group_1" type="id" />
     <item name="menu_group_2" type="id" />
-
     <item name="menu_1" type="id" />
-
     <item name="fast_scroller" type="id" />
-
-    <item name="bettermovementmethod_highlight_background_span" type="id" />
-
+    <item name="editText" type="id" />
+    <item name="tv_search_result_label" type="id" />
+    <item name="tv_search_result" type="id" />
+    <item name="switch_regex" type="id" />
+    <item name="tv_find_label" type="id" />
+    <item name="et_find" type="id" />
+    <item name="btn_close_find" type="id" />
+    <item name="tv_replace_label" type="id" />
+    <item name="et_replace" type="id" />
+    <item name="btn_close_replace" type="id" />
+    <item name="btn_previous" type="id" />
+    <item name="btn_next" type="id" />
+    <item name="btn_replace" type="id" />
+    <item name="btn_replace_all" type="id" />
+    <item name="replace_group" type="id" />
+    <item name="search_group" type="id" />
 </resources>

@@ -82,6 +82,8 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="dialog_style" parent="Theme.AppCompat.Light.Dialog.Alert" />
+
     //*******************Widget Style**********************************//
 
     <style name="Style.Shadow.Top" parent="android:Widget">

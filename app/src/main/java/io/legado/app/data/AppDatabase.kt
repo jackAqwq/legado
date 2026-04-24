@@ -107,7 +107,6 @@ val appDb by lazy {
         AutoMigration(from = 71, to = 72),
         AutoMigration(from = 72, to = 73),
         AutoMigration(from = 73, to = 74),
-        AutoMigration(from = 74, to = 75),
     ]
 )
 abstract class AppDatabase : RoomDatabase() {

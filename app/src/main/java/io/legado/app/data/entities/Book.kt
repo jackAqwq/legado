@@ -185,6 +185,30 @@ data class Book(
             return readConfig!!
         }
 
+    var durVolumeIndex: Int
+        get() = config.durVolumeIndex ?: 0
+        set(value) {
+            config.durVolumeIndex = value
+        }
+
+    var chapterInVolumeIndex: Int
+        get() = config.chapterInVolumeIndex ?: 0
+        set(value) {
+            config.chapterInVolumeIndex = value
+        }
+
+    fun getOpenCredits(): Int = config.openCredits ?: 0
+
+    fun setOpenCredits(value: Int) {
+        config.openCredits = value
+    }
+
+    fun getCloseCredits(): Int = config.closeCredits ?: 0
+
+    fun setCloseCredits(value: Int) {
+        config.closeCredits = value
+    }
+
     fun setReverseToc(reverseToc: Boolean) {
         config.reverseToc = reverseToc
     }
@@ -372,6 +396,10 @@ data class Book(
         }
     }
 
+    fun update() {
+        save()
+    }
+
     fun delete() {
         if (ReadBook.book?.bookUrl == bookUrl) {
             ReadBook.book = null
@@ -402,7 +430,11 @@ data class Book(
         var readSimulating: Boolean = false,
         var startDate: LocalDate? = null,
         var startChapter: Int? = null,     // 用户设置的起始章节
-        var dailyChapters: Int = 3    // 用户设置的每日更新章节数
+        var dailyChapters: Int = 3,   // 用户设置的每日更新章节数
+        var durVolumeIndex: Int? = null,
+        var chapterInVolumeIndex: Int? = null,
+        var openCredits: Int? = null,
+        var closeCredits: Int? = null
     ) : Parcelable
 
     class Converters {

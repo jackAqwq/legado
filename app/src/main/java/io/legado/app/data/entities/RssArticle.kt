@@ -41,6 +41,9 @@ data class RssArticle(
         GSON.fromJsonObject<HashMap<String, String>>(variable).getOrNull() ?: hashMapOf()
     }
 
+    val type: Int
+        get() = inferRssType(link, image)
+
     fun toStar() = RssStar(
         origin = origin,
         sort = sort,
@@ -54,4 +57,29 @@ data class RssArticle(
         group = group,
         variable = variable
     )
+
+    fun toRecord() = RssReadRecord(
+        record = link,
+        origin = origin,
+        sort = sort,
+        title = title,
+        readTime = System.currentTimeMillis(),
+        type = type,
+        read = read
+    )
+}
+
+private fun inferRssType(link: String?, image: String?): Int {
+    val url = (link ?: image).orEmpty().lowercase()
+    return when {
+        url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png")
+            || url.endsWith(".gif") || url.endsWith(".webp") || url.endsWith(".bmp")
+            || url.endsWith(".svg") -> 1
+
+        url.endsWith(".mp4") || url.endsWith(".m3u8") || url.endsWith(".flv")
+            || url.endsWith(".mp3") || url.endsWith(".m4a") || url.endsWith(".aac")
+            || url.endsWith(".mov") || url.endsWith(".mkv") || url.endsWith(".webm") -> 2
+
+        else -> 0
+    }
 }

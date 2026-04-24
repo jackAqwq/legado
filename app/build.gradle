@@ -1,3 +1,16 @@
+import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.variant.BuiltArtifactsLoader
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+
 plugins {
 //    id "com.android.application"
 //    id 'org.jetbrains.kotlin.android'
@@ -7,11 +20,59 @@ plugins {
 //    id "com.google.gms.google-services"
 
     alias libs.plugins.android.application
-    alias libs.plugins.kotlin.android
+    alias libs.plugins.kotlin.compose
     alias libs.plugins.kotlin.parcelize
     alias libs.plugins.room
     alias libs.plugins.ksp
     alias libs.plugins.google.services
+}
+
+abstract class CopyRenamedApk extends DefaultTask {
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract DirectoryProperty getInput()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutput()
+
+    @Internal
+    abstract Property<BuiltArtifactsLoader> getBuiltArtifactsLoader()
+
+    @Input
+    abstract Property<String> getArtifactBaseName()
+
+    @Input
+    abstract Property<String> getArtifactVersion()
+
+    @Input
+    abstract Property<String> getFlavorName()
+
+    @TaskAction
+    void taskAction() {
+        def outputDirectory = output.get()
+        def outputDirFile = outputDirectory.asFile
+        outputDirFile.deleteDir()
+        outputDirFile.mkdirs()
+
+        def builtArtifacts = builtArtifactsLoader.get().load(input.get())
+        if (builtArtifacts == null) {
+            throw new GradleException("Cannot load APKs")
+        }
+
+        builtArtifacts.elements.each { artifact ->
+            def targetFile = outputDirectory.file(
+                "${artifactBaseName.get()}_${flavorName.get()}_${artifactVersion.get()}.apk"
+            ).asFile
+            java.nio.file.Files.copy(
+                new File(artifact.outputFile).toPath(),
+                targetFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+        }
+
+        builtArtifacts.save(outputDirectory)
+    }
 }
 apply from: 'download.gradle'
 
@@ -22,15 +83,11 @@ static def releaseTime() {
 def name = "legado"
 def version = "3." + releaseTime()
 def gitCommits = Integer.parseInt('git rev-list HEAD --count'.execute().text.trim())
+def artifactBaseNameValue = name
 
 android {
     compileSdk = compile_sdk_version
     namespace = 'io.legado.app'
-    kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
 
     signingConfigs {
         if (project.hasProperty("RELEASE_STORE_FILE")) {
@@ -70,6 +127,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        compose = true
         viewBinding = true
     }
     buildTypes {
@@ -109,14 +167,6 @@ android {
         }
     }
 
-    android.applicationVariants.configureEach { variant ->
-        variant.outputs.configureEach {
-            def flavor = variant.productFlavors[0].name
-            outputFileName = "${name}_${flavor}_${defaultConfig.versionName}.apk"
-        }
-    }
-
-
     room {
         schemaDirectory "$projectDir/schemas"
     }
@@ -133,8 +183,8 @@ android {
         // Flag to enable support for the new language APIs
         coreLibraryDesugaringEnabled = true
         // Sets Java compatibility
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     packaging {
         resources.excludes.add('META-INF/*')
@@ -154,6 +204,20 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def variantTaskName = variant.name.substring(0, 1).toUpperCase() + variant.name.substring(1)
+        def copyTask = tasks.register("copy${variantTaskName}RenamedApk", CopyRenamedApk) {
+            output.set(layout.buildDirectory.dir("outputs/renamed-apk/${variant.name}"))
+            builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
+            artifactBaseName.set(artifactBaseNameValue)
+            artifactVersion.set(version)
+            flavorName.set("app")
+        }
+        variant.artifacts.use(copyTask).wiredWith { it.input }.toListenTo(SingleArtifact.APK.INSTANCE)
+    }
+}
+
 dependencies {
     //compileOnly "com.android.tools.build:gradle:$agp_version"
     //noinspection GradleDependency,GradlePackageUpdate
@@ -161,6 +225,8 @@ dependencies {
     coreLibraryDesugaring(libs.desugar)
     testImplementation(libs.junit)
     androidTestImplementation(libs.bundles.androidTest)
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     //kotlin
     //noinspection GradleDependency,DifferentStdlibGradleVersion
     implementation(libs.kotlin.stdlib)
@@ -181,9 +247,14 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat.appcompat)
     implementation(libs.activity.ktx)
+    implementation(libs.activity.compose)
     implementation(libs.fragment.ktx)
     implementation(libs.preference.ktx)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
@@ -205,6 +276,9 @@ dependencies {
     implementation(libs.media3.exoplayer)
     // For loading data using the OkHttp network stack
     implementation(libs.media3.datasource.okhttp)
+    implementation(libs.gsyvideoplayer.java)
+    implementation(libs.gsyvideoplayer.exo2)
+    implementation(libs.danmaku.flame.master)
     // For exposing and controlling media sessions
     //implementation "androidx.media3:media3-session:$media3_version"
 
@@ -239,13 +313,10 @@ dependencies {
 
     //Glide
     implementation(libs.glide.glide)
-    implementation(libs.glide.okhttp)
     ksp(libs.glide.ksp)
 
     //Svg
     implementation(libs.androidsvg)
-    //Glide svg plugin
-    implementation(libs.glide.svg)
 
     //webServer
     implementation(libs.nanohttpd.nanohttpd)
@@ -272,6 +343,8 @@ dependencies {
 
     //转换繁体
     implementation(libs.quick.chinese.transfer.core)
+    implementation(libs.sora.editor)
+    implementation(libs.sora.language.textmate)
 
     //加解密类库,有些书源使用
     //noinspection GradleDependency,GradlePackageUpdate
@@ -283,6 +356,9 @@ dependencies {
     implementation libs.firebase.perf
 
     implementation libs.glide.recyclerview
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     //LeakCanary, 内存泄露检测
     //debugImplementation('com.squareup.leakcanary:leakcanary-android:2.7')
