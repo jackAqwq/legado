@@ -94,18 +94,6 @@ cn.hutool.core.util.**{*;}
     *** putIfAbsent(...);
 }
 
-## ChangeBookSourceDialog initNavigationView
--keepclassmembers class androidx.appcompat.widget.Toolbar {
-    *** mNavButtonView;
-}
-
-# MenuExtensions applyOpenTint
--keepnames class androidx.appcompat.view.menu.SubMenuBuilder
--keep class androidx.appcompat.view.menu.MenuBuilder {
-    *** setOptionalIconsVisible(...);
-    *** getNonActionItems();
-}
-
 # FileDocExtensions.kt now uses public DocumentFile.fromTreeUri()
 # JsoupXpath
 -keep,allowobfuscation class * implements org.seimicrawler.xpath.core.AxisSelector{*;}

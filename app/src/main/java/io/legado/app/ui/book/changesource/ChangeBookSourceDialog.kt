@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.os.bundleOf
@@ -43,6 +42,7 @@ import io.legado.app.utils.dpToPx
 import io.legado.app.utils.getCompatDrawable
 import io.legado.app.utils.observeEvent
 import io.legado.app.utils.setLayout
+import io.legado.app.utils.setTintMutate
 import io.legado.app.utils.startActivity
 import io.legado.app.utils.transaction
 import io.legado.app.utils.viewbindingdelegate.viewBinding
@@ -193,14 +193,9 @@ class ChangeBookSourceDialog() : BaseDialogFragment(R.layout.dialog_book_change_
         binding.toolBar.setNavigationOnClickListener {
             dismissAllowingStateLoss()
         }
-        kotlin.runCatching {
-            val mNavButtonViewField = Toolbar::class.java.getDeclaredField("mNavButtonView")
-            mNavButtonViewField.isAccessible = true
-            val navigationView = mNavButtonViewField.get(binding.toolBar) as ImageButton
-            val isLight = ColorUtils.isColorLight(primaryColor)
-            val textColor = requireContext().getPrimaryTextColor(isLight)
-            navigationView.setColorFilter(textColor)
-        }
+        val isLight = ColorUtils.isColorLight(primaryColor)
+        val textColor = requireContext().getPrimaryTextColor(isLight)
+        binding.toolBar.navigationIcon?.setTintMutate(textColor)
     }
 
     private fun initBottomBar() {

@@ -41,8 +41,13 @@
 - Verification: source-guard test added for `FileDocExtensions.kt` plus release build verification.
 
 ### Medium-priority refinements
-1. AppCompat menu internals (`SubMenuBuilder`, `MenuBuilder`, `Toolbar#mNavButtonView`)
-- Action: preserve only where reflection utilities are used; isolate into dedicated block comments with code references.
+1. AppCompat menu internals (`SubMenuBuilder`, `MenuBuilder`, `Toolbar#mNavButtonView`) ✅ implemented
+- Previous issue: keep rules existed only to support reflection and class-name string checks in menu/navigation icon code paths.
+- Landed change:
+  - `Menu.applyOpenTint()` switched from reflection + class-name string checks to typed `MenuBuilder` path plus normal menu iteration.
+  - `ChangeBookSourceDialog.initNavigationView()` switched from `Toolbar#mNavButtonView` reflection to direct `navigationIcon` tinting.
+  - Removed keep rules for `Toolbar#mNavButtonView`, `SubMenuBuilder`, and `MenuBuilder` reflective methods.
+- Verification: source-guard tests added for `MenuExtensions.kt` and `ChangeBookSourceDialog.kt`, plus keep regression test and release build verification.
 
 2. Throwable member keep ✅ implemented
 - Previous issue: `-keepclassmembernames,allowobfuscation class * extends java.lang.Throwable{*;}` preserved member names for all exception types without a matching reflection dependency.
@@ -61,7 +66,7 @@
    - source edit/import/file picker/document tree
    - video/audio playback
 2. Evaluate further `org.jsoup.**` narrowing with staged tests (candidate: split by package/API surfaces actually referenced by built-in JS rules and app code).
-3. Re-evaluate appcompat internals (`Toolbar/MenuBuilder`) and remaining broad library keeps (`GSYVideoPlayer`, if further shrinkage is still worth the risk).
+3. Re-evaluate remaining broad library keeps (`org.eclipse.tm4e.**`, `org.joni.**`, and app package-wide keeps) with source-coupled reflection checks.
 4. If stable, continue narrowing package-level keeps to class/member-level where possible.
 
 ## Verification Advice

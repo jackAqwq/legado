@@ -34,6 +34,19 @@ class ProguardViewKeepRulesTest {
             "Broad GSYVideoPlayer keep should be removed",
             rules.contains("-keep class com.shuyu.gsyvideoplayer.** { *; }")
         )
+        assertFalse(
+            "Toolbar private-field keep should be removed after reflection cleanup",
+            rules.contains("androidx.appcompat.widget.Toolbar")
+                    && rules.contains("mNavButtonView")
+        )
+        assertFalse(
+            "MenuBuilder keep should be removed after reflection cleanup",
+            rules.contains("-keep class androidx.appcompat.view.menu.MenuBuilder")
+        )
+        assertFalse(
+            "SubMenuBuilder keepnames should be removed after reflection cleanup",
+            rules.contains("-keepnames class androidx.appcompat.view.menu.SubMenuBuilder")
+        )
         assertTrue(
             "App custom video wrappers should still be kept",
             rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")
