@@ -11,23 +11,31 @@ import org.junit.Test
 class MiniReaderBookshelfRepositoryTest {
 
     @Test
-    fun import_from_picked_uri_should_keep_original_content_uri_and_remove_not_shelf_flag() {
+    fun import_from_picked_uri_should_delegate_uri_import_and_remove_not_shelf_flag() {
+        val pickedUriString = "content://com.example.provider/document/book.txt"
         val importedBook = Book(
-            bookUrl = "content://legacy/other-path.txt",
+            bookUrl = pickedUriString,
             type = BookType.text or BookType.local or BookType.notShelf
         )
+        var delegatedUriString: String? = null
         var persistedBook: Book? = null
         val repository = MiniReaderBookshelfRepository(
-            importLocalBook = { importedBook },
+            importLocalBook = {
+                throw AssertionError("default importLocalBook should not be called in this unit test")
+            },
             persistBook = {
                 persistedBook = it
             }
         )
 
-        val result = repository.finalizeImportedBook(importedBook)
+        val result = repository.importFromPickedUriString(pickedUriString) { uriString ->
+            delegatedUriString = uriString
+            importedBook
+        }
 
         assertEquals(importedBook, result)
-        assertEquals("content://legacy/other-path.txt", result.bookUrl)
+        assertEquals(pickedUriString, delegatedUriString)
+        assertEquals(pickedUriString, result.bookUrl)
         assertFalse(result.isType(BookType.notShelf))
         assertTrue(result.isType(BookType.text))
         assertTrue(result.isType(BookType.local))
