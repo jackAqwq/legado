@@ -12,7 +12,6 @@ class MiniReaderBookshelfRepositoryTest {
 
     @Test
     fun import_from_picked_uri_should_keep_original_content_uri_and_remove_not_shelf_flag() {
-        val pickedUri = "content://com.example.provider/document/book.txt"
         val importedBook = Book(
             bookUrl = "content://legacy/other-path.txt",
             type = BookType.text or BookType.local or BookType.notShelf
@@ -25,12 +24,10 @@ class MiniReaderBookshelfRepositoryTest {
             }
         )
 
-        val result = repository.importFromPickedUriString(pickedUri) {
-            importedBook
-        }
+        val result = repository.finalizeImportedBook(importedBook)
 
         assertEquals(importedBook, result)
-        assertEquals(pickedUri, result.bookUrl)
+        assertEquals("content://legacy/other-path.txt", result.bookUrl)
         assertFalse(result.isType(BookType.notShelf))
         assertTrue(result.isType(BookType.text))
         assertTrue(result.isType(BookType.local))

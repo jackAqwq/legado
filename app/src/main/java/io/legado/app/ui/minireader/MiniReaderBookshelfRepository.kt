@@ -12,17 +12,10 @@ class MiniReaderBookshelfRepository(
 ) {
 
     fun importFromPickedUri(uri: Uri): Book {
-        return importFromPickedUriString(uri.toString()) {
-            importLocalBook(uri)
-        }
+        return finalizeImportedBook(importLocalBook(uri))
     }
 
-    internal fun importFromPickedUriString(
-        uriString: String,
-        importBookAction: (() -> Book)? = null
-    ): Book {
-        val book = importBookAction?.invoke() ?: importLocalBook(Uri.parse(uriString))
-        book.bookUrl = uriString
+    internal fun finalizeImportedBook(book: Book): Book {
         book.removeType(BookType.notShelf)
         persistBook(book)
         return book
