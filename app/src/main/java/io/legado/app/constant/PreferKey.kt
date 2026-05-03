@@ -51,6 +51,11 @@ object PreferKey {
     const val recordLog = "recordLog"
     const val performanceMetrics = "performanceMetrics"
     const val processText = "process_text"
+    const val miniReaderProgressPrefix = "miniReaderProgress_"
+    const val miniReaderFontSize = "miniReaderFontSize"
+    const val miniReaderLineSpacing = "miniReaderLineSpacing"
+    const val miniReaderBgMode = "miniReaderBgMode"
+    const val miniReaderBrightness = "miniReaderBrightness"
     const val cleanCache = "cleanCache"
     const val saveTabPosition = "saveTabPosition"
     const val fontFolder = "fontFolder"
@@ -212,3 +217,4 @@ object PreferKey {
     const val editAutoComplete = "editAutoComplete"
     const val showBoardLine = "showBoardLine"
 }
+

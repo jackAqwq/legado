@@ -2,12 +2,14 @@ package io.legado.app.help.config
 
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.core.content.edit
 import io.legado.app.BuildConfig
 import io.legado.app.constant.AppConst
 import io.legado.app.constant.PreferKey
 import io.legado.app.data.appDb
 import io.legado.app.utils.GSON
 import io.legado.app.utils.canvasrecorder.CanvasRecorderFactory
+import io.legado.app.utils.defaultSharedPreferences
 import io.legado.app.utils.fromJsonObject
 import io.legado.app.utils.getPrefBoolean
 import io.legado.app.utils.getPrefInt
@@ -825,5 +827,28 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
         }
 
     val autoUpdateVariant get() = appCtx.getPrefBoolean("autoUpdateVariant", true)
-}
 
+    var miniReaderDefaultBgMode: Int
+        get() = appCtx.getPrefInt(PreferKey.miniReaderBgMode, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.miniReaderBgMode, value)
+        }
+
+    var miniReaderFontSize: Int
+        get() = appCtx.getPrefInt(PreferKey.miniReaderFontSize, 18)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.miniReaderFontSize, value)
+        }
+
+    var miniReaderLineSpacing: Float
+        get() = appCtx.defaultSharedPreferences.getFloat(PreferKey.miniReaderLineSpacing, 1.35f)
+        set(value) {
+            appCtx.defaultSharedPreferences.edit().putFloat(PreferKey.miniReaderLineSpacing, value).apply()
+        }
+
+    var miniReaderBrightness: Int
+        get() = appCtx.getPrefInt(PreferKey.miniReaderBrightness, 100)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.miniReaderBrightness, value)
+        }
+}
