@@ -143,7 +143,6 @@ cn.hutool.core.util.**{*;}
 -keep class org.joni.** { *; }
 
 # GSYVideoPlayer
--keep class com.shuyu.gsyvideoplayer.** { *; }
 -dontwarn com.shuyu.gsyvideoplayer.**
 #-keep class com.shuyu.gsyvideoplayer.video.** { *; }
 #-dontwarn com.shuyu.gsyvideoplayer.video.**

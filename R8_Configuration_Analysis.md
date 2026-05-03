@@ -47,8 +47,10 @@
 2. Throwable name preservation
 - Action: verify crash/reporting pipeline requirement; if not mandatory, consider relaxing to allow better shrinking.
 
-3. GSYVideoPlayer full package keep
-- Action: keep as-is for now, then iteratively reduce with playback regression suite.
+3. GSYVideoPlayer full package keep ✅ implemented
+- Previous issue: broad package keep on the external video library.
+- Landed change: removed the package-wide `com.shuyu.gsyvideoplayer.**` keep and kept only app-owned wrapper classes.
+- Verification: `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"` plus release build verification.
 
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:

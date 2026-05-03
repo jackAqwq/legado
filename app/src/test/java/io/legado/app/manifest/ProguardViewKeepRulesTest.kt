@@ -30,5 +30,13 @@ class ProguardViewKeepRulesTest {
             "TreeDocumentFile keep should be removed",
             rules.contains("androidx.documentfile.provider.TreeDocumentFile")
         )
+        assertFalse(
+            "Broad GSYVideoPlayer keep should be removed",
+            rules.contains("-keep class com.shuyu.gsyvideoplayer.** { *; }")
+        )
+        assertTrue(
+            "App custom video wrappers should still be kept",
+            rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")
+        )
     }
 }
