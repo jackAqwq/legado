@@ -13,6 +13,11 @@ class MiniReaderActivity : VMBaseActivity<ActivityTranslucenceBinding, BaseViewM
     override val viewModel by viewModels<BaseViewModel>()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        val bookUrl = intent?.getStringExtra(MiniReaderContract.EXTRA_BOOK_URL)
+        if (bookUrl.isNullOrBlank()) {
+            finish()
+            return
+        }
         // Minimal shell to keep mini-reader intent route safe before formal UI lands.
     }
 }

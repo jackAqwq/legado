@@ -82,7 +82,8 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
         viewModel.execute {
             MiniReaderBookshelfRepository().importFromPickedUri(uri)
         }.onSuccess { book ->
-            requireContext().startActivityForMiniReader(book)
+            if (!isAdded) return@onSuccess
+            context?.startActivityForMiniReader(book)
         }.onError {
             toastOnUi(it.localizedMessage ?: "ERROR")
         }
