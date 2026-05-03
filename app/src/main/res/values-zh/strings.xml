@@ -67,6 +67,7 @@
     <string name="view">视图</string>
     <string name="book_library">书城</string>
     <string name="book_local">添加本地</string>
+    <string name="mini_reader_local">迷你阅读器（本地 TXT）</string>
     <string name="book_source">书源</string>
     <string name="book_source_manage">书源管理</string>
     <string name="book_source_manage_desc">新建、导入、编辑或管理书源</string>

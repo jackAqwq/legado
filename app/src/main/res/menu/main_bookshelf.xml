@@ -35,6 +35,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_add_local_minireader"
+        android:icon="@drawable/ic_add"
+        android:title="@string/mini_reader_local"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_bookshelf_manage"
         android:icon="@drawable/ic_arrange"
         android:title="@string/bookshelf_management"
