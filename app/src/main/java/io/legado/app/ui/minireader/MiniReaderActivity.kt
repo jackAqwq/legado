@@ -3,6 +3,7 @@ package io.legado.app.ui.minireader
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +75,7 @@ class MiniReaderActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         val launchBookUrl = intent?.getStringExtra(MiniReaderContract.EXTRA_BOOK_URL)
         val openPicker = intent?.getBooleanExtra(MiniReaderContract.EXTRA_OPEN_PICKER, false) == true
         if (launchBookUrl.isNullOrBlank() && !openPicker) {

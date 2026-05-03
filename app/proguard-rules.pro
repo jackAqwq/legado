@@ -81,9 +81,8 @@ cn.hutool.core.util.**{*;}
 # markwon
 -dontwarn org.commonmark.ext.gfm.**
 
--keep class okhttp3.*{*;}
--keep class okio.*{*;}
--keep class com.jayway.jsonpath.*{*;}
+## OkHttp / Okio / JsonPath already provide consumer rules for common runtime paths.
+## Keep app-specific reflective entry points only; avoid package-wide keep by default.
 
 # LiveEventBus
 -keepclassmembers class androidx.lifecycle.LiveData {
@@ -118,7 +117,9 @@ cn.hutool.core.util.**{*;}
 -keep,allowobfuscation class * implements org.seimicrawler.xpath.core.Function{*;}
 
 ## JSOUP
--keep class org.jsoup.**{*;}
+## Jsoup APIs are invoked by runtime JS rules (assets/user scripts) via string-based class/member access.
+## Preserve API surface but allow method-level optimization.
+-keep,allowoptimization class org.jsoup.** { *; }
 -dontwarn org.jspecify.annotations.NullMarked
 
 ## ExoPlayer 反射设置ua 保证该私有变量不被混淆
@@ -162,11 +163,11 @@ cn.hutool.core.util.**{*;}
 #-keep interface androidx.media3.**
 #-keep class com.shuyu.alipay.** {*;}
 #-keep interface com.shuyu.alipay.**
--keep public class * extends android.view.View{
-    *** get*();
-    void set*(***);
-    public <init>(android.content.Context);
-    public <init>(android.content.Context, java.lang.Boolean);
-    public <init>(android.content.Context, android.util.AttributeSet);
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
+## Keep XML-inflated custom views and read UI widgets without retaining every View subclass globally.
+-keep class io.legado.app.ui.widget.** { *; }
+-keep class io.legado.app.ui.book.read.** { *; }
+-keep class io.legado.app.ui.book.read.page.** { *; }
+-keep class io.legado.app.ui.book.manga.recyclerview.** { *; }
+-keep class io.legado.app.lib.theme.view.** { *; }
+-keep class io.legado.app.help.gsyVideo.FloatingPlayer { *; }
+-keep class io.legado.app.help.gsyVideo.VideoPlayer { *; }

@@ -32,6 +32,7 @@ import io.legado.app.utils.hideSoftInput
 import io.legado.app.utils.setLightStatusBar
 import io.legado.app.utils.setNavigationBarColorAuto
 import io.legado.app.utils.setStatusBarColorAuto
+import io.legado.app.utils.toggleSystemBar
 import io.legado.app.utils.toastOnUi
 import io.legado.app.utils.windowSize
 
@@ -161,6 +162,8 @@ abstract class BaseActivity<VB : ViewBinding>(
     open fun setupSystemBar() {
         if (fullScreen && !isInMultiWindow) {
             fullScreen()
+        } else {
+            toggleSystemBar(true)
         }
         val isTransparentStatusBar = AppConfig.isTransparentStatusBar
         val statusBarColor = ThemeStore.statusBarColor(this, isTransparentStatusBar)
