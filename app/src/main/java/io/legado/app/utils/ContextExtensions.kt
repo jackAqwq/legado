@@ -45,6 +45,7 @@ import io.legado.app.help.book.isImage
 import io.legado.app.help.book.isLocal
 import io.legado.app.help.book.isVideo
 import io.legado.app.help.config.AppConfig
+import io.legado.app.ui.minireader.MiniReaderContract
 import io.legado.app.ui.book.audio.AudioPlayActivity
 import io.legado.app.ui.video.VideoPlayerActivity
 import io.legado.app.ui.book.manga.ReadMangaActivity
@@ -79,6 +80,18 @@ fun Context.startActivityForBook(
     val intent = Intent(this, cls)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     intent.putExtra("bookUrl", book.bookUrl)
+    intent.apply(configIntent)
+    startActivity(intent)
+}
+
+fun Context.startActivityForMiniReader(
+    book: Book,
+    configIntent: Intent.() -> Unit = {},
+) {
+    val intent = Intent()
+        .setClassName(packageName, "io.legado.app.ui.minireader.MiniReaderActivity")
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        .putExtra(MiniReaderContract.EXTRA_BOOK_URL, book.bookUrl)
     intent.apply(configIntent)
     startActivity(intent)
 }

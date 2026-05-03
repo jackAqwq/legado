@@ -29,6 +29,8 @@ import io.legado.app.ui.book.search.SearchActivity
 import io.legado.app.ui.file.HandleFileContract
 import io.legado.app.ui.main.MainFragmentInterface
 import io.legado.app.ui.main.MainViewModel
+import io.legado.app.ui.minireader.MiniReaderBookshelfRepository
+import io.legado.app.ui.minireader.MiniReaderFilePickerGateway
 import io.legado.app.ui.widget.dialog.WaitDialog
 import io.legado.app.utils.checkByIndex
 import io.legado.app.utils.getCheckedIndex
@@ -38,6 +40,7 @@ import io.legado.app.utils.readText
 import io.legado.app.utils.sendToClip
 import io.legado.app.utils.showDialogFragment
 import io.legado.app.utils.startActivity
+import io.legado.app.utils.startActivityForMiniReader
 import io.legado.app.utils.toastOnUi
 
 abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfViewModel>(layoutId),
@@ -74,6 +77,19 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
             }
         }
     }
+    private val miniReaderImportResult = registerForActivityResult(HandleFileContract()) { result ->
+        val uri = result.uri ?: return@registerForActivityResult
+        viewModel.execute {
+            MiniReaderBookshelfRepository().importFromPickedUri(uri)
+        }.onSuccess { book ->
+            requireContext().startActivityForMiniReader(book)
+        }.onError {
+            toastOnUi(it.localizedMessage ?: "ERROR")
+        }
+    }
+    private val miniReaderFilePickerGateway by lazy {
+        MiniReaderFilePickerGateway(miniReaderImportResult)
+    }
     abstract val groupId: Long
     abstract val books: List<Book>
     abstract var onlyUpdateRead: Boolean
@@ -101,6 +117,7 @@ abstract class BaseBookshelfFragment(layoutId: Int) : VMBaseFragment<BookshelfVi
             R.id.menu_bookshelf_layout -> configBookshelf()
             R.id.menu_group_manage -> showDialogFragment<GroupManageDialog>()
             R.id.menu_add_local -> startActivity<ImportBookActivity>()
+            R.id.menu_add_local_minireader -> miniReaderFilePickerGateway.pickTxt()
             R.id.menu_add_url -> showAddBookByUrlAlert()
             R.id.menu_bookshelf_manage -> startActivity<BookshelfManageActivity> {
                 putExtra("groupId", groupId)
