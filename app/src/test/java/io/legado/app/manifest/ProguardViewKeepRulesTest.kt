@@ -38,5 +38,13 @@ class ProguardViewKeepRulesTest {
             "App custom video wrappers should still be kept",
             rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")
         )
+        assertTrue(
+            "Throwable class names should remain stable for logs/crash readability",
+            rules.contains("-keepnames class * extends java.lang.Throwable")
+        )
+        assertFalse(
+            "Throwable member keep should be removed",
+            rules.contains("-keepclassmembernames,allowobfuscation class * extends java.lang.Throwable{*;}")
+        )
     }
 }

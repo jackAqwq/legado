@@ -44,8 +44,10 @@
 1. AppCompat menu internals (`SubMenuBuilder`, `MenuBuilder`, `Toolbar#mNavButtonView`)
 - Action: preserve only where reflection utilities are used; isolate into dedicated block comments with code references.
 
-2. Throwable name preservation
-- Action: verify crash/reporting pipeline requirement; if not mandatory, consider relaxing to allow better shrinking.
+2. Throwable member keep ✅ implemented
+- Previous issue: `-keepclassmembernames,allowobfuscation class * extends java.lang.Throwable{*;}` preserved member names for all exception types without a matching reflection dependency.
+- Landed change: removed Throwable member keep and retained only `-keepnames class * extends java.lang.Throwable` for crash/log readability.
+- Verification: `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"` plus release build verification.
 
 3. GSYVideoPlayer full package keep ✅ implemented
 - Previous issue: broad package keep on the external video library.
