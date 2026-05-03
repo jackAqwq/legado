@@ -106,11 +106,7 @@ cn.hutool.core.util.**{*;}
     *** getNonActionItems();
 }
 
-# FileDocExtensions.kt treeDocumentFileConstructor
--keep class androidx.documentfile.provider.TreeDocumentFile {
-    <init>(...);
-}
-
+# FileDocExtensions.kt now uses public DocumentFile.fromTreeUri()
 # JsoupXpath
 -keep,allowobfuscation class * implements org.seimicrawler.xpath.core.AxisSelector{*;}
 -keep,allowobfuscation class * implements org.seimicrawler.xpath.core.NodeTest{*;}

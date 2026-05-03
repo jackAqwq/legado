@@ -26,5 +26,9 @@ class ProguardViewKeepRulesTest {
             "Expected Jsoup keep to allow optimization while preserving runtime script compatibility",
             rules.contains("-keep,allowoptimization class org.jsoup.** { *; }")
         )
+        assertFalse(
+            "TreeDocumentFile keep should be removed",
+            rules.contains("androidx.documentfile.provider.TreeDocumentFile")
+        )
     }
 }

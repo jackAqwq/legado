@@ -35,9 +35,10 @@
 - Landed change: removed package-wide keep.
 - Verification: `:app:assembleAppRelease` passed.
 
-5. `-keep class androidx.documentfile.provider.TreeDocumentFile { <init>(...); }`
-- Issue: framework internals keep for constructor reflection.
-- Action: keep only if reflection path remains; otherwise migrate to non-reflection API and delete rule.
+5. `-keep class androidx.documentfile.provider.TreeDocumentFile { <init>(...); }` ✅ implemented
+- Previous issue: framework internals keep for constructor reflection.
+- Landed change: `FileDoc.asDocumentFile()` now calls public `DocumentFile.fromTreeUri(...)` and the reflective constructor lookup was removed, so the keep rule was deleted.
+- Verification: source-guard test added for `FileDocExtensions.kt` plus release build verification.
 
 ### Medium-priority refinements
 1. AppCompat menu internals (`SubMenuBuilder`, `MenuBuilder`, `Toolbar#mNavButtonView`)
@@ -56,7 +57,7 @@
    - source edit/import/file picker/document tree
    - video/audio playback
 2. Evaluate further `org.jsoup.**` narrowing with staged tests (candidate: split by package/API surfaces actually referenced by built-in JS rules and app code).
-3. Re-evaluate appcompat internals (`Toolbar/MenuBuilder`) and `TreeDocumentFile` reflection path.
+3. Re-evaluate appcompat internals (`Toolbar/MenuBuilder`) and remaining broad library keeps (`GSYVideoPlayer`, if further shrinkage is still worth the risk).
 4. If stable, continue narrowing package-level keeps to class/member-level where possible.
 
 ## Verification Advice
