@@ -79,8 +79,8 @@
 -keep class io.legado.app.data.entities.RssStar { *; }
 -keep class io.legado.app.data.entities.SearchBook { *; }
 -keep class io.legado.app.data.entities.SearchKeyword { <fields>; }
--keep class io.legado.app.data.entities.Server { *; }
--keep class io.legado.app.data.entities.Server$WebDavConfig { *; }
+-keep class io.legado.app.data.entities.Server { <fields>; }
+-keep class io.legado.app.data.entities.Server$WebDavConfig { <fields>; }
 -keep class io.legado.app.data.entities.TxtTocRule { <fields>; }
 ## Rule models narrowed from package-wide keep to explicit classes.
 -keep class io.legado.app.data.entities.rule.BookInfoRule { *; }

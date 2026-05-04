@@ -70,6 +70,14 @@ class ProguardEntityKeepRulesGuardTest {
             "BookProgress keep should be narrowed to field-level retention",
             rules.contains("-keep class io.legado.app.data.entities.BookProgress { <fields>; }")
         )
+        assertTrue(
+            "Server keep should be narrowed to field-level retention",
+            rules.contains("-keep class io.legado.app.data.entities.Server { <fields>; }")
+        )
+        assertTrue(
+            "Server WebDavConfig keep should be narrowed to field-level retention",
+            rules.contains("-keep class io.legado.app.data.entities.Server\$WebDavConfig { <fields>; }")
+        )
         assertFalse(
             "DB-only cache entity should not be blanket-kept",
             rules.contains("-keep class io.legado.app.data.entities.Cache { *; }")
