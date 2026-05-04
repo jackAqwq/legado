@@ -60,6 +60,9 @@
 # 保持js引擎调用的java类
 -keep class * extends io.legado.app.help.JsExtensions{*;}
 # 数据类
+## NOTE: data.entities currently remains package-wide because API/import-export JSON compatibility
+## relies on stable field names across many entity models. Narrowing should be done per-entity
+## with source-coupled tests and staged rollout.
 -keep class **.data.entities.**{*;}
 # hutool-core hutool-crypto
 -keep class

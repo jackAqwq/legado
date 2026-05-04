@@ -22,6 +22,10 @@ class ProguardViewKeepRulesTest {
             "Expected explicit keep for ReadView custom widget",
             rules.contains("-keep class io.legado.app.ui.book.read.page.ReadView { *; }")
         )
+        assertTrue(
+            "Expected explicit keep for ThemeSeekBar custom widget",
+            rules.contains("-keep class io.legado.app.lib.theme.view.ThemeSeekBar { *; }")
+        )
         assertFalse(
             "Broad app custom widget package keep should be removed",
             rules.contains("-keep class io.legado.app.ui.widget.** { *; }")

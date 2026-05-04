@@ -116,6 +116,16 @@
   - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"`
   - `:app:assembleAppRelease`
 
+8. `data.entities` keep staged-rollback guard added ✅ implemented
+- Previous issue:
+  - Entity keep remains package-wide, but there was no explicit guard documenting why this cannot be narrowed in one shot.
+- Landed change:
+  - Added an explicit compatibility note in keep rules: entity package-wide keep is temporarily retained because API/import-export JSON field-name stability spans many models.
+  - Added `ProguardEntityKeepRulesGuardTest` to lock this staged boundary and prevent accidental unreviewed narrowing.
+- Verification:
+  - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest" --tests "io.legado.app.manifest.ProguardEntityKeepRulesGuardTest"`
+  - `:app:assembleAppRelease`
+
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:
    - main/bookshelf/explore/rss tabs
