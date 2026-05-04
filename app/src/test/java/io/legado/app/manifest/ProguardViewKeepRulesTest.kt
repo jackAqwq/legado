@@ -96,6 +96,22 @@ class ProguardViewKeepRulesTest {
             rules.contains("-keepnames class * extends java.lang.Throwable")
         )
         assertFalse(
+            "Broad hutool core util keep should be removed",
+            rules.contains("cn.hutool.core.util.**{*;}")
+        )
+        assertFalse(
+            "Broad hutool crypto keep should be removed",
+            rules.contains("-keep class cn.hutool.crypto.**{*;}")
+        )
+        assertTrue(
+            "Narrow hutool keep should retain Base64 codec",
+            rules.contains("cn.hutool.core.codec.Base64")
+        )
+        assertTrue(
+            "Narrow hutool keep should retain SymmetricCrypto",
+            rules.contains("cn.hutool.crypto.symmetric.SymmetricCrypto")
+        )
+        assertFalse(
             "Throwable member keep should be removed",
             rules.contains("-keepclassmembernames,allowobfuscation class * extends java.lang.Throwable{*;}")
         )

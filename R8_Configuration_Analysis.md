@@ -85,6 +85,21 @@
   - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest" --tests "io.legado.app.manifest.ExoPlayerHelperSourceGuardTest"`
   - `:app:assembleAppRelease`
 
+6. Hutool keep rules (core/crypto) narrowed from package-wide to used classes ✅ implemented
+- Previous issue:
+  - Broad keeps retained large swaths of Hutool:
+    - `cn.hutool.core.util.**`
+    - `cn.hutool.core.codec.**`
+    - `cn.hutool.crypto.**`
+- Landed change:
+  - Replaced package-wide keeps with class-level keeps for currently used APIs in app code paths:
+    - core: `Base64`, `PercentCodec`, `RFC3986`, `URLDecoder`, `URLEncodeUtil`, `HexUtil`, `Validator`
+    - crypto: `KeyUtil`, `DigestUtil`, `Digester`, `HMac`, `KeyType`, `AsymmetricCrypto`, `Sign`, `AES`, `SymmetricCrypto`
+  - Added keep regression assertions to ensure broad Hutool rules do not regress.
+- Verification:
+  - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"`
+  - `:app:assembleAppRelease`
+
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:
    - main/bookshelf/explore/rss tabs

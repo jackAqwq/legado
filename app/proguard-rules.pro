@@ -68,9 +68,23 @@
 !cn.hutool.core.util.ReflectUtil,
 !cn.hutool.core.util.SerializeUtil,
 !cn.hutool.core.util.ClassUtil,
-cn.hutool.core.codec.**,
-cn.hutool.core.util.**{*;}
--keep class cn.hutool.crypto.**{*;}
+cn.hutool.core.codec.Base64,
+cn.hutool.core.codec.PercentCodec,
+cn.hutool.core.net.RFC3986,
+cn.hutool.core.net.URLDecoder,
+cn.hutool.core.net.URLEncodeUtil,
+cn.hutool.core.util.HexUtil,
+cn.hutool.core.lang.Validator{*;}
+-keep class
+cn.hutool.crypto.KeyUtil,
+cn.hutool.crypto.digest.DigestUtil,
+cn.hutool.crypto.digest.Digester,
+cn.hutool.crypto.digest.HMac,
+cn.hutool.crypto.asymmetric.KeyType,
+cn.hutool.crypto.asymmetric.AsymmetricCrypto,
+cn.hutool.crypto.asymmetric.Sign,
+cn.hutool.crypto.symmetric.AES,
+cn.hutool.crypto.symmetric.SymmetricCrypto{*;}
 -dontwarn cn.hutool.**
 
 # markwon
