@@ -130,24 +130,6 @@ object ExoPlayerHelper {
             databaseProvider
         )
     }
-
-    /**
-     * 通过kotlin扩展函数+反射实现CacheDataSource.Factory设置默认请求头
-     * 需要添加混淆规则 -keepclassmembers class com.google.android.exoplayer2.upstream.cache.CacheDataSource$Factory{upstreamDataSourceFactory;}
-     * @param headers
-     * @return
-     */
-//    private fun CacheDataSource.Factory.setDefaultRequestProperties(headers: Map<String, String> = mapOf()): CacheDataSource.Factory {
-//        val declaredField = this.javaClass.getDeclaredField("upstreamDataSourceFactory")
-//        declaredField.isAccessible = true
-//        val df = declaredField[this] as DataSource.Factory
-//        if (df is OkHttpDataSource.Factory) {
-//            df.setDefaultRequestProperties(headers)
-//        }
-//        return this
-//    }
-
-
     fun getMediaSource(context: Context, url: String): MediaSource? {
         val uris = GSON.fromJsonArray<String>(url).getOrNull() ?: return null
         val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(context)

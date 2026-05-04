@@ -69,6 +69,22 @@
   - Kept library-driven consumer rules (LiveEventBus internal `ExternalLiveData` reflection path and Sora TextMate `proguard.txt` targeted keeps).
 - Verification: keep regression test + release build verification.
 
+5. `@Keep`-annotated app classes + ExoPlayer legacy reflection keep ✅ implemented
+- Previous issue:
+  - Explicit keeps duplicated existing `@Keep` annotation coverage:
+    - `**.help.http.CookieStore`
+    - `**.help.CacheManager`
+    - `**.help.http.StrResponse`
+    - `io.legado.app.api.ReturnData`
+  - Legacy keep for `CacheDataSource$Factory#upstreamDataSourceFactory` remained after reflection code was removed.
+- Landed change:
+  - Removed the four explicit app keep rules above and rely on `androidx.annotation.Keep` consumer rules.
+  - Removed `CacheDataSource$Factory#upstreamDataSourceFactory` keep and cleaned stale reflection comments in `ExoPlayerHelper`.
+  - Added guard tests to keep these deletions from regressing.
+- Verification:
+  - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest" --tests "io.legado.app.manifest.ExoPlayerHelperSourceGuardTest"`
+  - `:app:assembleAppRelease`
+
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:
    - main/bookshelf/explore/rss tabs

@@ -72,11 +72,6 @@ cn.hutool.core.codec.**,
 cn.hutool.core.util.**{*;}
 -keep class cn.hutool.crypto.**{*;}
 -dontwarn cn.hutool.**
-# 缓存 Cookie
--keep class **.help.http.CookieStore{*;}
--keep class **.help.CacheManager{*;}
-# StrResponse
--keep class **.help.http.StrResponse{*;}
 
 # markwon
 -dontwarn org.commonmark.ext.gfm.**
@@ -96,15 +91,8 @@ cn.hutool.core.util.**{*;}
 -keep,allowoptimization class org.jsoup.** { *; }
 -dontwarn org.jspecify.annotations.NullMarked
 
-## ExoPlayer 反射设置ua 保证该私有变量不被混淆
--keepclassmembers class androidx.media3.datasource.cache.CacheDataSource$Factory {
-    *** upstreamDataSourceFactory;
-}
 ## ExoPlayer 如果还不能播放就取消注释这个
 # -keep class com.google.android.exoplayer2.** {*;}
-
-## 对外提供api
--keep class io.legado.app.api.ReturnData{*;}
 
 # Cronet
 -keepclassmembers class org.chromium.net.X509Util {

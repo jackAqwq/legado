@@ -66,6 +66,27 @@ class ProguardViewKeepRulesTest {
             "Broad joni keep should be removed when TextMate consumer rules are sufficient",
             rules.contains("-keep class org.joni.** { *; }")
         )
+        assertFalse(
+            "CookieStore explicit keep should be removed and rely on @Keep consumer rules",
+            rules.contains("-keep class **.help.http.CookieStore{*;}")
+        )
+        assertFalse(
+            "CacheManager explicit keep should be removed and rely on @Keep consumer rules",
+            rules.contains("-keep class **.help.CacheManager{*;}")
+        )
+        assertFalse(
+            "StrResponse explicit keep should be removed and rely on @Keep consumer rules",
+            rules.contains("-keep class **.help.http.StrResponse{*;}")
+        )
+        assertFalse(
+            "ReturnData explicit keep should be removed and rely on @Keep consumer rules",
+            rules.contains("-keep class io.legado.app.api.ReturnData{*;}")
+        )
+        assertFalse(
+            "ExoPlayer CacheDataSource.Factory upstreamDataSourceFactory keep should stay removed after reflection cleanup",
+            rules.contains("CacheDataSource\$Factory")
+                    && rules.contains("upstreamDataSourceFactory")
+        )
         assertTrue(
             "App custom video wrappers should still be kept",
             rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")
