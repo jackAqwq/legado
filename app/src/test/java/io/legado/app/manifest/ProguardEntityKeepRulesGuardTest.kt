@@ -38,5 +38,9 @@ class ProguardEntityKeepRulesGuardTest {
             "DB-only cookie entity should not be blanket-kept",
             rules.contains("-keep class io.legado.app.data.entities.Cookie { *; }")
         )
+        assertFalse(
+            "RSS read record entity should not be blanket-kept when no external JSON contract requires it",
+            rules.contains("-keep class io.legado.app.data.entities.RssReadRecord { *; }")
+        )
     }
 }
