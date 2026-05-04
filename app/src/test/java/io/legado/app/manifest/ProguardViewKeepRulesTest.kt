@@ -15,12 +15,32 @@ class ProguardViewKeepRulesTest {
             rules.contains("-keep public class * extends android.view.View")
         )
         assertTrue(
-            "Expected scoped keep for app custom widgets",
-            rules.contains("-keep class io.legado.app.ui.widget.**")
+            "Expected explicit keep for TitleBar custom widget",
+            rules.contains("-keep class io.legado.app.ui.widget.TitleBar { *; }")
         )
         assertTrue(
-            "Expected scoped keep for read pages",
-            rules.contains("-keep class io.legado.app.ui.book.read.page.**")
+            "Expected explicit keep for ReadView custom widget",
+            rules.contains("-keep class io.legado.app.ui.book.read.page.ReadView { *; }")
+        )
+        assertFalse(
+            "Broad app custom widget package keep should be removed",
+            rules.contains("-keep class io.legado.app.ui.widget.** { *; }")
+        )
+        assertFalse(
+            "Broad read package keep should be removed",
+            rules.contains("-keep class io.legado.app.ui.book.read.** { *; }")
+        )
+        assertFalse(
+            "Broad read.page package keep should be removed",
+            rules.contains("-keep class io.legado.app.ui.book.read.page.** { *; }")
+        )
+        assertFalse(
+            "Broad manga.recyclerview package keep should be removed",
+            rules.contains("-keep class io.legado.app.ui.book.manga.recyclerview.** { *; }")
+        )
+        assertFalse(
+            "Broad theme view package keep should be removed",
+            rules.contains("-keep class io.legado.app.lib.theme.view.** { *; }")
         )
         assertTrue(
             "Expected Jsoup keep to allow optimization while preserving runtime script compatibility",

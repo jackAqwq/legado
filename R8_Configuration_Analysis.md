@@ -100,6 +100,22 @@
   - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"`
   - `:app:assembleAppRelease`
 
+7. XML custom-view keep rules narrowed from package-level to explicit class list ✅ implemented
+- Previous issue:
+  - Broad package keeps retained all classes in:
+    - `io.legado.app.ui.widget.**`
+    - `io.legado.app.ui.book.read.**`
+    - `io.legado.app.ui.book.read.page.**`
+    - `io.legado.app.ui.book.manga.recyclerview.**`
+    - `io.legado.app.lib.theme.view.**`
+- Landed change:
+  - Replaced package-level keeps with explicit class-level keeps generated from actual XML tags under `res/layout` and `res/xml` (50 classes total).
+  - Preserved existing `"{ *; }"` member retention per class for behavior neutrality in this phase.
+  - Updated keep regression assertions to lock out broad package keeps and validate representative explicit classes.
+- Verification:
+  - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"`
+  - `:app:assembleAppRelease`
+
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:
    - main/bookshelf/explore/rss tabs
