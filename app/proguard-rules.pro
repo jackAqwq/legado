@@ -68,7 +68,7 @@
 -keep class io.legado.app.data.entities.BookChapter { *; }
 -keep class io.legado.app.data.entities.BookGroup { <fields>; }
 -keep class io.legado.app.data.entities.BookSource { *; }
--keep class io.legado.app.data.entities.Bookmark { *; }
+-keep class io.legado.app.data.entities.Bookmark { <fields>; }
 -keep class io.legado.app.data.entities.BookProgress { *; }
 -keep class io.legado.app.data.entities.DictRule { *; }
 -keep class io.legado.app.data.entities.HttpTTS { *; }

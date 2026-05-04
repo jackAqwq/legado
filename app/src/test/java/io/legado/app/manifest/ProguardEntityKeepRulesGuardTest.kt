@@ -27,6 +27,10 @@ class ProguardEntityKeepRulesGuardTest {
             rules.contains("-keep class io.legado.app.data.entities.BookGroup { <fields>; }")
         )
         assertTrue(
+            "Bookmark keep should be narrowed to field-level retention",
+            rules.contains("-keep class io.legado.app.data.entities.Bookmark { <fields>; }")
+        )
+        assertTrue(
             "Expected explicit keep for RssSource entity",
             rules.contains("-keep class io.legado.app.data.entities.RssSource { *; }")
         )
