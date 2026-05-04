@@ -78,7 +78,7 @@
 -keep class io.legado.app.data.entities.RssSource { *; }
 -keep class io.legado.app.data.entities.RssStar { *; }
 -keep class io.legado.app.data.entities.SearchBook { *; }
--keep class io.legado.app.data.entities.SearchKeyword { *; }
+-keep class io.legado.app.data.entities.SearchKeyword { <fields>; }
 -keep class io.legado.app.data.entities.Server { *; }
 -keep class io.legado.app.data.entities.Server$WebDavConfig { *; }
 -keep class io.legado.app.data.entities.TxtTocRule { *; }
