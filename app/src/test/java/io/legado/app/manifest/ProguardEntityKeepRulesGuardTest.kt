@@ -50,5 +50,9 @@ class ProguardEntityKeepRulesGuardTest {
             "ReplaceBook helper model should not be blanket-kept when no persistence/import-export contract requires it",
             rules.contains("-keep class io.legado.app.data.entities.ReplaceBook { *; }")
         )
+        assertFalse(
+            "BookSource Converters helper should not be blanket-kept when Room handles converter wiring directly",
+            rules.contains("-keep class io.legado.app.data.entities.BookSource\$Converters { *; }")
+        )
     }
 }
