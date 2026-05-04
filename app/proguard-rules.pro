@@ -65,7 +65,6 @@
 ## Narrowed from package-wide to explicit models; DB-only cache/cookie/projection models are excluded.
 -keep class io.legado.app.data.entities.BaseBook { *; }
 -keep class io.legado.app.data.entities.BaseSource { *; }
--keep class io.legado.app.data.entities.BaseRssArticle { *; }
 -keep class io.legado.app.data.entities.Book { *; }
 -keep class io.legado.app.data.entities.Book$ReadConfig { *; }
 -keep class io.legado.app.data.entities.BookChapter { *; }

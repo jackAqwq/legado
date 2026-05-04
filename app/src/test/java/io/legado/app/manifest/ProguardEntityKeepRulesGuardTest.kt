@@ -54,5 +54,9 @@ class ProguardEntityKeepRulesGuardTest {
             "BookSource Converters helper should not be blanket-kept when Room handles converter wiring directly",
             rules.contains("-keep class io.legado.app.data.entities.BookSource\$Converters { *; }")
         )
+        assertFalse(
+            "BaseRssArticle interface should not be blanket-kept when concrete rss models remain explicitly kept",
+            rules.contains("-keep class io.legado.app.data.entities.BaseRssArticle { *; }")
+        )
     }
 }
