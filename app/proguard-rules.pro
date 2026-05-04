@@ -60,10 +60,37 @@
 # 保持js引擎调用的java类
 -keep class * extends io.legado.app.help.JsExtensions{*;}
 # 数据类
-## NOTE: data.entities currently remains package-wide because API/import-export JSON compatibility
-## relies on stable field names across many entity models. Narrowing should be done per-entity
-## with source-coupled tests and staged rollout.
--keep class **.data.entities.**{*;}
+## NOTE: data.entities keeps explicit model classes because API/import-export/backup JSON
+## compatibility relies on stable member names across persisted schemas and JS-bound models.
+## Narrowed from package-wide to explicit models; DB-only cache/cookie/projection models are excluded.
+-keep class io.legado.app.data.entities.BaseBook { *; }
+-keep class io.legado.app.data.entities.BaseSource { *; }
+-keep class io.legado.app.data.entities.BaseRssArticle { *; }
+-keep class io.legado.app.data.entities.Book { *; }
+-keep class io.legado.app.data.entities.Book$ReadConfig { *; }
+-keep class io.legado.app.data.entities.BookChapter { *; }
+-keep class io.legado.app.data.entities.BookGroup { *; }
+-keep class io.legado.app.data.entities.BookSource { *; }
+-keep class io.legado.app.data.entities.BookSource$Converters { *; }
+-keep class io.legado.app.data.entities.Bookmark { *; }
+-keep class io.legado.app.data.entities.BookProgress { *; }
+-keep class io.legado.app.data.entities.DictRule { *; }
+-keep class io.legado.app.data.entities.HttpTTS { *; }
+-keep class io.legado.app.data.entities.KeyboardAssist { *; }
+-keep class io.legado.app.data.entities.ReadRecord { *; }
+-keep class io.legado.app.data.entities.ReplaceBook { *; }
+-keep class io.legado.app.data.entities.ReplaceRule { *; }
+-keep class io.legado.app.data.entities.RuleSub { *; }
+-keep class io.legado.app.data.entities.RssArticle { *; }
+-keep class io.legado.app.data.entities.RssReadRecord { *; }
+-keep class io.legado.app.data.entities.RssSource { *; }
+-keep class io.legado.app.data.entities.RssStar { *; }
+-keep class io.legado.app.data.entities.SearchBook { *; }
+-keep class io.legado.app.data.entities.SearchKeyword { *; }
+-keep class io.legado.app.data.entities.Server { *; }
+-keep class io.legado.app.data.entities.Server$WebDavConfig { *; }
+-keep class io.legado.app.data.entities.TxtTocRule { *; }
+-keep class io.legado.app.data.entities.rule.** { *; }
 # hutool-core hutool-crypto
 -keep class
 !cn.hutool.core.util.RuntimeUtil,

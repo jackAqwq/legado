@@ -116,12 +116,13 @@
   - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"`
   - `:app:assembleAppRelease`
 
-8. `data.entities` keep staged-rollback guard added ✅ implemented
+8. `data.entities` keep narrowed from package-wide to explicit model list ✅ implemented
 - Previous issue:
-  - Entity keep remains package-wide, but there was no explicit guard documenting why this cannot be narrowed in one shot.
+  - `-keep class **.data.entities.**{*;}` retained every class/member under the package, including DB-only models without JSON/script reflection requirements.
 - Landed change:
-  - Added an explicit compatibility note in keep rules: entity package-wide keep is temporarily retained because API/import-export JSON field-name stability spans many models.
-  - Added `ProguardEntityKeepRulesGuardTest` to lock this staged boundary and prevent accidental unreviewed narrowing.
+  - Replaced package-wide keep with explicit class-level keeps for JSON/backups/JS-bound entity models and `data.entities.rule.**`.
+  - Explicitly excluded DB-only/projection classes from blanket keep (`Cache`, `Cookie`, `ReadRecordShow`, `BookSourcePart`, `BookChapterReview`) to reduce over-retention.
+  - Updated `ProguardEntityKeepRulesGuardTest` to assert broad keep removal, representative explicit keeps, and excluded DB-only model keeps.
 - Verification:
   - `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest" --tests "io.legado.app.manifest.ProguardEntityKeepRulesGuardTest"`
   - `:app:assembleAppRelease`
