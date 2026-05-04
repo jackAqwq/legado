@@ -47,6 +47,25 @@ class ProguardViewKeepRulesTest {
             "SubMenuBuilder keepnames should be removed after reflection cleanup",
             rules.contains("-keepnames class androidx.appcompat.view.menu.SubMenuBuilder")
         )
+        assertFalse(
+            "LiveData internals keep should be removed and rely on library consumer rules",
+            rules.contains("androidx.lifecycle.LiveData")
+                    && rules.contains("mObservers")
+                    && rules.contains("mActiveCount")
+        )
+        assertFalse(
+            "SafeIterableMap internals keep should be removed and rely on library consumer rules",
+            rules.contains("androidx.arch.core.internal.SafeIterableMap")
+                    && rules.contains("putIfAbsent")
+        )
+        assertFalse(
+            "Broad tm4e keep should be removed when TextMate consumer rules are sufficient",
+            rules.contains("-keep class org.eclipse.tm4e.** { *; }")
+        )
+        assertFalse(
+            "Broad joni keep should be removed when TextMate consumer rules are sufficient",
+            rules.contains("-keep class org.joni.** { *; }")
+        )
         assertTrue(
             "App custom video wrappers should still be kept",
             rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")

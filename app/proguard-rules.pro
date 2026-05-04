@@ -84,16 +84,6 @@ cn.hutool.core.util.**{*;}
 ## OkHttp / Okio / JsonPath already provide consumer rules for common runtime paths.
 ## Keep app-specific reflective entry points only; avoid package-wide keep by default.
 
-# LiveEventBus
--keepclassmembers class androidx.lifecycle.LiveData {
-    *** mObservers;
-    *** mActiveCount;
-}
--keepclassmembers class androidx.arch.core.internal.SafeIterableMap {
-    *** size();
-    *** putIfAbsent(...);
-}
-
 # FileDocExtensions.kt now uses public DocumentFile.fromTreeUri()
 # JsoupXpath
 -keep,allowobfuscation class * implements org.seimicrawler.xpath.core.AxisSelector{*;}
@@ -126,8 +116,6 @@ cn.hutool.core.util.**{*;}
 -keepnames class * extends java.lang.Throwable
 
 # Sora Editor
--keep class org.eclipse.tm4e.** { *; }
--keep class org.joni.** { *; }
 
 # GSYVideoPlayer
 -dontwarn com.shuyu.gsyvideoplayer.**

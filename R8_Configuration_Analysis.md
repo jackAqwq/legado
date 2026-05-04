@@ -59,6 +59,16 @@
 - Landed change: removed the package-wide `com.shuyu.gsyvideoplayer.**` keep and kept only app-owned wrapper classes.
 - Verification: `:app:testAppDebugUnitTest --tests "io.legado.app.manifest.ProguardViewKeepRulesTest"` plus release build verification.
 
+4. LiveEventBus + Sora broad keeps ✅ implemented
+- Previous issue:
+  - App-level keep on `androidx.lifecycle.LiveData` / `SafeIterableMap` internals.
+  - Broad keeps on `org.eclipse.tm4e.**` and `org.joni.**`.
+- Landed change:
+  - Removed the LiveData/SafeIterableMap app-level keep block.
+  - Removed broad `tm4e/joni` keeps.
+  - Kept library-driven consumer rules (LiveEventBus internal `ExternalLiveData` reflection path and Sora TextMate `proguard.txt` targeted keeps).
+- Verification: keep regression test + release build verification.
+
 ## Suggested Execution Order
 1. Validate key runtime smoke paths on device/emulator:
    - main/bookshelf/explore/rss tabs
@@ -66,7 +76,7 @@
    - source edit/import/file picker/document tree
    - video/audio playback
 2. Evaluate further `org.jsoup.**` narrowing with staged tests (candidate: split by package/API surfaces actually referenced by built-in JS rules and app code).
-3. Re-evaluate remaining broad library keeps (`org.eclipse.tm4e.**`, `org.joni.**`, and app package-wide keeps) with source-coupled reflection checks.
+3. Re-evaluate remaining app package-wide keeps (`io.legado.app.ui.widget/read/page/...`) with source-coupled XML/reflective usage checks.
 4. If stable, continue narrowing package-level keeps to class/member-level where possible.
 
 ## Verification Advice
