@@ -55,6 +55,10 @@ class ProguardEntityKeepRulesGuardTest {
             rules.contains("-keep class io.legado.app.data.entities.RssReadRecord { *; }")
         )
         assertFalse(
+            "RssArticle entity should not be blanket-kept when no backup/import-export JSON contract requires it",
+            rules.contains("-keep class io.legado.app.data.entities.RssArticle { *; }")
+        )
+        assertFalse(
             "RuleSub entity should not be blanket-kept when no external JSON contract requires it",
             rules.contains("-keep class io.legado.app.data.entities.RuleSub { *; }")
         )
