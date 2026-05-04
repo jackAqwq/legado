@@ -78,7 +78,6 @@
 -keep class io.legado.app.data.entities.HttpTTS { *; }
 -keep class io.legado.app.data.entities.KeyboardAssist { *; }
 -keep class io.legado.app.data.entities.ReadRecord { *; }
--keep class io.legado.app.data.entities.ReplaceBook { *; }
 -keep class io.legado.app.data.entities.ReplaceRule { *; }
 -keep class io.legado.app.data.entities.RssArticle { *; }
 -keep class io.legado.app.data.entities.RssSource { *; }

@@ -46,5 +46,9 @@ class ProguardEntityKeepRulesGuardTest {
             "RuleSub entity should not be blanket-kept when no external JSON contract requires it",
             rules.contains("-keep class io.legado.app.data.entities.RuleSub { *; }")
         )
+        assertFalse(
+            "ReplaceBook helper model should not be blanket-kept when no persistence/import-export contract requires it",
+            rules.contains("-keep class io.legado.app.data.entities.ReplaceBook { *; }")
+        )
     }
 }
