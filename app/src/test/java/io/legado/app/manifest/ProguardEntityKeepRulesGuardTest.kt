@@ -34,6 +34,10 @@ class ProguardEntityKeepRulesGuardTest {
             "Expected explicit keep for BookInfoRule model",
             rules.contains("-keep class io.legado.app.data.entities.rule.BookInfoRule { *; }")
         )
+        assertFalse(
+            "Rule interface BookListRule should not be blanket-kept when concrete rule models are explicitly kept",
+            rules.contains("-keep class io.legado.app.data.entities.rule.BookListRule { *; }")
+        )
         assertTrue(
             "Expected explicit keep for SearchRule model",
             rules.contains("-keep class io.legado.app.data.entities.rule.SearchRule { *; }")

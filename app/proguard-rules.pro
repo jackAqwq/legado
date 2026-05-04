@@ -85,7 +85,6 @@
 -keep class io.legado.app.data.entities.TxtTocRule { *; }
 ## Rule models narrowed from package-wide keep to explicit classes.
 -keep class io.legado.app.data.entities.rule.BookInfoRule { *; }
--keep class io.legado.app.data.entities.rule.BookListRule { *; }
 -keep class io.legado.app.data.entities.rule.ContentRule { *; }
 -keep class io.legado.app.data.entities.rule.ExploreKind { *; }
 -keep class io.legado.app.data.entities.rule.ExploreRule { *; }
