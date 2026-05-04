@@ -72,8 +72,8 @@
 -keep class io.legado.app.data.entities.BookProgress { *; }
 -keep class io.legado.app.data.entities.DictRule { *; }
 -keep class io.legado.app.data.entities.HttpTTS { *; }
--keep class io.legado.app.data.entities.KeyboardAssist { *; }
--keep class io.legado.app.data.entities.ReadRecord { *; }
+-keep class io.legado.app.data.entities.KeyboardAssist { <fields>; }
+-keep class io.legado.app.data.entities.ReadRecord { <fields>; }
 -keep class io.legado.app.data.entities.ReplaceRule { *; }
 -keep class io.legado.app.data.entities.RssSource { *; }
 -keep class io.legado.app.data.entities.RssStar { *; }
