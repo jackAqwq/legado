@@ -26,9 +26,17 @@ class ProguardEntityKeepRulesGuardTest {
             "Expected explicit keep for RssSource entity",
             rules.contains("-keep class io.legado.app.data.entities.RssSource { *; }")
         )
-        assertTrue(
-            "Expected explicit keep for entity rule models",
+        assertFalse(
+            "Package-wide keep for entity rule models should be removed",
             rules.contains("-keep class io.legado.app.data.entities.rule.** { *; }")
+        )
+        assertTrue(
+            "Expected explicit keep for BookInfoRule model",
+            rules.contains("-keep class io.legado.app.data.entities.rule.BookInfoRule { *; }")
+        )
+        assertTrue(
+            "Expected explicit keep for SearchRule model",
+            rules.contains("-keep class io.legado.app.data.entities.rule.SearchRule { *; }")
         )
         assertFalse(
             "DB-only cache entity should not be blanket-kept",

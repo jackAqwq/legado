@@ -83,7 +83,17 @@
 -keep class io.legado.app.data.entities.Server { *; }
 -keep class io.legado.app.data.entities.Server$WebDavConfig { *; }
 -keep class io.legado.app.data.entities.TxtTocRule { *; }
--keep class io.legado.app.data.entities.rule.** { *; }
+## Rule models narrowed from package-wide keep to explicit classes.
+-keep class io.legado.app.data.entities.rule.BookInfoRule { *; }
+-keep class io.legado.app.data.entities.rule.BookListRule { *; }
+-keep class io.legado.app.data.entities.rule.ContentRule { *; }
+-keep class io.legado.app.data.entities.rule.ExploreKind { *; }
+-keep class io.legado.app.data.entities.rule.ExploreRule { *; }
+-keep class io.legado.app.data.entities.rule.FlexChildStyle { *; }
+-keep class io.legado.app.data.entities.rule.ReviewRule { *; }
+-keep class io.legado.app.data.entities.rule.RowUi { *; }
+-keep class io.legado.app.data.entities.rule.SearchRule { *; }
+-keep class io.legado.app.data.entities.rule.TocRule { *; }
 # hutool-core hutool-crypto
 -keep class
 !cn.hutool.core.util.RuntimeUtil,
