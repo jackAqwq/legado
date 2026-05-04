@@ -82,6 +82,10 @@ class ProguardEntityKeepRulesGuardTest {
             "RssStar keep should be narrowed to field-level retention",
             rules.contains("-keep class io.legado.app.data.entities.RssStar { <fields>; }")
         )
+        assertTrue(
+            "SearchBook keep should be narrowed to field-level retention",
+            rules.contains("-keep class io.legado.app.data.entities.SearchBook { <fields>; }")
+        )
         assertFalse(
             "DB-only cache entity should not be blanket-kept",
             rules.contains("-keep class io.legado.app.data.entities.Cache { *; }")
