@@ -142,8 +142,8 @@ cn.hutool.crypto.symmetric.SymmetricCrypto{*;}
 
 # Cronet
 -keepclassmembers class org.chromium.net.X509Util {
-    *** sDefaultTrustManager;
-    *** sTestTrustManager;
+    android.net.http.X509TrustManagerExtensions sDefaultTrustManager;
+    android.net.http.X509TrustManagerExtensions sTestTrustManager;
 }
 
 # Throwable

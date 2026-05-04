@@ -123,6 +123,16 @@ class ProguardViewKeepRulesTest {
             "Throwable class names should remain stable for logs/crash readability",
             rules.contains("-keepnames class * extends java.lang.Throwable")
         )
+        assertTrue(
+            "Cronet X509Util keep should be narrowed to exact trust-manager extension fields",
+            rules.contains("android.net.http.X509TrustManagerExtensions sDefaultTrustManager;")
+                    && rules.contains("android.net.http.X509TrustManagerExtensions sTestTrustManager;")
+        )
+        assertFalse(
+            "Cronet X509Util keep should not use broad wildcard member type",
+            rules.contains("*** sDefaultTrustManager;")
+                    || rules.contains("*** sTestTrustManager;")
+        )
         assertFalse(
             "Broad hutool core util keep should be removed",
             rules.contains("cn.hutool.core.util.**{*;}")
