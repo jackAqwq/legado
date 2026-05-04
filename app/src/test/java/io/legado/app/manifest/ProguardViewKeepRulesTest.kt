@@ -15,16 +15,8 @@ class ProguardViewKeepRulesTest {
             rules.contains("-keep public class * extends android.view.View")
         )
         assertTrue(
-            "Expected explicit keep for TitleBar custom widget",
-            rules.contains("-keep class io.legado.app.ui.widget.TitleBar { *; }")
-        )
-        assertTrue(
-            "Expected explicit keep for ReadView custom widget",
-            rules.contains("-keep class io.legado.app.ui.book.read.page.ReadView { *; }")
-        )
-        assertTrue(
-            "Expected explicit keep for ThemeSeekBar custom widget",
-            rules.contains("-keep class io.legado.app.lib.theme.view.ThemeSeekBar { *; }")
+            "Expected Jsoup keep to allow optimization while preserving runtime script compatibility",
+            rules.contains("-keep,allowoptimization class org.jsoup.** { *; }")
         )
         assertFalse(
             "Broad app custom widget package keep should be removed",
@@ -46,9 +38,21 @@ class ProguardViewKeepRulesTest {
             "Broad theme view package keep should be removed",
             rules.contains("-keep class io.legado.app.lib.theme.view.** { *; }")
         )
-        assertTrue(
-            "Expected Jsoup keep to allow optimization while preserving runtime script compatibility",
-            rules.contains("-keep,allowoptimization class org.jsoup.** { *; }")
+        assertFalse(
+            "Redundant explicit custom-view keep for TitleBar should be removed and rely on AAPT generated rules",
+            rules.contains("-keep class io.legado.app.ui.widget.TitleBar { *; }")
+        )
+        assertFalse(
+            "Redundant explicit custom-view keep for ReadView should be removed and rely on AAPT generated rules",
+            rules.contains("-keep class io.legado.app.ui.book.read.page.ReadView { *; }")
+        )
+        assertFalse(
+            "Redundant explicit custom-view keep for ThemeSeekBar should be removed and rely on AAPT generated rules",
+            rules.contains("-keep class io.legado.app.lib.theme.view.ThemeSeekBar { *; }")
+        )
+        assertFalse(
+            "Redundant explicit custom-view keep for VideoPlayer should be removed and rely on AAPT generated rules",
+            rules.contains("-keep class io.legado.app.help.gsyVideo.VideoPlayer { *; }")
         )
         assertFalse(
             "TreeDocumentFile keep should be removed",
@@ -111,9 +115,9 @@ class ProguardViewKeepRulesTest {
             rules.contains("CacheDataSource\$Factory")
                     && rules.contains("upstreamDataSourceFactory")
         )
-        assertTrue(
-            "App custom video wrappers should still be kept",
-            rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer")
+        assertFalse(
+            "Redundant explicit custom-view keep for FloatingPlayer should be removed and rely on AAPT generated rules",
+            rules.contains("-keep class io.legado.app.help.gsyVideo.FloatingPlayer { *; }")
         )
         assertTrue(
             "Throwable class names should remain stable for logs/crash readability",
