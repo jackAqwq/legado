@@ -76,7 +76,7 @@
 -keep class io.legado.app.data.entities.ReadRecord { <fields>; }
 -keep class io.legado.app.data.entities.ReplaceRule { *; }
 -keep class io.legado.app.data.entities.RssSource { *; }
--keep class io.legado.app.data.entities.RssStar { *; }
+-keep class io.legado.app.data.entities.RssStar { <fields>; }
 -keep class io.legado.app.data.entities.SearchBook { *; }
 -keep class io.legado.app.data.entities.SearchKeyword { <fields>; }
 -keep class io.legado.app.data.entities.Server { <fields>; }
