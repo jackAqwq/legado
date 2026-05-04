@@ -80,7 +80,6 @@
 -keep class io.legado.app.data.entities.ReadRecord { *; }
 -keep class io.legado.app.data.entities.ReplaceBook { *; }
 -keep class io.legado.app.data.entities.ReplaceRule { *; }
--keep class io.legado.app.data.entities.RuleSub { *; }
 -keep class io.legado.app.data.entities.RssArticle { *; }
 -keep class io.legado.app.data.entities.RssSource { *; }
 -keep class io.legado.app.data.entities.RssStar { *; }
