@@ -63,7 +63,6 @@
 ## NOTE: data.entities keeps explicit model classes because API/import-export/backup JSON
 ## compatibility relies on stable member names across persisted schemas and JS-bound models.
 ## Narrowed from package-wide to explicit models; DB-only cache/cookie/projection models are excluded.
--keep class io.legado.app.data.entities.BaseBook { *; }
 -keep class io.legado.app.data.entities.BaseSource { *; }
 -keep class io.legado.app.data.entities.Book { *; }
 -keep class io.legado.app.data.entities.Book$ReadConfig { *; }

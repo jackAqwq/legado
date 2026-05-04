@@ -55,6 +55,10 @@ class ProguardEntityKeepRulesGuardTest {
             rules.contains("-keep class io.legado.app.data.entities.BookSource\$Converters { *; }")
         )
         assertFalse(
+            "BaseBook interface should not be blanket-kept when concrete book models remain explicitly kept",
+            rules.contains("-keep class io.legado.app.data.entities.BaseBook { *; }")
+        )
+        assertFalse(
             "BaseRssArticle interface should not be blanket-kept when concrete rss models remain explicitly kept",
             rules.contains("-keep class io.legado.app.data.entities.BaseRssArticle { *; }")
         )
