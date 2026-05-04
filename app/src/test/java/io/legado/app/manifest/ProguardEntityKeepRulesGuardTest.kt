@@ -62,5 +62,9 @@ class ProguardEntityKeepRulesGuardTest {
             "BaseRssArticle interface should not be blanket-kept when concrete rss models remain explicitly kept",
             rules.contains("-keep class io.legado.app.data.entities.BaseRssArticle { *; }")
         )
+        assertFalse(
+            "BaseSource interface should not be blanket-kept when JsExtensions keep already covers BaseSource implementors",
+            rules.contains("-keep class io.legado.app.data.entities.BaseSource { *; }")
+        )
     }
 }
