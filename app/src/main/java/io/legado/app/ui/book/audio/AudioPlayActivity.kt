@@ -61,7 +61,6 @@ import io.legado.app.utils.gone
 /**
  * 音频播放
  */
-@SuppressLint("ObsoleteSdkInt")
 class AudioPlayActivity :
     VMBaseActivity<ActivityAudioPlayBinding, AudioPlayViewModel>(toolBarTheme = Theme.Dark),
     ChangeBookSourceDialog.CallBack,

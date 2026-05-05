@@ -1,6 +1,5 @@
 package io.legado.app.utils.compress
 
-import android.annotation.SuppressLint
 import io.legado.app.utils.DebugLog
 import io.legado.app.utils.compress.ZipUtils.zipFile
 import io.legado.app.utils.printOnDebug
@@ -19,7 +18,6 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
-@SuppressLint("ObsoleteSdkInt")
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 object ZipUtils {
 

@@ -1,6 +1,5 @@
 package io.legado.app.lib.cronet
 
-import android.annotation.SuppressLint
 import androidx.annotation.Keep
 import okhttp3.Call
 import okhttp3.Request
@@ -10,7 +9,6 @@ import java.io.IOException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-@SuppressLint("ObsoleteSdkInt")
 @Keep
 class NewCallBack(originalRequest: Request, mCall: Call, readTimeoutMillis: Int) :
     AbsCallBack(originalRequest, mCall, readTimeoutMillis) {
