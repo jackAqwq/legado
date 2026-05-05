@@ -15,7 +15,6 @@ import io.legado.app.lib.theme.ThemeStore
 import io.legado.app.lib.theme.bottomBackground
 import io.legado.app.lib.theme.getSecondaryTextColor
 import io.legado.app.lib.theme.transparentNavBar
-import io.legado.app.lib.theme.system.UiThemeDefaults
 import io.legado.app.ui.widget.text.BadgeView
 import io.legado.app.utils.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
@@ -45,10 +44,7 @@ class ThemeBottomNavigationVIew(context: Context, attrs: AttributeSet) :
             isItemHorizontalTranslationEnabled = false
             itemBackground = Color.TRANSPARENT.toDrawable()
         }
-        itemActiveIndicatorColor =
-            ColorStateList.valueOf(UiThemeDefaults.deepImmersiveSnapshot.outlineColor)
-        itemIconSize = itemIconSize
-        setPadding(paddingLeft, paddingTop + 2, paddingRight, paddingBottom + 2)
+        itemActiveIndicatorColor = ColorStateList.valueOf(ThemeStore.accentColor(context))
 
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
     }
