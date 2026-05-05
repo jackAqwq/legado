@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import io.legado.app.R
 import io.legado.app.help.config.AppConfig
+import io.legado.app.lib.theme.system.UiThemeEngine
+import io.legado.app.lib.theme.system.UiThemeSnapshotInput
 import io.legado.app.utils.ColorUtils
 import io.legado.app.utils.dpToPx
 
@@ -59,19 +61,19 @@ fun Context.getSecondaryDisabledTextColor(dark: Boolean): Int {
 }
 
 val Context.primaryColor: Int
-    get() = ThemeStore.primaryColor(this)
+    get() = uiThemeSnapshot.primaryColor
 
 val Context.primaryColorDark: Int
     get() = ThemeStore.primaryColorDark(this)
 
 val Context.accentColor: Int
-    get() = ThemeStore.accentColor(this)
+    get() = uiThemeSnapshot.accentColor
 
 val Context.backgroundColor: Int
-    get() = ThemeStore.backgroundColor(this)
+    get() = uiThemeSnapshot.surfaceColor
 
 val Context.bottomBackground: Int
-    get() = ThemeStore.bottomBackground(this)
+    get() = uiThemeSnapshot.surfaceVariantColor
 
 val Context.primaryTextColor: Int
     get() = getPrimaryTextColor(isDarkTheme)
@@ -123,7 +125,7 @@ val Context.buttonDisabledColor: Int
     }
 
 val Context.isDarkTheme: Boolean
-    get() = ColorUtils.isColorLight(ThemeStore.primaryColor(this))
+    get() = uiThemeSnapshot.isDark
 
 val Fragment.isDarkTheme: Boolean
     get() = requireContext().isDarkTheme
@@ -149,3 +151,15 @@ val Context.filletBackground: GradientDrawable
         background.setColor(backgroundColor)
         return background
     }
+
+private val Context.uiThemeSnapshot
+    get() = UiThemeEngine.buildSnapshot(
+        UiThemeSnapshotInput(
+            primaryColor = ThemeStore.primaryColor(this),
+            accentColor = ThemeStore.accentColor(this),
+            backgroundColor = ThemeStore.backgroundColor(this),
+            bottomBackgroundColor = ThemeStore.bottomBackground(this),
+            isDark = ColorUtils.isColorLight(ThemeStore.primaryColor(this)),
+            isEInk = AppConfig.isEInkMode,
+        )
+    )

@@ -4,6 +4,7 @@ import io.legado.app.lib.theme.system.UiThemeDefaults
 import io.legado.app.lib.theme.system.UiThemeEngine
 import io.legado.app.lib.theme.system.UiThemeSnapshotInput
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class UiThemeEngineTest {
@@ -49,5 +50,21 @@ class UiThemeEngineTest {
 
         assertEquals(background, snapshot.surfaceColor)
         assertEquals(bottomBackground, snapshot.surfaceVariantColor)
+    }
+
+    @Test
+    fun buildSnapshot_mapsPrimaryAndFlags_whenProvided() {
+        val primary = 0xFF334455.toInt()
+        val snapshot = UiThemeEngine.buildSnapshot(
+            UiThemeSnapshotInput(
+                primaryColor = primary,
+                isDark = false,
+                isEInk = true
+            )
+        )
+
+        assertEquals(primary, snapshot.primaryColor)
+        assertFalse(snapshot.isDark)
+        assertEquals(true, snapshot.isEInk)
     }
 }
