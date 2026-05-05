@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import io.legado.app.R
@@ -212,19 +211,15 @@ class WebService : BaseService() {
         startForeground(NotificationId.WebService, notification)
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     private fun upTile(active: Boolean) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            kotlin.runCatching {
-                startService<WebTileService> {
-                    action = if (active) {
-                        IntentAction.start
-                    } else {
-                        IntentAction.stop
-                    }
+        kotlin.runCatching {
+            startService<WebTileService> {
+                action = if (active) {
+                    IntentAction.start
+                } else {
+                    IntentAction.stop
                 }
             }
-
         }
     }
 }

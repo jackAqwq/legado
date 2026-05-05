@@ -73,12 +73,7 @@ object AppConst {
                     else -> AppVariant.UNKNOWN
                 }
 
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    appInfo.versionCode = it.longVersionCode
-                } else {
-                    @Suppress("DEPRECATION")
-                    appInfo.versionCode = it.versionCode.toLong()
-                }
+                appInfo.versionCode = it.longVersionCode
             }
         appInfo
     }

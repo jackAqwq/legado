@@ -1,6 +1,5 @@
 package io.legado.app.ui.dict
 
-import android.os.Build
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.View
@@ -100,9 +99,7 @@ class DictDialog() : BaseDialogFragment(R.layout.dialog_dict) {
                         }
                         val mark = contentTrimS.substring(4, lastIndex)
                         viewLifecycleOwner.lifecycleScope.launch {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                binding.tvDict.setTextClassifier(TextClassifier.NO_OP)
-                            }
+                            binding.tvDict.setTextClassifier(TextClassifier.NO_OP)
                             val markwon: Markwon
                             val markdown = withContext(IO) {
                                 markwon = Markwon.builder(requireContext())

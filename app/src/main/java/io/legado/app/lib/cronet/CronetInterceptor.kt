@@ -1,7 +1,6 @@
 package io.legado.app.lib.cronet
 
 import android.annotation.SuppressLint
-import android.os.Build
 import androidx.annotation.Keep
 import io.legado.app.help.http.CookieManager
 import io.legado.app.help.http.CookieManager.cookieJarHeader
@@ -70,14 +69,9 @@ class CronetInterceptor(private val cookieJar: CookieJar) : Interceptor {
         }
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     @Throws(IOException::class)
     private fun proceedWithCronet(request: Request, call: Call, readTimeoutMillis: Int): Response? {
-        val callBack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            NewCallBack(request, call, readTimeoutMillis)
-        } else {
-            OldCallback(request, call, readTimeoutMillis)
-        }
+        val callBack = NewCallBack(request, call, readTimeoutMillis)
         buildRequest(request, callBack)?.let {
             return callBack.waitForDone(it)
         }

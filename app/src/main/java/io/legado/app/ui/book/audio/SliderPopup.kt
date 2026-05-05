@@ -2,7 +2,6 @@ package io.legado.app.ui.book.audio
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -81,9 +80,7 @@ class SliderPopup(private val context: Context, private val name: Int) :
             setProcessTimerText(0)
             return
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            binding.seekBar.min = 50
-        }
+        binding.seekBar.min = 50
         binding.seekBar.max = 300
         binding.seekBar.progress = (AudioPlayService.playSpeed * 100).toInt()
         setProcessSpeedText(AudioPlayService.playSpeed)

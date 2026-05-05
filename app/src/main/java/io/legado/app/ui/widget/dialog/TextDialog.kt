@@ -1,6 +1,5 @@
 package io.legado.app.ui.widget.dialog
 
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -74,9 +73,7 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
             val mode = it.getString("mode")
             when (mode) {
                 Mode.MD.name -> viewLifecycleOwner.lifecycleScope.launch {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        binding.textView.setTextClassifier(TextClassifier.NO_OP)
-                    }
+                    binding.textView.setTextClassifier(TextClassifier.NO_OP)
                     val markwon: Markwon
                     val markdown = withContext(IO) {
                         markwon = Markwon.builder(requireContext())

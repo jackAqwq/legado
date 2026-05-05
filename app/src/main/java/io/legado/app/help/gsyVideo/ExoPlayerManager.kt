@@ -3,11 +3,9 @@ package io.legado.app.help.gsyVideo
 import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioManager
-import android.os.Build
 import android.os.Message
 import android.view.Surface
 import android.view.SurfaceControl
-import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.video.PlaceholderSurface
@@ -78,17 +76,12 @@ class ExoPlayerManager : BasePlayerManager() {
             if (model.getSpeed() != 1f && model.getSpeed() > 0) {
                 mediaPlayer!!.setSpeed(model.getSpeed(), 1f)
             }
-            // 仅在 API 29+ 使用 SurfaceControl
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                surfaceControl = SurfaceControl.Builder()
-                    .setName(SURFACE_CONTROL_NAME)
-                    .setBufferSize(0, 0)
-                    .build()
-                videoSurface = Surface(surfaceControl!!)
-                mediaPlayer!!.setSurface(videoSurface)
-            } else {
-                mediaPlayer!!.setSurface(dummySurface)
-            }
+            surfaceControl = SurfaceControl.Builder()
+                .setName(SURFACE_CONTROL_NAME)
+                .setBufferSize(0, 0)
+                .build()
+            videoSurface = Surface(surfaceControl!!)
+            mediaPlayer!!.setSurface(videoSurface)
         } catch (e: Exception) {
             e.printStackTrace()
         }

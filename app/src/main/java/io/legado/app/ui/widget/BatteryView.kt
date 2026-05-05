@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
-import android.os.Build
 import android.text.StaticLayout
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
@@ -39,9 +38,7 @@ class BatteryView @JvmOverloads constructor(
 
     init {
         setPadding(4.dpToPx(), 3.dpToPx(), 6.dpToPx(), 3.dpToPx())
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            isFallbackLineSpacing = false
-        }
+        isFallbackLineSpacing = false
         batteryPaint.strokeWidth = 1f.dpToPx()
         batteryPaint.isAntiAlias = true
         batteryPaint.color = paint.color

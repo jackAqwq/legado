@@ -12,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PixelFormat
 import android.media.AudioManager
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.support.v4.media.MediaMetadataCompat
@@ -184,12 +183,10 @@ class VideoPlayService : BaseService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                checkFloatPermission()
-                stopSelf()
-                return START_NOT_STICKY
-            }
+        if (!Settings.canDrawOverlays(this)) {
+            checkFloatPermission()
+            stopSelf()
+            return START_NOT_STICKY
         }
         if (intent == null) return START_NOT_STICKY
         intent.action?.let { action ->
@@ -433,12 +430,7 @@ class VideoPlayService : BaseService() {
         params = WindowManager.LayoutParams(
             windowWidth,
             windowHeight,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                @Suppress("DEPRECATION")
-                WindowManager.LayoutParams.TYPE_PHONE
-            },
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED or
                     WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,

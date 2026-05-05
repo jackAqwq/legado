@@ -2,7 +2,6 @@ package io.legado.app.ui.book.read.page.entities
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import androidx.annotation.Keep
@@ -169,9 +168,7 @@ data class TextPage(
                 for (i in textLine.text.indices) {
                     val char = textLine.text[i].toString()
                     var cw = StaticLayout.getDesiredWidth(char, paint)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                        cw += letterSpacing
-                    }
+                    cw += letterSpacing
                     val x1 = x + cw
                     textLine.addColumn(
                         TextColumn(start = x, end = x1, char)

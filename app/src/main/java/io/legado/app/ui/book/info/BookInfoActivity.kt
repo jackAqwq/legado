@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -200,9 +199,7 @@ class BookInfoActivity :
         initIntroView = true
         val inflater = LayoutInflater.from(this)
         val view = inflater.inflate(R.layout.view_book_intro, binding.tvIntroContainer, false) as ScrollTextView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            view.revealOnFocusHint = false
-        }
+        view.revealOnFocusHint = false
         view
     }
 
@@ -609,9 +606,7 @@ class BookInfoActivity :
             }
             val mark = intro.substring(4, lastIndex)
             lifecycleScope.launch {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    tvIntro.setTextClassifier(TextClassifier.NO_OP)
-                }
+                tvIntro.setTextClassifier(TextClassifier.NO_OP)
                 val context = this@BookInfoActivity
                 val markwon: Markwon
                 val markdown = withContext(IO) {

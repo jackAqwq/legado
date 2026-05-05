@@ -3,7 +3,6 @@ package io.legado.app.ui.book.read
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -164,18 +163,16 @@ abstract class BaseReadBookActivity :
         toolBarHide: Boolean = true,
         useBgMeanColor: Boolean = false
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.run {
-                if (toolBarHide && ReadBookConfig.hideNavigationBar) {
-                    hide(WindowInsets.Type.navigationBars())
-                } else {
-                    show(WindowInsets.Type.navigationBars())
-                }
-                if (toolBarHide && ReadBookConfig.hideStatusBar) {
-                    hide(WindowInsets.Type.statusBars())
-                } else {
-                    show(WindowInsets.Type.statusBars())
-                }
+        window.insetsController?.run {
+            if (toolBarHide && ReadBookConfig.hideNavigationBar) {
+                hide(WindowInsets.Type.navigationBars())
+            } else {
+                show(WindowInsets.Type.navigationBars())
+            }
+            if (toolBarHide && ReadBookConfig.hideStatusBar) {
+                hide(WindowInsets.Type.statusBars())
+            } else {
+                show(WindowInsets.Type.statusBars())
             }
         }
         upSystemUiVisibilityO(isInMultiWindow, toolBarHide)
@@ -252,13 +249,11 @@ abstract class BaseReadBookActivity :
      * 适配刘海
      */
     private fun upLayoutInDisplayCutoutMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.attributes = window.attributes.apply {
-                layoutInDisplayCutoutMode = if (ReadBookConfig.readBodyToLh) {
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-                } else {
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
-                }
+        window.attributes = window.attributes.apply {
+            layoutInDisplayCutoutMode = if (ReadBookConfig.readBodyToLh) {
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            } else {
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
         }
     }

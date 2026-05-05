@@ -55,23 +55,19 @@ class WebTileService : TileService() {
         if (WebService.isRun) {
             WebService.stop(this)
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                val dialog = Dialog(this, R.style.AppTheme_Transparent)
-                dialog.setOnShowListener {
-                    try {
-                        WebService.startForeground(this)
-                    } catch (e: ForegroundServiceStartNotAllowedException) {
-                        e.printStackTrace()
-                    }
-                    dialog.dismiss()
-                }
+            val dialog = Dialog(this, R.style.AppTheme_Transparent)
+            dialog.setOnShowListener {
                 try {
-                    showDialog(dialog)
-                } catch (e: BadTokenException) {
+                    WebService.startForeground(this)
+                } catch (e: ForegroundServiceStartNotAllowedException) {
                     e.printStackTrace()
                 }
-            } else {
-                WebService.start(this)
+                dialog.dismiss()
+            }
+            try {
+                showDialog(dialog)
+            } catch (e: BadTokenException) {
+                e.printStackTrace()
             }
         }
     }

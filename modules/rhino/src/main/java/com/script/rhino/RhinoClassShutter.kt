@@ -24,7 +24,6 @@
  */
 package com.script.rhino
 
-import android.os.Build
 import org.mozilla.javascript.ClassShutter
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
@@ -135,11 +134,9 @@ object RhinoClassShutter : ClassShutter {
             okio.FileHandle::class.java,
             okio.Path::class.java,
             android.content.Context::class.java,
-        ) + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            arrayOf(FileSystem::class.java, Path::class.java)
-        } else {
-            emptyArray()
-        }
+            FileSystem::class.java,
+            Path::class.java,
+        )
     }
 
     fun visibleToScripts(obj: Any): Boolean {
@@ -153,13 +150,9 @@ object RhinoClassShutter : ClassShutter {
             is okio.FileSystem,
             is okio.FileHandle,
             is okio.Path,
+            is FileSystem,
+            is Path,
             is android.content.Context -> return false
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            when (obj) {
-                is FileSystem,
-                is Path -> return false
-            }
         }
         return visibleToScripts(obj.javaClass.name)
     }

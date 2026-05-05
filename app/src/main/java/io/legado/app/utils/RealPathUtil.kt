@@ -5,7 +5,6 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
@@ -25,12 +24,9 @@ object RealPathUtil {
     private var filePathUri: Uri? = null
 
     fun getPath(context: Context, uri: Uri): String? {
-        //check here to KITKAT or new version
-        @SuppressLint("ObsoleteSdkInt")
-        val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
         filePathUri = uri
         // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) { // ExternalStorageProvider
+        if (DocumentsContract.isDocumentUri(context, uri)) { // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":")
