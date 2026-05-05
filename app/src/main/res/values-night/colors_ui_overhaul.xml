@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ui_surface">#0F1622</color>
+    <color name="ui_surface_variant">#131D2C</color>
+    <color name="ui_surface_card">#192538</color>
+    <color name="ui_on_surface">#EAF2FF</color>
+    <color name="ui_on_surface_muted">#9BB0CC</color>
+    <color name="ui_primary">#5BAEFF</color>
+    <color name="ui_outline">#33485F</color>
+    <color name="ui_outline_weak">#2633485F</color>
+</resources>

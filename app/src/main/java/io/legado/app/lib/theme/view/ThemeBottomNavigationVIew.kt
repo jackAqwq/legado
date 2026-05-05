@@ -40,11 +40,11 @@ class ThemeBottomNavigationVIew(context: Context, attrs: AttributeSet) :
             .create()
         itemIconTintList = colorStateList
         itemTextColor = colorStateList
+        itemActiveIndicatorColor = ColorStateList.valueOf(ThemeStore.accentColor(context))
         if (AppConfig.isEInkMode || transparentNavBar) {
             isItemHorizontalTranslationEnabled = false
             itemBackground = Color.TRANSPARENT.toDrawable()
         }
-        itemActiveIndicatorColor = ColorStateList.valueOf(ThemeStore.accentColor(context))
 
         ViewCompat.setOnApplyWindowInsetsListener(this, null)
     }

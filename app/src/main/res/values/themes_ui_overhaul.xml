@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.UiOverhaul.Deep" parent="Base.AppTheme">
+        <item name="colorPrimary">@color/ui_primary</item>
+        <item name="colorAccent">@color/ui_primary</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowBackground">@color/ui_surface</item>
+    </style>
+</resources>
