@@ -117,7 +117,7 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         initView()
         upHomePage()
         onBackPressedDispatcher.addCallback(this) {
-            if (mainShellNavigator.onBackPressed()) {
+            if (mainShellNavigator.onBackPressed() == MainShellNavigator.BackResult.SWITCHED_HOME) {
                 return@addCallback
             }
             (fragmentMap[getFragmentId(0)] as? BookshelfFragment2)?.let {

@@ -2,28 +2,23 @@ package io.legado.app.ui.main.shell
 
 class MainShellNavigator(
     private val tabHost: MainShellTabHost,
-    private val nowProvider: () -> Long = { System.currentTimeMillis() },
-    private val bookshelfReselectWindowMs: Long = 300L
 ) {
 
-    private var lastBookshelfReselectAt = 0L
     private var hasPendingBookshelfReselectEvent = false
+
+    enum class BackResult {
+        SWITCHED_HOME,
+        SHOULD_EXIT
+    }
 
     fun select(tab: MainShellTab) {
         tabHost.showTab(tab)
     }
 
     fun onTabReselected(tab: MainShellTab) {
-        if (tab != MainShellTab.BOOKSHELF) {
-            return
-        }
-        val now = nowProvider()
-        if (now - lastBookshelfReselectAt <= bookshelfReselectWindowMs) {
+        if (tab == MainShellTab.BOOKSHELF) {
             hasPendingBookshelfReselectEvent = true
-            lastBookshelfReselectAt = 0L
-            return
         }
-        lastBookshelfReselectAt = now
     }
 
     fun consumeBookshelfReselectEvent(): Boolean {
@@ -34,11 +29,11 @@ class MainShellNavigator(
         return true
     }
 
-    fun onBackPressed(): Boolean {
+    fun onBackPressed(): BackResult {
         if (tabHost.currentTab() == MainShellTab.BOOKSHELF) {
-            return false
+            return BackResult.SHOULD_EXIT
         }
         tabHost.showTab(MainShellTab.BOOKSHELF)
-        return true
+        return BackResult.SWITCHED_HOME
     }
 }
