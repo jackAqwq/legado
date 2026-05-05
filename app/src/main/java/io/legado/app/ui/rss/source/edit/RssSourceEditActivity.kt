@@ -2,7 +2,6 @@ package io.legado.app.ui.rss.source.edit
 
 import android.content.Intent
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,7 +9,6 @@ import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -559,7 +557,6 @@ class RssSourceEditActivity :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onUndoClicked() {
         val editText = window.decorView.findFocus()
         if (editText is EditText) {
@@ -567,7 +564,6 @@ class RssSourceEditActivity :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onRedoClicked() {
         val editText = window.decorView.findFocus()
         if (editText is EditText) {

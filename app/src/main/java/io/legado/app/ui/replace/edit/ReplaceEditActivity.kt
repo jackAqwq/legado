@@ -2,14 +2,12 @@ package io.legado.app.ui.replace.edit
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import io.legado.app.R
 import io.legado.app.base.VMBaseActivity
@@ -197,7 +195,6 @@ class ReplaceEditActivity :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onUndoClicked() {
         val editText = window.decorView.findFocus()
         if (editText is EditText) {
@@ -205,7 +202,6 @@ class ReplaceEditActivity :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onRedoClicked() {
         val editText = window.decorView.findFocus()
         if (editText is EditText) {

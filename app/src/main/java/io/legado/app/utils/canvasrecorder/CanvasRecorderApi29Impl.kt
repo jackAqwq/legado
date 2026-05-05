@@ -3,13 +3,10 @@ package io.legado.app.utils.canvasrecorder
 import android.graphics.Canvas
 import android.graphics.Picture
 import android.graphics.RenderNode
-import android.os.Build
-import androidx.annotation.RequiresApi
 import io.legado.app.utils.objectpool.synchronized
 import io.legado.app.utils.canvasrecorder.pools.PicturePool
 import io.legado.app.utils.canvasrecorder.pools.RenderNodePool
 
-@RequiresApi(Build.VERSION_CODES.Q)
 class CanvasRecorderApi29Impl : BaseCanvasRecorder() {
 
     private var renderNode: RenderNode? = null

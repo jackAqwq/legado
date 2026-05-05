@@ -2,13 +2,11 @@ package io.legado.app.ui.code
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -377,12 +375,10 @@ class CodeEditActivity :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onUndoClicked() {
         editor.undo()
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onRedoClicked() {
         editor.redo()
     }
