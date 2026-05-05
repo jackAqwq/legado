@@ -43,6 +43,9 @@ import io.legado.app.ui.main.bookshelf.BaseBookshelfFragment
 import io.legado.app.ui.main.bookshelf.style1.BookshelfFragment1
 import io.legado.app.ui.main.bookshelf.style2.BookshelfFragment2
 import io.legado.app.ui.main.explore.ExploreFragment
+import io.legado.app.ui.main.shell.MainShellNavigator
+import io.legado.app.ui.main.shell.MainShellTab
+import io.legado.app.ui.main.shell.MainShellTabHost
 import io.legado.app.ui.main.my.MyFragment
 import io.legado.app.ui.main.rss.RssFragment
 import io.legado.app.ui.widget.dialog.TextDialog
@@ -61,7 +64,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import splitties.views.bottomPadding
 import kotlin.coroutines.resume
-import androidx.core.view.get
 import io.legado.app.help.update.AppUpdate
 import io.legado.app.ui.about.UpdateDialog
 import kotlin.time.Duration.Companion.hours
@@ -84,7 +86,6 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     private val idRss = 2
     private val idMy = 3
     private var exitTime: Long = 0
-    private var bookshelfReselected: Long = 0
     private var exploreReselected: Long = 0
     private var pagePosition = 0
     private val fragmentMap = hashMapOf<Int, Fragment>()
@@ -94,6 +95,21 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     private val adapter by lazy {
         TabFragmentPageAdapter(supportFragmentManager)
     }
+    private val mainShellTabHost = object : MainShellTabHost {
+        override fun showTab(tab: MainShellTab) {
+            val position = getTabPosition(tab)
+            if (position >= 0) {
+                binding.viewPagerMain.setCurrentItem(position, false)
+            }
+        }
+
+        override fun currentTab(): MainShellTab {
+            return getCurrentTab()
+        }
+    }
+    private val mainShellNavigator by lazy {
+        MainShellNavigator(tabHost = mainShellTabHost)
+    }
     private var onUpBooksBadgeView: BadgeView? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -101,8 +117,7 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
         initView()
         upHomePage()
         onBackPressedDispatcher.addCallback(this) {
-            if (pagePosition != 0) {
-                binding.viewPagerMain.currentItem = 0
+            if (mainShellNavigator.onBackPressed()) {
                 return@addCallback
             }
             (fragmentMap[getFragmentId(0)] as? BookshelfFragment2)?.let {
@@ -162,17 +177,10 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean = binding.run {
         when (item.itemId) {
-            R.id.menu_bookshelf ->
-                viewPagerMain.setCurrentItem(0, false)
-
-            R.id.menu_discovery ->
-                viewPagerMain.setCurrentItem(realPositions.indexOf(idExplore), false)
-
-            R.id.menu_rss ->
-                viewPagerMain.setCurrentItem(realPositions.indexOf(idRss), false)
-
-            R.id.menu_my_config ->
-                viewPagerMain.setCurrentItem(realPositions.indexOf(idMy), false)
+            R.id.menu_bookshelf -> mainShellNavigator.select(MainShellTab.BOOKSHELF)
+            R.id.menu_discovery -> mainShellNavigator.select(MainShellTab.EXPLORE)
+            R.id.menu_rss -> mainShellNavigator.select(MainShellTab.RSS)
+            R.id.menu_my_config -> mainShellNavigator.select(MainShellTab.MY)
         }
         return false
     }
@@ -180,9 +188,8 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
     override fun onNavigationItemReselected(item: MenuItem) {
         when (item.itemId) {
             R.id.menu_bookshelf -> {
-                if (System.currentTimeMillis() - bookshelfReselected > 300) {
-                    bookshelfReselected = System.currentTimeMillis()
-                } else {
+                mainShellNavigator.onTabReselected(MainShellTab.BOOKSHELF)
+                if (mainShellNavigator.consumeBookshelfReselectEvent()) {
                     (fragmentMap[getFragmentId(0)] as? BaseBookshelfFragment)?.gotoTop()
                 }
             }
@@ -434,6 +441,27 @@ class MainActivity : VMBaseActivity<ActivityMainBinding, MainViewModel>(),
             return if (AppConfig.bookGroupStyle == 1) idBookshelf2 else idBookshelf1
         }
         return id
+    }
+
+    private fun getTabPosition(tab: MainShellTab): Int {
+        return when (tab) {
+            MainShellTab.BOOKSHELF -> 0
+            MainShellTab.EXPLORE -> realPositions.indexOf(idExplore)
+            MainShellTab.RSS -> realPositions.indexOf(idRss)
+            MainShellTab.MY -> realPositions.indexOf(idMy)
+        }
+    }
+
+    private fun getCurrentTab(): MainShellTab {
+        if (pagePosition !in 0 until bottomMenuCount) {
+            return MainShellTab.BOOKSHELF
+        }
+        return when (realPositions[pagePosition]) {
+            idExplore -> MainShellTab.EXPLORE
+            idRss -> MainShellTab.RSS
+            idMy -> MainShellTab.MY
+            else -> MainShellTab.BOOKSHELF
+        }
     }
 
     private inner class PageChangeCallback : ViewPager.SimpleOnPageChangeListener() {
