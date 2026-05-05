@@ -30,11 +30,10 @@ import io.legado.app.help.source.getSourceType
 import io.legado.app.lib.dialogs.alert
 import io.legado.app.lib.theme.Selector
 import io.legado.app.lib.theme.accentColor
-import io.legado.app.lib.theme.bottomBackground
 import io.legado.app.lib.theme.buttonDisabledColor
-import io.legado.app.lib.theme.getPrimaryTextColor
-import io.legado.app.lib.theme.primaryColor
-import io.legado.app.lib.theme.primaryTextColor
+import io.legado.app.lib.theme.ThemeStore
+import io.legado.app.lib.theme.system.UiThemeEngine
+import io.legado.app.lib.theme.system.UiThemeSnapshotInput
 import io.legado.app.model.ReadBook
 import io.legado.app.model.SourceCallBack
 import io.legado.app.ui.browser.WebViewActivity
@@ -66,6 +65,15 @@ class ReadMenu @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
+    private val uiSnapshot
+        get() = UiThemeEngine.buildSnapshot(
+            UiThemeSnapshotInput(
+                primaryColor = ThemeStore.primaryColor(context),
+                accentColor = ThemeStore.accentColor(context),
+                backgroundColor = ThemeStore.backgroundColor(context),
+                bottomBackgroundColor = ThemeStore.bottomBackground(context)
+            )
+        )
     var canShowMenu: Boolean = false
     private val callBack: CallBack get() = activity as CallBack
     private val binding = ViewReadMenuBinding.inflate(LayoutInflater.from(context), this, true)
@@ -88,14 +96,14 @@ class ReadMenu @JvmOverloads constructor(
     private var bgColor: Int = if (immersiveMenu) {
         kotlin.runCatching {
             ReadBookConfig.durConfig.curBgStr().toColorInt()
-        }.getOrDefault(context.bottomBackground)
+        }.getOrDefault(uiSnapshot.surfaceVariantColor)
     } else {
-        context.bottomBackground
+        uiSnapshot.surfaceVariantColor
     }
     private var textColor: Int = if (immersiveMenu) {
         ReadBookConfig.durConfig.curTextColor()
     } else {
-        context.getPrimaryTextColor(ColorUtils.isColorLight(bgColor))
+        uiSnapshot.onSurfaceColor
     }
 
     private var bottomBackgroundList: ColorStateList = Selector.colorBuild()
@@ -188,8 +196,9 @@ class ReadMenu @JvmOverloads constructor(
             tvChapterName.setTextColor(lightTextColor)
             tvChapterUrl.setTextColor(lightTextColor)
         } else if (reset) {
-            val bgColor = context.primaryColor
-            val textColor = context.primaryTextColor
+            val snapshot = uiSnapshot
+            val bgColor = snapshot.primaryColor
+            val textColor = snapshot.onSurfaceColor
             titleBar.setTextColor(textColor)
             titleBar.setBackgroundColor(bgColor)
             titleBar.setColorFilter(textColor)
@@ -256,14 +265,14 @@ class ReadMenu @JvmOverloads constructor(
         bgColor = if (immersiveMenu) {
             kotlin.runCatching {
                 ReadBookConfig.durConfig.curBgStr().toColorInt()
-            }.getOrDefault(context.bottomBackground)
+            }.getOrDefault(uiSnapshot.surfaceVariantColor)
         } else {
-            context.bottomBackground
+            uiSnapshot.surfaceVariantColor
         }
         textColor = if (immersiveMenu) {
             ReadBookConfig.durConfig.curTextColor()
         } else {
-            context.getPrimaryTextColor(ColorUtils.isColorLight(bgColor))
+            uiSnapshot.onSurfaceColor
         }
         bottomBackgroundList = Selector.colorBuild()
             .setDefaultColor(bgColor)

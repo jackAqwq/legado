@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/background"
+    android:background="@drawable/bg_app_card_surface"
     android:gravity="center"
     android:padding="20dp"
     android:orientation="horizontal">
@@ -21,5 +21,5 @@
         android:padding="6dp"
         android:gravity="center"
         android:text="@string/loading"
-        android:textColor="@color/primaryText" />
+        android:textColor="@color/ui_on_surface" />
 </LinearLayout>

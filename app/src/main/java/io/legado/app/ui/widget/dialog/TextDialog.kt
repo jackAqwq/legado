@@ -11,7 +11,9 @@ import io.legado.app.base.BaseDialogFragment
 import io.legado.app.databinding.DialogTextViewBinding
 import io.legado.app.help.CacheManager
 import io.legado.app.help.IntentData
-import io.legado.app.lib.theme.primaryColor
+import io.legado.app.lib.theme.ThemeStore
+import io.legado.app.lib.theme.system.UiThemeEngine
+import io.legado.app.lib.theme.system.UiThemeSnapshotInput
 import io.legado.app.ui.code.CodeEditActivity
 import io.legado.app.utils.applyTint
 import io.legado.app.utils.setHtml
@@ -63,7 +65,15 @@ class TextDialog() : BaseDialogFragment(R.layout.dialog_text_view) {
     }
 
     override fun onFragmentCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolBar.setBackgroundColor(primaryColor)
+        val uiSnapshot = UiThemeEngine.buildSnapshot(
+            UiThemeSnapshotInput(
+                primaryColor = ThemeStore.primaryColor(requireContext()),
+                accentColor = ThemeStore.accentColor(requireContext()),
+                backgroundColor = ThemeStore.backgroundColor(requireContext()),
+                bottomBackgroundColor = ThemeStore.bottomBackground(requireContext())
+            )
+        )
+        binding.toolBar.setBackgroundColor(uiSnapshot.primaryColor)
         binding.toolBar.inflateMenu(R.menu.dialog_text)
         binding.toolBar.menu.applyTint(requireContext())
         arguments?.let {

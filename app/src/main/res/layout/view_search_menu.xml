@@ -23,9 +23,9 @@
         android:contentDescription="上个结果"
         android:rotation="180"
         android:src="@drawable/ic_arrow_right"
-        android:tint="@color/primaryText"
+        android:tint="@color/ui_on_surface"
         android:tooltipText="@string/search_content"
-        app:backgroundTint="@color/background_menu"
+        app:backgroundTint="@color/ui_surface_variant"
         app:elevation="2dp"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -41,9 +41,9 @@
         android:layout_margin="16dp"
         android:contentDescription="下个结果"
         android:src="@drawable/ic_arrow_right"
-        android:tint="@color/primaryText"
+        android:tint="@color/ui_on_surface"
         android:tooltipText="@string/search_content"
-        app:backgroundTint="@color/background_menu"
+        app:backgroundTint="@color/ui_surface_variant"
         app:elevation="2dp"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -63,7 +63,7 @@
             android:id="@+id/ll_search_base_info"
             android:layout_width="match_parent"
             android:layout_height="36dp"
-            android:background="@color/background_menu"
+            android:background="@color/ui_surface_variant"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingLeft="10dp"
@@ -77,7 +77,7 @@
                 android:contentDescription="@string/go_to_top"
                 android:src="@drawable/ic_arrow_drop_up"
                 android:tooltipText="@string/go_to_top"
-                app:tint="@color/primaryText"
+                app:tint="@color/ui_on_surface"
                 tools:ignore="UnusedAttribute" />
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -88,7 +88,7 @@
                 android:contentDescription="@string/go_to_bottom"
                 android:src="@drawable/ic_arrow_drop_down"
                 android:tooltipText="@string/go_to_bottom"
-                app:tint="@color/primaryText"
+                app:tint="@color/ui_on_surface"
                 tools:ignore="UnusedAttribute" />
 
             <TextView
@@ -102,7 +102,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:singleLine="true"
-                android:textColor="@color/primaryText"
+                android:textColor="@color/ui_on_surface"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -141,7 +141,7 @@
                     android:contentDescription="结果"
                     android:maxHeight="20dp"
                     android:src="@drawable/ic_toc"
-                    app:tint="@color/primaryText"
+                    app:tint="@color/ui_on_surface"
                     tools:ignore="NestedWeights" />
 
                 <TextView
@@ -152,7 +152,7 @@
                     android:layout_marginTop="3dp"
                     android:maxLines="1"
                     android:text="结果"
-                    android:textColor="@color/primaryText"
+                    android:textColor="@color/ui_on_surface"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -182,7 +182,7 @@
                     android:contentDescription="@string/main_menu"
                     android:maxHeight="20dp"
                     android:src="@drawable/ic_menu"
-                    app:tint="@color/primaryText"
+                    app:tint="@color/ui_on_surface"
                     tools:ignore="NestedWeights" />
 
                 <TextView
@@ -193,7 +193,7 @@
                     android:layout_marginTop="3dp"
                     android:maxLines="1"
                     android:text="@string/main_menu"
-                    android:textColor="@color/primaryText"
+                    android:textColor="@color/ui_on_surface"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -222,7 +222,7 @@
                     android:contentDescription="退出"
                     android:maxHeight="20dp"
                     android:src="@drawable/ic_auto_page_stop"
-                    app:tint="@color/primaryText"
+                    app:tint="@color/ui_on_surface"
                     tools:ignore="NestedWeights" />
 
                 <TextView
@@ -233,7 +233,7 @@
                     android:layout_marginTop="3dp"
                     android:maxLines="1"
                     android:text="退出"
-                    android:textColor="@color/primaryText"
+                    android:textColor="@color/ui_on_surface"
                     android:textSize="12sp" />
             </LinearLayout>
 
@@ -260,7 +260,7 @@
             <!--                android:layout_weight="1"-->
             <!--                android:contentDescription="@string/aloud_config"-->
             <!--                android:src="@drawable/ic_settings"-->
-            <!--                app:tint="@color/primaryText"-->
+            <!--                app:tint="@color/ui_on_surface"-->
             <!--                tools:ignore="NestedWeights" />-->
 
             <!--            <TextView-->
@@ -271,7 +271,7 @@
             <!--                android:layout_marginTop="3dp"-->
             <!--                android:maxLines="1"-->
             <!--                android:text="@string/setting"-->
-            <!--                android:textColor="@color/primaryText"-->
+            <!--                android:textColor="@color/ui_on_surface"-->
             <!--                android:textSize="12sp" />-->
             <!--        </LinearLayout>-->
 

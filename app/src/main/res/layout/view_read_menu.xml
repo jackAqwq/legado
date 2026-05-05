@@ -96,7 +96,7 @@
         android:layout_height="0dp"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
-        android:background="@color/transparent30"
+        android:background="@color/ui_outline_weak"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/bottom_menu"
@@ -161,9 +161,9 @@
                 android:layout_margin="16dp"
                 android:contentDescription="@string/search_content"
                 android:src="@drawable/ic_search"
-                android:tint="@color/primaryText"
+                android:tint="@color/ui_on_surface"
                 android:tooltipText="@string/search_content"
-                app:backgroundTint="@color/background_menu"
+                app:backgroundTint="@color/ui_surface_variant"
                 app:elevation="2dp"
                 app:fabSize="mini"
                 app:pressedTranslationZ="2dp"
@@ -181,9 +181,9 @@
                 android:layout_margin="16dp"
                 android:contentDescription="@string/auto_next_page"
                 android:src="@drawable/ic_auto_page"
-                android:tint="@color/primaryText"
+                android:tint="@color/ui_on_surface"
                 android:tooltipText="@string/auto_next_page"
-                app:backgroundTint="@color/background_menu"
+                app:backgroundTint="@color/ui_surface_variant"
                 app:elevation="2dp"
                 app:fabSize="mini"
                 app:pressedTranslationZ="2dp"
@@ -201,9 +201,9 @@
                 android:layout_margin="16dp"
                 android:contentDescription="@string/replace_rule_title"
                 android:src="@drawable/ic_find_replace"
-                android:tint="@color/primaryText"
+                android:tint="@color/ui_on_surface"
                 android:tooltipText="@string/replace_rule_title"
-                app:backgroundTint="@color/background_menu"
+                app:backgroundTint="@color/ui_surface_variant"
                 app:elevation="2dp"
                 app:fabSize="mini"
                 app:pressedTranslationZ="2dp"
@@ -221,9 +221,9 @@
                 android:layout_margin="16dp"
                 android:contentDescription="@string/dark_theme"
                 android:src="@drawable/ic_brightness"
-                android:tint="@color/primaryText"
+                android:tint="@color/ui_on_surface"
                 android:tooltipText="@string/dark_theme"
-                app:backgroundTint="@color/background_menu"
+                app:backgroundTint="@color/ui_surface_variant"
                 app:elevation="2dp"
                 app:fabSize="mini"
                 app:pressedTranslationZ="2dp"
@@ -236,7 +236,7 @@
             android:id="@+id/ll_bottom_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/background_menu"
+            android:background="@color/ui_surface_variant"
             android:importantForAccessibility="no"
             android:orientation="vertical">
             <!--章节设置-->
@@ -263,7 +263,7 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
                     android:text="@string/previous_chapter"
-                    android:textColor="@color/primaryText"
+                    android:textColor="@color/ui_on_surface"
                     android:textSize="14sp"
                     tools:ignore="TouchTargetSizeCheck" />
 
@@ -287,7 +287,7 @@
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"
                     android:text="@string/next_chapter"
-                    android:textColor="@color/primaryText"
+                    android:textColor="@color/ui_on_surface"
                     android:textSize="14sp"
                     tools:ignore="TouchTargetSizeCheck" />
             </LinearLayout>
@@ -327,7 +327,7 @@
                         android:contentDescription="@string/chapter_list"
                         android:maxHeight="20dp"
                         android:src="@drawable/ic_toc"
-                        app:tint="@color/primaryText"
+                        app:tint="@color/ui_on_surface"
                         tools:ignore="NestedWeights" />
 
                     <TextView
@@ -339,7 +339,7 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:text="@string/chapter_list"
-                        android:textColor="@color/primaryText"
+                        android:textColor="@color/ui_on_surface"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -371,7 +371,7 @@
                         android:contentDescription="@string/read_aloud"
                         android:maxHeight="20dp"
                         android:src="@drawable/ic_read_aloud"
-                        app:tint="@color/primaryText"
+                        app:tint="@color/ui_on_surface"
                         tools:ignore="NestedWeights" />
 
                     <TextView
@@ -383,7 +383,7 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:text="@string/read_aloud"
-                        android:textColor="@color/primaryText"
+                        android:textColor="@color/ui_on_surface"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -415,7 +415,7 @@
                         android:contentDescription="@string/interface_setting"
                         android:maxHeight="20dp"
                         android:src="@drawable/ic_interface_setting"
-                        app:tint="@color/primaryText"
+                        app:tint="@color/ui_on_surface"
                         tools:ignore="NestedWeights" />
 
                     <TextView
@@ -427,7 +427,7 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:text="@string/interface_setting"
-                        android:textColor="@color/primaryText"
+                        android:textColor="@color/ui_on_surface"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -459,7 +459,7 @@
                         android:contentDescription="@string/setting"
                         android:maxHeight="20dp"
                         android:src="@drawable/ic_settings"
-                        app:tint="@color/primaryText"
+                        app:tint="@color/ui_on_surface"
                         tools:ignore="NestedWeights" />
 
                     <TextView
@@ -471,7 +471,7 @@
                         android:ellipsize="middle"
                         android:singleLine="true"
                         android:text="@string/setting"
-                        android:textColor="@color/primaryText"
+                        android:textColor="@color/ui_on_surface"
                         android:textSize="12sp" />
                 </LinearLayout>
 

@@ -3,13 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/ui_surface"
     android:padding="16dp">
 
     <LinearLayout
         android:id="@+id/vw_bg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_card_view"
+        android:background="@drawable/bg_app_card_surface"
         android:orientation="vertical"
         android:layout_gravity="center"
         android:padding="16dp"
