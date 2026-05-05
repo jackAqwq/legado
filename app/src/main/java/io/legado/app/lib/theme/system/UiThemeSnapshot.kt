@@ -15,6 +15,10 @@ data class UiThemeSnapshot(
     val isEInk: Boolean,
 )
 
+/**
+ * Input colors map to semantic surfaces in [UiThemeSnapshot]:
+ * backgroundColor -> surfaceColor, bottomBackgroundColor -> surfaceVariantColor.
+ */
 data class UiThemeSnapshotInput(
     val primaryColor: Int? = null,
     val accentColor: Int? = null,

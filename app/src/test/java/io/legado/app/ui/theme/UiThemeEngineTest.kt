@@ -27,4 +27,27 @@ class UiThemeEngineTest {
 
         assertEquals(explicitAccent, snapshot.accentColor)
     }
+
+    @Test
+    fun buildSnapshot_returnsDefaults_whenInputExistsButFieldsMissing() {
+        val snapshot = UiThemeEngine.buildSnapshot(UiThemeSnapshotInput())
+
+        assertEquals(UiThemeDefaults.deepImmersiveSnapshot, snapshot)
+    }
+
+    @Test
+    fun buildSnapshot_mapsBackgroundAndBottomBackgroundToSurfaceTokens() {
+        val background = 0xFF101820.toInt()
+        val bottomBackground = 0xFF202830.toInt()
+
+        val snapshot = UiThemeEngine.buildSnapshot(
+            UiThemeSnapshotInput(
+                backgroundColor = background,
+                bottomBackgroundColor = bottomBackground
+            )
+        )
+
+        assertEquals(background, snapshot.surfaceColor)
+        assertEquals(bottomBackground, snapshot.surfaceVariantColor)
+    }
 }
